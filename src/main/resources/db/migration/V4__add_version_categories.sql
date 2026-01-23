@@ -1,0 +1,2 @@
+ALTER TABLE categories 
+    ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;

@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -21,7 +20,7 @@ import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.repository.projection.ProductStockProjection;
 
-@SpringBootTest
+@DataJpaTest
 @Transactional
 public class ProductRepositoryTest {
 
