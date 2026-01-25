@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import lumi.insert.app.entity.Product;
-import lumi.insert.app.repository.projection.ProductStockProjection;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {

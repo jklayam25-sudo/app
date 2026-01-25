@@ -94,9 +94,12 @@ public class ProductRepositoryTest {
 
         Slice<Product> products = productRepository.findAllByNameContaining("Jordan", pageable);
         Slice<Product> productsNike = productRepository.findAllByNameContaining("NIKE", pageable);
+        Slice<Product> productsSomething = productRepository.findAllByNameContaining("Something", pageable);
+
         assertEquals(1, products.getNumberOfElements());
         assertEquals(2, productsNike.getNumberOfElements());
         assertFalse(productsNike.hasNext());
+        assertTrue(productsSomething.isEmpty());
     }
 
     @Test
