@@ -79,4 +79,19 @@ public class CategoryRepositoryTest {
         assertEquals(1, product.size());
         assertEquals("NIKE Jordan Low 3", product.getFirst().getName());
     }
+
+    @Test
+    public void testExistsByName() {
+        Category dumpCategory = Category.builder()
+        .name("Shoes")
+        .build();
+
+        categoryRepository.save(dumpCategory);
+
+        boolean exists = categoryRepository.existsByName("Shoes");
+        assertEquals(true, exists);
+
+        boolean notExists = categoryRepository.existsByName("Electronics");
+        assertEquals(false, notExists);
+    }
 }

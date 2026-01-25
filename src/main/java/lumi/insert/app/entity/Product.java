@@ -1,13 +1,13 @@
 package lumi.insert.app.entity;
 
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,19 +26,20 @@ public class Product extends TimestampAuditing {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @NotNull
+    @Column(nullable = false)    
     private Long basePrice;
 
-    @NotNull
+    @Column(nullable = false)
     private Long sellPrice;
 
-    @NotNull
+    @Column(nullable = false)
     private Long stockQuantity;
 
-    private Long stockMinimum;
+    @Builder.Default
+    private Long stockMinimum = 0L;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)

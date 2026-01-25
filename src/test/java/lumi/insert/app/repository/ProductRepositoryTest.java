@@ -18,7 +18,6 @@ import org.springframework.data.domain.Sort;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Product;
-import lumi.insert.app.repository.projection.ProductStockProjection;
 
 @DataJpaTest
 @Transactional
@@ -65,9 +64,9 @@ public class ProductRepositoryTest {
 
         Product savedProduct = productRepository.save(dumpProduct);
 
-        ProductStockProjection stockProjection = productRepository.getStockById(savedProduct.getId());
+        Optional<Long> stockProjection = productRepository.getStockById(savedProduct.getId());
 
-        assertEquals(50L, stockProjection.getStockQuantity());
+        assertEquals(50L, stockProjection.get());
     }
 
     @Test
@@ -144,5 +143,30 @@ public class ProductRepositoryTest {
                 assertEquals("Product 12", productsSet.getLast().getName());
             }
         }
+    }
+
+    @Test
+    public void testExistsByName() {
+        Product dumpProduct = Product.builder()
+        .name("NIKE Jordan Low 3")
+        .basePrice(10000L)
+        .sellPrice(12000L)
+        .stockQuantity(50L)
+        .stockMinimum(5L)
+        .build();
+
+        productRepository.save(dumpProduct);
+
+        Boolean exists = productRepository.existsByName("NIKE Jordan Low 3");
+        assertTrue(exists);
+
+        Boolean notExists = productRepository.existsByName("Adidas Superstar");
+        assertFalse(notExists);
+    }
+
+    @Test
+    public void testGetStockByIdNotFound() {
+        Optional<Long> stockProjection = productRepository.getStockById(999L);
+        assertEquals(null, stockProjection.orElse(null));
     }
 }
