@@ -5,14 +5,20 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Product;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
     
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "id", ignore = true)
     void updateProductFromDto(ProductEditRequest dto, @MappingTarget Product entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    ProductResponse createDtoResponseFromProduct(Product entity);
+
 }

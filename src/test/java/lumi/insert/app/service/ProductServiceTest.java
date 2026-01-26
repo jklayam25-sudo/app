@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -21,22 +22,27 @@ import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired; 
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductCreateResponse;
 import lumi.insert.app.dto.response.ProductName;
+import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
@@ -389,5 +395,73 @@ public class ProductServiceTest {
             assertNotNull(e.getId());
         });
     }
+
+    @Test
+    public void testGetProductByCriteria(){
+
+        for ( int i = 1; i <= 12; i++ ) {
+            Product dumpProduct = Product.builder()
+            .name("Product " + i)
+            .basePrice(1000L * i)
+            .sellPrice(1200L * i)
+            .stockQuantity(10L * i)
+            .stockMinimum(1L * i)
+            .build();
+
+            productRepository.save(dumpProduct);
+        }
+
+        Category category = Category.builder()
+        .id(99999L)
+        .build();
+
+         Product dumpProduct = Product.builder()
+            .name("Prodoteus XIJ ")
+            .basePrice(5999L)
+            .sellPrice(5999L)
+            .stockQuantity(10L)
+            .stockMinimum(0L)
+            .category(category)
+            .build();
+
+        productRepository.save(dumpProduct);
+
+        ProductGetByFilter productGetByFilter = ProductGetByFilter.builder()
+        .name("prod")
+        .minPrice(2000L)
+        .maxPrice(6000L)
+        .page(0)
+        .size(5)
+        .sortBy("sellPrice")
+        .sortDirection("ASC")
+        .categoryId(99999L)
+        .build();
+
+        Slice<ProductResponse> productsByRequests = productService.getProductsByRequests(productGetByFilter);
+        Sort sort = Sort.by("sellPrice").ascending();
+        assertEquals(1, productsByRequests.getNumberOfElements());
+        assertEquals(sort, productsByRequests.getSort());
+        assertEquals(5999L, productsByRequests.getContent().getFirst().sellPrice());
+        assertEquals(5999L, productsByRequests.getContent().getLast().sellPrice());
+    }
+
+    @Test
+    public void testGetProductByCriteriaWithInvalidCategories(){
+        when(categoryRepositoryMock.existsById(1L)).thenReturn(false);
+
+        ProductGetByFilter productGetByFilter = ProductGetByFilter.builder()
+        .name("prod")
+        .minPrice(2000L)
+        .maxPrice(6000L)
+        .page(0)
+        .size(5)
+        .sortBy("sellPrice")
+        .sortDirection("ASC")
+        .categoryId(1L)
+        .build();
+
+        assertThrows(IllegalArgumentException.class, () -> productServiceMock.getProductsByRequests(productGetByFilter));
+    }
+
 
 }

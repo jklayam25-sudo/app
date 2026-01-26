@@ -5,10 +5,12 @@ import org.springframework.data.domain.Slice;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 
 import lumi.insert.app.dto.response.ProductCreateResponse;
 import lumi.insert.app.dto.response.ProductName;
+import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 
 public interface ProductService {
@@ -24,5 +26,7 @@ public interface ProductService {
     ProductCreateResponse getProductById(Long id);
 
     Slice<ProductCreateResponse> getAllProducts(PaginationRequest request);
+
+    Slice<ProductResponse> getProductsByRequests(ProductGetByFilter request);
 
 }

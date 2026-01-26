@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +16,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Product;
 
@@ -171,5 +174,36 @@ public class ProductRepositoryTest {
     public void testGetStockByIdNotFound() {
         Optional<Long> stockProjection = productRepository.getStockById(999L);
         assertEquals(null, stockProjection.orElse(null));
+    }
+
+    @Test
+    public void testGetProductCriteria(){
+        for ( int i = 1; i <= 12; i++ ) {
+            Product dumpProduct = Product.builder()
+            .name("Product " + i)
+            .basePrice(1000L * i)
+            .sellPrice(1200L * i)
+            .stockQuantity(10L * i)
+            .stockMinimum(1L * i)
+            .build();
+
+            productRepository.save(dumpProduct);
+        }
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("sellPrice").ascending());
+
+        Specification<Product> specification = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+            predicates.add(builder.like(builder.lower(root.get("name")), "%" + "pro" + "%"));
+            predicates.add(builder.between(root.get("sellPrice"), 0L, 5000L));
+
+            return builder.and(predicates);
+        }; 
+
+       Slice<Product> result = productRepository.findAll(specification, pageable);
+
+        System.out.println(result.getContent());
+        assertEquals(4, result.getNumberOfElements());
+        assertEquals(4800L, result.getContent().getLast().getSellPrice());
     }
 }
