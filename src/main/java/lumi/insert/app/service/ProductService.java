@@ -8,25 +8,29 @@ import lumi.insert.app.dto.request.ProductEditRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 
-import lumi.insert.app.dto.response.ProductCreateResponse;
+import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 
 public interface ProductService {
 
-    ProductCreateResponse createProduct(ProductCreateRequest request);
+    ProductResponse createProduct(ProductCreateRequest request);
 
     ProductStockResponse getProductStock(Long request);
 
-    ProductCreateResponse editProduct(ProductEditRequest request);
+    ProductResponse editProduct(ProductEditRequest request);
 
     Slice<ProductName> getAllProductNames(ProductGetNameRequest request);
 
-    ProductCreateResponse getProductById(Long id);
+    ProductResponse getProductById(Long id);
 
-    Slice<ProductCreateResponse> getAllProducts(PaginationRequest request);
+    Slice<ProductResponse> getAllProducts(PaginationRequest request);
 
     Slice<ProductResponse> getProductsByRequests(ProductGetByFilter request);
+
+    ProductDeleteResponse setProductInactive(Long id);
+
+    ProductDeleteResponse setProductActive(Long id);
 
 }

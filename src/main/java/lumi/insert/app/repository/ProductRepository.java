@@ -21,7 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Set<Product> findAllByNameContaining(String name);
 
-    Slice<Product> findAllByNameContaining(String name, Pageable pageable);
+    Slice<Product> findAllByNameContainingAndIsActiveTrue(String name, Pageable pageable);
 
     Slice<Product> findAllBy(Pageable pageable);
 

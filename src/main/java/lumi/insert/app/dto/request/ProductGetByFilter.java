@@ -15,5 +15,4 @@ public class ProductGetByFilter extends PaginationRequest {
     String sortBy;
     String sortDirection;
 
-
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -93,5 +95,46 @@ public class CategoryRepositoryTest {
 
         boolean notExists = categoryRepository.existsByName("Electronics");
         assertEquals(false, notExists);
+    }
+
+    @Test
+    public void testFindAllByIsActiveTrue_shouldReturnOnlyActiveCategory(){
+        Category dumpCategory = Category.builder()
+        .name("Shoes Active")
+        .build();
+
+        Category dumpCategoryInactive = Category.builder()
+        .name("Shoes Inactive")
+        .isActive(false)
+        .build();
+
+        categoryRepository.saveAll(List.of(dumpCategory, dumpCategoryInactive));
+
+        Slice<Category> allByIsActiveTrue = categoryRepository.findAllByIsActiveTrue(PageRequest.of(0, 5));
+
+        assertEquals(1, allByIsActiveTrue.getNumberOfElements());
+    }
+
+    @Test
+    public void testFindAllByIsInactiveTrue_shouldReturnOnlyInactiveCategory(){
+        Category dumpCategory = Category.builder()
+        .name("Shoes Active")
+        .build();
+
+        Category dumpCategoryInactive = Category.builder()
+        .name("Shoes Inactive")
+        .isActive(false)
+        .build();
+
+        Category dumpCategoryInactive2 = Category.builder()
+        .name("Shoes Inactive 2")
+        .isActive(false)
+        .build();
+
+        categoryRepository.saveAll(List.of(dumpCategory, dumpCategoryInactive, dumpCategoryInactive2));
+
+        Slice<Category> allByIsActiveTrue = categoryRepository.findAllByIsActiveFalse(PageRequest.of(0, 5));
+
+        assertEquals(2, allByIsActiveTrue.getNumberOfElements());
     }
 }

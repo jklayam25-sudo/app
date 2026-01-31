@@ -30,4 +30,10 @@ public class Category extends TimestampAuditing {
 
     @OneToMany(mappedBy = "category")
     private List<Product> product;
+
+    @Builder.Default
+    private Long totalItems = 0L;
+
+    @Builder.Default
+    private Boolean isActive  = true;
 }

@@ -90,14 +90,24 @@ public class ProductRepositoryTest {
         .stockMinimum(3L)
         .build();
 
+        Product dumpProductInactive = Product.builder()
+        .name("NIKE Jordan Low Inactive")
+        .basePrice(10000L)
+        .sellPrice(12000L)
+        .stockQuantity(50L)
+        .stockMinimum(5L)
+        .isActive(false)
+        .build();
+
         productRepository.save(dumpProduct1);
         productRepository.save(dumpProduct2);
+        productRepository.save(dumpProductInactive);
 
         Pageable pageable = PageRequest.of(0, 5, Sort.by("name").ascending());
 
-        Slice<Product> products = productRepository.findAllByNameContaining("Jordan", pageable);
-        Slice<Product> productsNike = productRepository.findAllByNameContaining("NIKE", pageable);
-        Slice<Product> productsSomething = productRepository.findAllByNameContaining("Something", pageable);
+        Slice<Product> products = productRepository.findAllByNameContainingAndIsActiveTrue("Jordan", pageable);
+        Slice<Product> productsNike = productRepository.findAllByNameContainingAndIsActiveTrue("NIKE", pageable);
+        Slice<Product> productsSomething = productRepository.findAllByNameContainingAndIsActiveTrue("Something", pageable);
 
         assertEquals(1, products.getNumberOfElements());
         assertEquals(2, productsNike.getNumberOfElements());

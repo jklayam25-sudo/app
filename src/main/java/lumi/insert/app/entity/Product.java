@@ -44,4 +44,7 @@ public class Product extends TimestampAuditing {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
     private Category category;
+
+    @Builder.Default
+    private Boolean isActive = true;
 }

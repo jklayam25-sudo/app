@@ -18,8 +18,7 @@ import lumi.insert.app.dto.request.ProductEditRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 
-import lumi.insert.app.dto.response.CategorySimpleResponse;
-import lumi.insert.app.dto.response.ProductCreateResponse;
+import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
@@ -45,11 +44,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductMapper productMapper;
 
-
     @Override
-    public ProductCreateResponse createProduct(ProductCreateRequest request) {
-        CategorySimpleResponse categorySimpleResponse = null;
-
+    public ProductResponse createProduct(ProductCreateRequest request) {
         if (productRepository.existsByName(request.getName())) {
             throw new IllegalArgumentException("Product with the same name already exists.");
         }
@@ -71,27 +67,15 @@ public class ProductServiceImpl implements ProductService {
 
             newProduct.setCategory(searchedCategory);
 
-            categorySimpleResponse = CategorySimpleResponse.builder()
-                .id(searchedCategory.getId())
-                .name(searchedCategory.getName())
-                .build();
+            searchedCategory.setTotalItems(searchedCategory.getTotalItems() + 1);
+            categoryRepository.save(searchedCategory); 
         }
 
         Product savedProduct = productRepository.save(newProduct);
 
-        ProductCreateResponse responseProduct = ProductCreateResponse.builder()
-            .id(savedProduct.getId())
-            .name(savedProduct.getName())
-            .basePrice(savedProduct.getBasePrice())
-            .sellPrice(savedProduct.getSellPrice())
-            .stockQuantity(savedProduct.getStockQuantity())
-            .stockMinimum(savedProduct.getStockMinimum())
-            .category(categorySimpleResponse)
-            .createdAt(savedProduct.getCreatedAt())
-            .updatedAt(savedProduct.getUpdatedAt())
-            .build();
+        ProductResponse dtoResponseFromProduct = productMapper.createDtoResponseFromProduct(savedProduct);
         
-            return responseProduct;
+        return dtoResponseFromProduct;
     }
 
 
@@ -109,30 +93,32 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductCreateResponse editProduct(ProductEditRequest request) {
+    public ProductResponse editProduct(ProductEditRequest request) {
 
-        if(!productRepository.existsById(request.getId())) {
-            throw new IllegalArgumentException("Product not found");
-        }
-
-        Product existingProduct = productRepository.findById(request.getId()).orElseThrow();
+        Product existingProduct = productRepository.findById(request.getId()).orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         productMapper.updateProductFromDto(request, existingProduct);
+        Category category = existingProduct.getCategory();
+        Long newCategoryId = request.getCategoryId();
+
+        if(newCategoryId != null && (category == null || !category.getId().equals(newCategoryId))){
+            if(category != null) {
+                category.setTotalItems(category.getTotalItems() - 1L);
+                categoryRepository.save(category);
+            }
+
+            Category newCategory = categoryRepository.findById(newCategoryId).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+            existingProduct.setCategory(newCategory);
+            newCategory.setTotalItems(newCategory.getTotalItems() + 1L);
+
+            categoryRepository.save(newCategory);
+        }
 
         Product updatedProduct = productRepository.save(existingProduct);
 
-        ProductCreateResponse responseProduct = ProductCreateResponse.builder()
-            .id(updatedProduct.getId())
-            .name(updatedProduct.getName())
-            .basePrice(updatedProduct.getBasePrice())
-            .sellPrice(updatedProduct.getSellPrice())
-            .stockQuantity(updatedProduct.getStockQuantity())
-            .stockMinimum(updatedProduct.getStockMinimum())
-            .createdAt(updatedProduct.getCreatedAt())
-            .updatedAt(updatedProduct.getUpdatedAt())
-            .build();
-
-        return responseProduct;
+        ProductResponse dtoResponseFromProduct = productMapper.createDtoResponseFromProduct(updatedProduct);
+        
+        return dtoResponseFromProduct;
     }
 
 
@@ -141,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
         Sort sort = Sort.by("name").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
-        Slice<Product> allByNameContaining = productRepository.findAllByNameContaining(request.getName(), pageable);
+        Slice<Product> allByNameContaining = productRepository.findAllByNameContainingAndIsActiveTrue(request.getName(), pageable);
 
         Slice<ProductName> map = allByNameContaining.map(product -> {
             ProductName productNameResponse = ProductName.builder()
@@ -157,65 +143,23 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductCreateResponse getProductById(Long id) {
+    public ProductResponse getProductById(Long id) {
         Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
-
-
-        
-        ProductCreateResponse responseProduct = ProductCreateResponse.builder()
-            .id(searchedProduct.getId())
-            .name(searchedProduct.getName())
-            .basePrice(searchedProduct.getBasePrice())
-            .sellPrice(searchedProduct.getSellPrice())
-            .stockQuantity(searchedProduct.getStockQuantity())
-            .stockMinimum(searchedProduct.getStockMinimum())
-            .createdAt(searchedProduct.getCreatedAt())
-            .updatedAt(searchedProduct.getUpdatedAt())
-            .build();
-
-        if(searchedProduct.getCategory() != null) {
-            CategorySimpleResponse categorySimpleResponse = CategorySimpleResponse.builder()
-                .id(searchedProduct.getCategory().getId())
-                .name(searchedProduct.getCategory().getName())
-                .build();
-            responseProduct.setCategory(categorySimpleResponse);
-        }
-
+ 
+        ProductResponse responseProduct = productMapper.createDtoResponseFromProduct(searchedProduct);
         return responseProduct;
     }
 
 
     @Override
-    public Slice<ProductCreateResponse> getAllProducts(PaginationRequest request) {
+    public Slice<ProductResponse> getAllProducts(PaginationRequest request) {
         Sort sort = Sort.by("name").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
         Slice<Product> allRawProducts = productRepository.findAllBy(pageable);
-
-        Slice<ProductCreateResponse> result = allRawProducts.map(product -> {
-            ProductCreateResponse responseProduct = ProductCreateResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .basePrice(product.getBasePrice())
-                .sellPrice(product.getSellPrice())
-                .stockQuantity(product.getStockQuantity())
-                .stockMinimum(product.getStockMinimum())
-                .createdAt(product.getCreatedAt())
-                .updatedAt(product.getUpdatedAt())
-                .build();
-
-                if(product.getCategory() != null) {
-                    CategorySimpleResponse categorySimpleResponse = CategorySimpleResponse.builder()
-                        .id(product.getCategory().getId())
-                        .name(product.getCategory().getName())
-                        .build();
-                    responseProduct.setCategory(categorySimpleResponse);
-                }
-
-            return responseProduct;
-        });
+        Slice<ProductResponse> mapResult = allRawProducts.map(productMapper::createDtoResponseFromProduct);
         
-        return result;
+        return mapResult;
     }
 
 
@@ -244,6 +188,7 @@ public class ProductServiceImpl implements ProductService {
             if (request.getName() != null) {
                 predicates.add(builder.like(builder.lower(root.get("name")), "%" + request.getName() + "%"));
             }
+            predicates.add(builder.isTrue(root.get("isActive")));
             predicates.add(builder.between(root.get("sellPrice"), request.getMinPrice(), request.getMaxPrice()));
 
             return builder.and(predicates);
@@ -251,8 +196,46 @@ public class ProductServiceImpl implements ProductService {
 
         Slice<Product> result = productRepository.findAll(specification, pageable);
         Slice<ProductResponse> resultMap = result.map(productMapper::createDtoResponseFromProduct);;
-
         return resultMap;
+    }
+
+
+    @Override
+    public ProductDeleteResponse setProductInactive(Long id) {
+        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        if(!searchedProduct.getIsActive()) throw new IllegalArgumentException("Product already inactive!");
+
+        Category category = searchedProduct.getCategory();
+
+        if(category != null){
+            category.setTotalItems(category.getTotalItems() - 1L);
+            categoryRepository.save(category);
+        }
+
+        searchedProduct.setIsActive(false);
+        Product savedProduct = productRepository.save(searchedProduct);
+
+        ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(savedProduct);
+        return deleteDtoResponseFromProduct;
+    }
+
+
+    @Override
+    public ProductDeleteResponse setProductActive(Long id) {
+        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        if(searchedProduct.getIsActive()) throw new IllegalArgumentException("Product already active!");
+
+        Category category = searchedProduct.getCategory();
+
+            if(category != null){
+                category.setTotalItems(category.getTotalItems() + 1L);
+                categoryRepository.save(category);
+            }
+        searchedProduct.setIsActive(true);
+        Product savedProduct = productRepository.save(searchedProduct);
+
+        ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(savedProduct);
+        return deleteDtoResponseFromProduct;
     }
 
 }
