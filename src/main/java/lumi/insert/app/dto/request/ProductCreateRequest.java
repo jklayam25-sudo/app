@@ -1,5 +1,7 @@
 package lumi.insert.app.dto.request;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
@@ -8,16 +10,19 @@ import lombok.Data;
 @Builder
 public class ProductCreateRequest {
 
-    @NotNull
+    @NotBlank(message = "Name cannot be empty")
     private String name;
 
-    @NotNull   
+    @NotNull(message = "basePrice cannot be empty")
+    @Min(value = 0, message = "basePrice cannot below 0")
     private Long basePrice;
 
-    @NotNull
+    @NotNull(message = "sellPrice cannot be empty")
+    @Min(value = 0, message = "sellPrice cannot below 0")
     private Long sellPrice;
 
-    @NotNull
+    @NotNull(message = "stockQuantity cannot be empty")
+    @Min(value = 0, message = "stockQuantity cannot below 0")
     private Long stockQuantity;
 
     private Long stockMinimum;

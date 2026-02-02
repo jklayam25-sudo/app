@@ -1,14 +1,21 @@
 package lumi.insert.app.dto.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaginationRequest {
     
-    private Integer page;
+    @Builder.Default
+    private Integer page = 0;
 
-    private Integer size;
+    @Builder.Default
+    private Integer size = 10;
     
 }

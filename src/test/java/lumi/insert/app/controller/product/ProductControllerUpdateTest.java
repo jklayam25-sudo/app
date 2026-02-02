@@ -1,0 +1,132 @@
+package lumi.insert.app.controller.product;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+
+import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.response.ProductDeleteResponse;
+import lumi.insert.app.dto.response.ProductResponse;
+import lumi.insert.app.entity.Product;
+import lumi.insert.app.utils.forTesting.ProductUtils;
+
+public class ProductControllerUpdateTest extends BaseProductControllerTest{
+    @Test
+    @DisplayName("Should response with updated entity")
+    public void updateProductAPI_shouldReturnOKWithUpdatedEntity() throws Exception{
+        Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+        ProductResponse dtoResponseFromProduct = productMapper.createDtoResponseFromProduct(mockCategorizedProduct);
+
+        when(productService.editProduct(any(ProductEditRequest.class))).thenReturn(dtoResponseFromProduct);
+
+        mockMvc.perform(
+            put("/api/products/1")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("name", "Product")
+            .param("basePrice", "1000")
+            .param("sellPrice", "1200")
+            .param("stockQuantity", "10")
+            .param("stockMinimum", "1")
+            .param("categoryId", "1")
+        )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(jsonPath("$.data.name").value("Product"))
+        .andExpect(jsonPath("$.data.category.name").value("Category"));
+    }
+
+    @Test
+    @DisplayName("Should response with MethodArgsTypeMissMatch due to wrong type input")
+    public void updateProductAPI_shouldThrownTypeMissExc() throws Exception{
+        mockMvc.perform(
+            put("/api/products/were")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("name", "Product")
+            .param("basePrice", "1000")
+            .param("sellPrice", "1200")
+            .param("stockQuantity", "10")
+            .param("stockMinimum", "1")
+            .param("categoryId", "1")
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("id must be Long"));
+    }
+
+    @Test
+    @DisplayName("Should response with MethodArgsTypeMissMatch due to wrong type input")
+    public void activateProductAPI_shouldThrownTypeMissExc() throws Exception{
+        mockMvc.perform(
+            post("/api/products/were/activate")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should response with MethodArgsTypeMissMatch due to wrong type input")
+    public void deactivateProductAPI_shouldThrownTypeMissExc() throws Exception{
+        mockMvc.perform(
+            post("/api/products/were/deactivate")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should response with OK Status and response with field isActive false")
+    public void deactivateProductAPI_shouldReturnOK() throws Exception{
+        Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+        mockCategorizedProduct.setIsActive(false);
+
+        ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(mockCategorizedProduct);
+
+        when(productService.setProductInactive(1L)).thenReturn(deleteDtoResponseFromProduct);
+
+        mockMvc.perform(
+            post("/api/products/1/deactivate")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(jsonPath("$.data.isActive").value(false))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should response with OK Status and response with field isActive true")
+    public void activateProductAPI_shouldReturnOK() throws Exception{
+        Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+        mockCategorizedProduct.setIsActive(true);
+
+        ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(mockCategorizedProduct);
+
+        when(productService.setProductActive(1L)).thenReturn(deleteDtoResponseFromProduct);
+
+        mockMvc.perform(
+            post("/api/products/1/activate")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(jsonPath("$.data.isActive").value(true))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+}

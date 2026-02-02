@@ -17,18 +17,17 @@ import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductEditRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
-
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
-
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
-
+import lumi.insert.app.exception.BoilerplateRequestException;
+import lumi.insert.app.exception.DuplicateEntityException;
+import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.CategoryRepository;
 import lumi.insert.app.repository.ProductRepository;
-
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.utils.mapper.ProductMapper;
 
@@ -47,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
         if (productRepository.existsByName(request.getName())) {
-            throw new IllegalArgumentException("Product with the same name already exists.");
+            throw new DuplicateEntityException("Product with name " + request.getName() +" already exists");
         }
 
         Product newProduct = Product.builder()
@@ -63,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
 
         if(request.getCategoryId() != null) {
             Category searchedCategory = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new IllegalArgumentException("Category didn't exists."));
+            .orElseThrow(() -> new NotFoundEntityException("Category with ID " + request.getCategoryId() + " was not found"));
 
             newProduct.setCategory(searchedCategory);
 
@@ -81,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductStockResponse getProductStock(Long productId) {
-        Long stock = productRepository.getStockById(productId).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        Long stock = productRepository.getStockById(productId).orElseThrow(() -> new NotFoundEntityException("Product with ID " + productId + " was not found"));
 
         ProductStockResponse responseStock = ProductStockResponse.builder()
             .id(productId)
@@ -94,8 +93,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse editProduct(ProductEditRequest request) {
-
-        Product existingProduct = productRepository.findById(request.getId()).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        Product existingProduct = productRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Product with ID " + request.getId() + " was not found"));
 
         productMapper.updateProductFromDto(request, existingProduct);
         Category category = existingProduct.getCategory();
@@ -107,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
                 categoryRepository.save(category);
             }
 
-            Category newCategory = categoryRepository.findById(newCategoryId).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+            Category newCategory = categoryRepository.findById(newCategoryId).orElseThrow(() -> new NotFoundEntityException("Category with ID " + newCategoryId + " was not found"));
             existingProduct.setCategory(newCategory);
             newCategory.setTotalItems(newCategory.getTotalItems() + 1L);
 
@@ -144,7 +142,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse getProductById(Long id) {
-        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Product with ID " + id + " was not found"));
  
         ProductResponse responseProduct = productMapper.createDtoResponseFromProduct(searchedProduct);
         return responseProduct;
@@ -166,7 +164,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Slice<ProductResponse> getProductsByRequests(ProductGetByFilter request) {
         if(!(request.getCategoryId() != null & categoryRepository.existsById(request.getCategoryId()))){
-            throw new IllegalArgumentException("Category not found");
+            throw new NotFoundEntityException("Category with ID " + request.getCategoryId() + " was not found");
         }
 
         Sort sort = Sort.by(request.getSortBy());
@@ -202,8 +200,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDeleteResponse setProductInactive(Long id) {
-        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found"));
-        if(!searchedProduct.getIsActive()) throw new IllegalArgumentException("Product already inactive!");
+        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
+        if(!searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already inactive");
 
         Category category = searchedProduct.getCategory();
 
@@ -222,8 +220,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDeleteResponse setProductActive(Long id) {
-        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
-        if(searchedProduct.getIsActive()) throw new IllegalArgumentException("Product already active!");
+        Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Product with ID " + id + " was not found"));
+        if(searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already active");
 
         Category category = searchedProduct.getCategory();
 

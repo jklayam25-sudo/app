@@ -163,8 +163,8 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         assertEquals(50L, productById.stockQuantity());
         assertEquals(5L, productById.stockMinimum());
         assertEquals(1L, productById.id());
-        assertEquals(2L, productById.category().getId());
-        assertEquals("Shoes", productById.category().getName());
+        assertEquals(2L, productById.category().id());
+        assertEquals("Shoes", productById.category().name());
     }
 
     @Test
