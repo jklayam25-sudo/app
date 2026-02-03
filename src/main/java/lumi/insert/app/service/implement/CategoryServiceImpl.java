@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
         if(categoryRepository.existsByName(request.getName())){
             throw  new DuplicateEntityException("Category with name " + request.getName() + " already exists");
         } else {
-        Category searchedCategory = categoryRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
+        Category searchedCategory = categoryRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Category with ID " + request.getId() + " was not found"));
         
         searchedCategory.setName(request.getName());
         Category savedCategory = categoryRepository.save(searchedCategory);
@@ -64,8 +64,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse activateCategory(Long id) {
-        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
-        if(searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category already active");
+        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
+        if(searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category with ID " + id + " already active");
 
         searchedCategory.setIsActive(true);
         Category savedCategory = categoryRepository.save(searchedCategory);
@@ -76,8 +76,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse deactivateCategory(Long id) {
-        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
-        if(!searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category already inactive");
+        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
+        if(!searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category with ID " + id + " already inactive");
 
         searchedCategory.setIsActive(false);
         Category savedCategory = categoryRepository.save(searchedCategory);

@@ -2,6 +2,7 @@ package lumi.insert.app.controller.product;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +21,7 @@ import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
+import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.utils.forTesting.ProductUtils;
@@ -197,7 +199,7 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-     @DisplayName("Should return 200 http status and product list with default pagination")
+    @DisplayName("Should return 200 http status and product list with default pagination")
     public void getAllProductsAPI_withoutParam_return200StatusAndDefaultPaginatedList() throws Exception{
         ArgumentCaptor<PaginationRequest> captor = ArgumentCaptor.forClass(PaginationRequest.class);
 
@@ -220,5 +222,53 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
 
         assertEquals(0, value.getPage());
         assertEquals(10, value.getSize());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and data of product's stock")
+    public void getProductStockAPI_validRequest_return200StatusAndDtoStockResponse() throws Exception{
+        ProductStockResponse productStockResponse = ProductStockResponse.builder()
+        .id(1L)
+        .stockQuantity(100L)
+        .build();
+
+        when(productService.getProductStock(anyLong())).thenReturn(productStockResponse);
+
+         mockMvc.perform(
+            get("/api/products/1/stocks")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(jsonPath("$.data.stockQuantity").value(100L))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 404 http status when product was not found")
+    public void getProductStockAPI_invalidIdNotFound_return404StatusAndErrorResponse() throws Exception{
+        when(productService.getProductStock(anyLong())).thenThrow(new NotFoundEntityException("Product with ID " + 1 + " was not found"));
+
+         mockMvc.perform(
+            get("/api/products/1/stocks")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isNotFound()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 400 http status when parameteer given was miss type")
+    public void getProductStockAPI_missMatchTypeParam_return400StatusAndErrorResponse() throws Exception{
+         mockMvc.perform(
+            get("/api/products/1were/stocks")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").isNotEmpty());
     }
 }

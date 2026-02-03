@@ -25,6 +25,7 @@ import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
+import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.service.ProductService;
 
 @RestController
@@ -82,6 +83,18 @@ public class ProductController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @GetMapping(
+        path = "/api/products/{id}/stocks",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<ProductStockResponse>> getProductStock(@PathVariable(value = "id", required = true) Long id ){
+        ProductStockResponse resultFromService = productService.getProductStock(id);
+
+        WebResponse<ProductStockResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+
+        return ResponseEntity.ok(wrappedResult);   
+    }
+
     @PostMapping(
         path = "/api/products",
         produces = MediaType.APPLICATION_JSON_VALUE,
@@ -98,20 +111,6 @@ public class ProductController {
         .toUri();
 
         return ResponseEntity.created(location).body(wrappedResult);   
-    }
-
-    @PutMapping(
-        path = "/api/products/{id}",
-        produces = MediaType.APPLICATION_JSON_VALUE,
-        consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
-    )
-    ResponseEntity<WebResponse<ProductResponse>> editProduct(@PathVariable(value = "id", required = true) Long id, @Valid ProductUpdateRequest request){
-        request.setId(id);
-        ProductResponse resultFromService = productService.updateProduct(request);
-
-        WebResponse<ProductResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
-
-        return ResponseEntity.ok(wrappedResult);   
     }
 
     @PostMapping(
@@ -137,6 +136,22 @@ public class ProductController {
 
         return ResponseEntity.ok(wrappedResult);   
     }
+
+    @PutMapping(
+        path = "/api/products/{id}",
+        produces = MediaType.APPLICATION_JSON_VALUE,
+        consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+    )
+    ResponseEntity<WebResponse<ProductResponse>> editProduct(@PathVariable(value = "id", required = true) Long id, @Valid ProductUpdateRequest request){
+        request.setId(id);
+        ProductResponse resultFromService = productService.updateProduct(request);
+
+        WebResponse<ProductResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+
+        return ResponseEntity.ok(wrappedResult);   
+    }
+
+    
 
 
 }
