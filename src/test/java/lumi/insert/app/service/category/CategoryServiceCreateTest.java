@@ -37,7 +37,7 @@ public class CategoryServiceCreateTest extends BaseCategoryServiceTest{
 
         when(categoryRepositoryMock.save(mockCategoryQuery)).thenReturn(mockCategoryResult);
 
-        CategoryResponse categoryResponse = new CategoryResponse(mockCategoryResult.getId(), mockCategoryResult.getName(), null, LocalDateTime.now(), LocalDateTime.now());
+        CategoryResponse categoryResponse = new CategoryResponse(mockCategoryResult.getId(), mockCategoryResult.getName(), null, null,LocalDateTime.now(), LocalDateTime.now());
         when(categoryMapper.createDtoResponseFromCategory(mockCategoryResult)).thenReturn(categoryResponse);
 
         CategoryResponse mockCategoryResponse = categoryServiceMock.createCategory(categoryCreateRequest);

@@ -29,7 +29,7 @@ public class CategoryServiceGetTest extends BaseCategoryServiceTest{
 
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.of(mockCategory));
 
-        CategoryResponse categoryResponse = new CategoryResponse(mockCategory.getId(), mockCategory.getName(), null, null, null);
+        CategoryResponse categoryResponse = new CategoryResponse(mockCategory.getId(), mockCategory.getName(), null, null, null, null);
 
         when(categoryMapper.createDtoResponseFromCategory(mockCategory)).thenReturn(categoryResponse);
 
@@ -60,7 +60,7 @@ public class CategoryServiceGetTest extends BaseCategoryServiceTest{
         when(categoryRepositoryMock.findAllByIsActiveTrue(any(Pageable.class))).thenReturn(slice);
         when(categoryMapper.createDtoResponseFromCategory(any(Category.class))).thenAnswer(inv -> {
             Category categoryInv = inv.getArgument(0);
-            CategoryResponse categoryResponse = new CategoryResponse(null, categoryInv.getName(), null, null, null);
+            CategoryResponse categoryResponse = new CategoryResponse(null, categoryInv.getName(), null, null, null, null);
             return categoryResponse;
         });
 

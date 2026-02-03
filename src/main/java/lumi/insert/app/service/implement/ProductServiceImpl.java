@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
         if (productRepository.existsByName(request.getName())) {
-            throw new DuplicateEntityException("Product with name " + request.getName() +" already exists");
+            throw new DuplicateEntityException("Product with name " + request.getName() + " already exists");
         }
 
         Product newProduct = Product.builder()

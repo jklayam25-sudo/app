@@ -36,7 +36,7 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         .name("changedName")
         .build();
         
-        CategoryResponse categoryResponse = new CategoryResponse(mockCategoryEdit.getId(), mockCategoryEdit.getName(), null, null, null);
+        CategoryResponse categoryResponse = new CategoryResponse(mockCategoryEdit.getId(), mockCategoryEdit.getName(),null, null, null, null);
 
         when(categoryMapper.createDtoResponseFromCategory(mockCategoryEdit)).thenReturn(categoryResponse);
 
@@ -71,7 +71,7 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         .thenAnswer(inv -> inv.getArgument(0));
 
         CategoryResponse response = new CategoryResponse(
-        1L, "mockCategory", null, null, null);
+        1L, "mockCategory", null, null, null, null);
 
         when(categoryMapper.createDtoResponseFromCategory(any(Category.class)))
         .thenReturn(response);
@@ -112,7 +112,7 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         .thenAnswer(inv -> inv.getArgument(0));
 
         CategoryResponse response = new CategoryResponse(
-        1L, "mockCategory", null, null, null);
+        1L, "mockCategory", null, null, null, null);
 
         when(categoryMapper.createDtoResponseFromCategory(any(Category.class)))
         .thenReturn(response);

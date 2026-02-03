@@ -77,7 +77,7 @@ public class ProductController {
         path = "/api/products",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductResponse>>> getAllProducts(PaginationRequest request){
+    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProducts(PaginationRequest request){
         Slice<ProductResponse> resultFromService = productService.getAllProducts(request);
 
         WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.<Slice<ProductResponse>>builder()

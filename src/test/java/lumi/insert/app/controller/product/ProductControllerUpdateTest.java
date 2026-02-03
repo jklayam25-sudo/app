@@ -16,6 +16,7 @@ import lumi.insert.app.dto.request.ProductEditRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 
 public class ProductControllerUpdateTest extends BaseProductControllerTest{
@@ -128,5 +129,20 @@ public class ProductControllerUpdateTest extends BaseProductControllerTest{
         .andExpect(status().isOk()) 
         .andExpect(jsonPath("$.data.isActive").value(true))
         .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should response with BoilerplateRequest due to no change gonna happen even if method run")
+    public void deactivateProductAPI_shouldThrownBoilerplateExc() throws Exception{
+        when(productService.setProductInactive(1L)).thenThrow(new BoilerplateRequestException("Product with ID 1 already inactive"));
+        mockMvc.perform(
+            post("/api/products/1/deactivate")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isNotImplemented()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Product with ID 1 already inactive"));
+
     }
 }

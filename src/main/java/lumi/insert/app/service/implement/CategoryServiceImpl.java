@@ -1,6 +1,7 @@
 package lumi.insert.app.service.implement;
+ 
 
-import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -11,8 +12,9 @@ import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.request.CategoryEditRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-
-import lumi.insert.app.entity.Category; 
+import lumi.insert.app.entity.Category;
+import lumi.insert.app.exception.DuplicateEntityException;
+import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.CategoryRepository;
 import lumi.insert.app.service.CategoryService;
 import lumi.insert.app.utils.mapper.CategoryMapper;
@@ -30,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryResponse createCategory(CategoryCreateRequest request) {
 
         if(categoryRepository.existsByName(request.getName())){
-            throw  new IllegalArgumentException("Category with the same name already exists.");
+            throw  new DuplicateEntityException("Category with name " + request.getName() + " already exists");
         } else {
             Category newCategory = Category.builder()
                 .name(request.getName())
@@ -46,19 +48,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse editCategoryName(CategoryEditRequest request) {
-        Category searchedCategory = categoryRepository.findById(request.getId()).orElseThrow(() -> new IllegalArgumentException("Category not found!"));
+        if(categoryRepository.existsByName(request.getName())){
+            throw  new DuplicateEntityException("Category with name " + request.getName() + " already exists");
+        } else {
+        Category searchedCategory = categoryRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
         
         searchedCategory.setName(request.getName());
         Category savedCategory = categoryRepository.save(searchedCategory);
 
         CategoryResponse response = categoryMapper.createDtoResponseFromCategory(savedCategory);
         return response;
+        }
     }
 
     @Override
     public CategoryResponse setCategoryActive(Long id) {
-        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found!"));
-        if(searchedCategory.getIsActive()) throw new IllegalArgumentException("Category already active");
+        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
+        if(searchedCategory.getIsActive()) throw new NotFoundEntityException("Category already active");
 
         searchedCategory.setIsActive(true);
         Category savedCategory = categoryRepository.save(searchedCategory);
@@ -69,8 +75,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse setCategoryInactive(Long id) {
-        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found!"));
-        if(!searchedCategory.getIsActive()) throw new IllegalArgumentException("Category already inactive");
+        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category not found!"));
+        if(!searchedCategory.getIsActive()) throw new NotFoundEntityException("Category already inactive");
 
         searchedCategory.setIsActive(false);
         Category savedCategory = categoryRepository.save(searchedCategory);
@@ -81,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse getCategoryById(Long id) {
-        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found!"));
+        Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
 
         CategoryResponse response = categoryMapper.createDtoResponseFromCategory(searchedCategory);
 

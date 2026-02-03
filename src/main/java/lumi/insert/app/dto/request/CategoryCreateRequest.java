@@ -1,6 +1,6 @@
 package lumi.insert.app.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank; 
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 public class CategoryCreateRequest {
 
-    @NotNull
+    @NotBlank(message = "Name cannot be empty")
     private String name;
     
 }
