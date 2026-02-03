@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,11 +18,13 @@ import org.springframework.data.domain.SliceImpl;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.entity.Category;
+import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CategoryServiceGetTest extends BaseCategoryServiceTest{
     
     @Test
-    public void testGetCategoryById_shouldReturnCategory(){
+    @DisplayName("Should return CategoryResponse DTO when category is found by ID")
+    public void getCategoryById_validId_returnCategoryResponseDTO(){
         Category mockCategory = Category.builder()
         .id(1L)
         .name("unChangedName")
@@ -39,14 +42,16 @@ public class CategoryServiceGetTest extends BaseCategoryServiceTest{
     }
 
     @Test
-    public void testGetCategoryById_shouldThrownAnErrorNotFound(){
+    @DisplayName("Should throw IllegalArgumentException when category ID not found")
+    public void getCategoryById_idNotFound_throwIllegalArgumentException(){
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.getCategoryById(1L));
+        assertThrows(NotFoundEntityException.class, () -> categoryServiceMock.getCategoryById(1L));
     }
 
     @Test
-    public void testGetCategories_shouldReturnSliceOfCategoryResponse(){
+    @DisplayName("Should return Slice of CategoryResponse DTOs based on pagination request")
+    public void getCategories_validPaginationRequest_returnSliceOfCategoryResponseDTO(){
         List<Category> categories = new ArrayList<>();
 
         for(int i = 1; i < 10; i++){

@@ -4,7 +4,7 @@ import org.springframework.data.domain.Slice;
 
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
-import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 
@@ -17,20 +17,20 @@ public interface ProductService {
 
     ProductResponse createProduct(ProductCreateRequest request);
 
-    ProductStockResponse getProductStock(Long request);
+    ProductStockResponse getProductStock(Long id);
 
-    ProductResponse editProduct(ProductEditRequest request);
+    ProductResponse updateProduct(ProductUpdateRequest request);
 
-    Slice<ProductName> getAllProductNames(ProductGetNameRequest request);
+    Slice<ProductName> searchProductNames(ProductGetNameRequest request);
 
     ProductResponse getProductById(Long id);
 
-    Slice<ProductResponse> getAllProducts(PaginationRequest request);
+    Slice<ProductResponse> getProducts(PaginationRequest request);
 
     Slice<ProductResponse> getProductsByRequests(ProductGetByFilter request);
 
-    ProductDeleteResponse setProductInactive(Long id);
+    ProductDeleteResponse deactivateProduct(Long id);
 
-    ProductDeleteResponse setProductActive(Long id);
+    ProductDeleteResponse activateProduct(Long id);
 
 }

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Slice;
@@ -25,7 +26,8 @@ import lumi.insert.app.utils.forTesting.ProductUtils;
 
 public class ProductControllerGetTest extends BaseProductControllerTest{
     @Test
-    public void getProductAPI_shouldSuccessAndReturningJson() throws Exception{
+    @DisplayName("Should return 200 http status and response of product DTO")
+    public void getProductAPI_validId_return200StatusAndResponseDTO() throws Exception{
         ProductResponse productResponse = ProductResponse.builder()
         .id(1L)
         .name("ProductMock")
@@ -45,7 +47,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductAPI_shouldThrownNotFound() throws Exception{
+    @DisplayName("Should return 404 http status when product ID not found")
+    public void getProductAPI_idNotFound_return404StatusAndErrorResponse() throws Exception{
         when(productService.getProductById(1L)).thenThrow(new NotFoundEntityException("Product with ID " + 1L + " was not found"));
 
         mockMvc.perform(
@@ -59,7 +62,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductAPI_shouldThrownTypeMissMatch() throws Exception{
+    @DisplayName("Should return 400 http status when product ID type is mismatched")
+    public void getProductAPI_typeMismatch_return400StatusAndErrorResponse() throws Exception{
         mockMvc.perform(
             get("/api/products/were")
             .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -71,7 +75,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductsNameAPI_shouldReturnListOf() throws Exception{
+    @DisplayName("Should return 200 http status and list of product names")
+    public void searchProductNamesAPI_validQuery_return200StatusAndListOfProductName() throws Exception{
         Slice<Product> mockSliceProduct = ProductUtils.getMockSliceProduct();
 
         Slice<ProductName> map = mockSliceProduct.map(product -> {
@@ -83,7 +88,7 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
             return productNameResponse;
         });
 
-        when(productService.getAllProductNames(any(ProductGetNameRequest.class))).thenReturn(map);
+        when(productService.searchProductNames(any(ProductGetNameRequest.class))).thenReturn(map);
 
         mockMvc.perform(
             get("/api/products/searchName?name=pro")
@@ -97,7 +102,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductsNameAPI_shouldThrownMethodArgsException() throws Exception{       
+    @DisplayName("Should return 400 http status when search name is empty")
+    public void getProductsNameAPI_emptyName_return400StatusAndErrorResponse() throws Exception{       
         mockMvc.perform(
             get("/api/products/searchName?name=")
             .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -108,7 +114,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductByFilterAPI_shouldReturnListOf() throws Exception{
+    @DisplayName("Should return 200 http status and filtered list of products")
+    public void getProductByFilterAPI_validFilter_return200StatusAndFilteredList() throws Exception{
         ArgumentCaptor<ProductGetByFilter> captor = ArgumentCaptor.forClass(ProductGetByFilter.class);
 
         Slice<Product> mockSliceProduct = ProductUtils.getMockSliceProduct();
@@ -137,7 +144,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductByFilterAPI_shouldThrownNotFound() throws Exception{
+    @DisplayName("Should return 404 http status when filtering with non-existent category")
+    public void getProductByFilterAPI_categoryNotFound_return404StatusAndErrorResponse() throws Exception{
          when(productService.getProductsByRequests(any())).thenThrow(new NotFoundEntityException("Category with ID " + 1L + " was not found"));
 
          mockMvc.perform(
@@ -151,7 +159,8 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getProductByFilterAPI_shouldThrownTypeMissMatch() throws Exception{
+    @DisplayName("Should return 400 http status when filter parameter type is invalid")
+    public void getProductByFilterAPI_typeMismatch_return400StatusAndErrorResponse() throws Exception{
          mockMvc.perform(
             get("/api/products/filter?categoryId=true")
             .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -162,13 +171,14 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getAllProductsAPI_withParam_shouldReturnListOf() throws Exception{
+    @DisplayName("Should return 200 http status and product list with custom pagination")
+    public void getAllProductsAPI_withParam_return200StatusAndPaginatedList() throws Exception{
         ArgumentCaptor<PaginationRequest> captor = ArgumentCaptor.forClass(PaginationRequest.class);
 
         Slice<Product> mockSliceProduct = ProductUtils.getMockSliceProduct();
         Slice<ProductResponse> map = mockSliceProduct.map(productMapper::createDtoResponseFromProduct);
 
-        when(productService.getAllProducts(any())).thenReturn(map);
+        when(productService.getProducts(any())).thenReturn(map);
 
         mockMvc.perform(
             get("/api/products?size=12")
@@ -179,7 +189,7 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
         .andExpect(jsonPath("$.data.content").isArray())
         .andExpect(jsonPath("$.data.content.length()").value(12));
 
-        verify(productService).getAllProducts(captor.capture());
+        verify(productService).getProducts(captor.capture());
         PaginationRequest value = captor.getValue();
 
         assertEquals(0, value.getPage());
@@ -187,13 +197,14 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
-    public void getAllProductsAPI_withoutParam_shouldReturnListOf() throws Exception{
+     @DisplayName("Should return 200 http status and product list with default pagination")
+    public void getAllProductsAPI_withoutParam_return200StatusAndDefaultPaginatedList() throws Exception{
         ArgumentCaptor<PaginationRequest> captor = ArgumentCaptor.forClass(PaginationRequest.class);
 
         Slice<Product> mockSliceProduct = ProductUtils.getMockSliceProduct();
         Slice<ProductResponse> map = mockSliceProduct.map(productMapper::createDtoResponseFromProduct);
 
-        when(productService.getAllProducts(any())).thenReturn(map);
+        when(productService.getProducts(any())).thenReturn(map);
 
         mockMvc.perform(
             get("/api/products")
@@ -204,7 +215,7 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
         .andExpect(jsonPath("$.data.content").isArray())
         .andExpect(jsonPath("$.data.content.length()").value(12));
 
-        verify(productService).getAllProducts(captor.capture());
+        verify(productService).getProducts(captor.capture());
         PaginationRequest value = captor.getValue();
 
         assertEquals(0, value.getPage());

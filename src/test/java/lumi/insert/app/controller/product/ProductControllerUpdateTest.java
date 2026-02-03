@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Product;
@@ -26,7 +26,7 @@ public class ProductControllerUpdateTest extends BaseProductControllerTest{
         Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
         ProductResponse dtoResponseFromProduct = productMapper.createDtoResponseFromProduct(mockCategorizedProduct);
 
-        when(productService.editProduct(any(ProductEditRequest.class))).thenReturn(dtoResponseFromProduct);
+        when(productService.updateProduct(any(ProductUpdateRequest.class))).thenReturn(dtoResponseFromProduct);
 
         mockMvc.perform(
             put("/api/products/1")
@@ -99,7 +99,7 @@ public class ProductControllerUpdateTest extends BaseProductControllerTest{
 
         ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(mockCategorizedProduct);
 
-        when(productService.setProductInactive(1L)).thenReturn(deleteDtoResponseFromProduct);
+        when(productService.deactivateProduct(1L)).thenReturn(deleteDtoResponseFromProduct);
 
         mockMvc.perform(
             post("/api/products/1/deactivate")
@@ -119,7 +119,7 @@ public class ProductControllerUpdateTest extends BaseProductControllerTest{
 
         ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(mockCategorizedProduct);
 
-        when(productService.setProductActive(1L)).thenReturn(deleteDtoResponseFromProduct);
+        when(productService.activateProduct(1L)).thenReturn(deleteDtoResponseFromProduct);
 
         mockMvc.perform(
             post("/api/products/1/activate")
@@ -134,7 +134,7 @@ public class ProductControllerUpdateTest extends BaseProductControllerTest{
     @Test
     @DisplayName("Should response with BoilerplateRequest due to no change gonna happen even if method run")
     public void deactivateProductAPI_shouldThrownBoilerplateExc() throws Exception{
-        when(productService.setProductInactive(1L)).thenThrow(new BoilerplateRequestException("Product with ID 1 already inactive"));
+        when(productService.deactivateProduct(1L)).thenThrow(new BoilerplateRequestException("Product with ID 1 already inactive"));
         mockMvc.perform(
             post("/api/products/1/deactivate")
             .accept(MediaType.APPLICATION_JSON_VALUE)

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CategoryEditRequest { 
+public class CategoryUpdateRequest { 
 
     @NotNull
     private Long id;

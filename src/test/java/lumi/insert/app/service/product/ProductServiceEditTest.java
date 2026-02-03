@@ -8,17 +8,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test; 
 
-import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.exception.BoilerplateRequestException;
+import lumi.insert.app.exception.NotFoundEntityException;
 
 public class ProductServiceEditTest extends BaseProductServiceTest {
     @Test
-    public void testEditProductWithValidId() {
+    @DisplayName("Should return updated ProductResponse DTO when update with valid ID is successful")
+    public void updateProduct_validRequest_returnUpdatedProductResponseDTO(){
 
         Product mockProduct = Product.builder()
         .name("NIKE Jordan Low 3")
@@ -30,7 +34,7 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
 
         Product savedProduct = productRepository.save(mockProduct);
 
-        ProductEditRequest productEditRequest = ProductEditRequest.builder()
+        ProductUpdateRequest productEditRequest = ProductUpdateRequest.builder()
         .id(savedProduct.getId())
         .name("NIKE Jordan Low 4")
         .basePrice(11000L)
@@ -38,7 +42,7 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
         .stockMinimum(2L)
         .build();
 
-        ProductResponse editedProduct = productService.editProduct(productEditRequest);
+        ProductResponse editedProduct = productService.updateProduct(productEditRequest);
 
         assertEquals("NIKE Jordan Low 4", editedProduct.name());
         assertEquals(11000L, editedProduct.basePrice());
@@ -49,9 +53,10 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
     }
 
     @Test
-    public void testEditProductWithInvalidId() {
+    @DisplayName("Should throw NotFoundEntityException when updating product with non-existent ID")
+    public void updateProduct_idNotFound_throwNotFoundEntityException(){
 
-        ProductEditRequest productEditRequest = ProductEditRequest.builder()
+        ProductUpdateRequest productEditRequest = ProductUpdateRequest.builder()
         .id(1L)
         .name("NIKE Jordan Low 4")
         .basePrice(11000L)
@@ -59,11 +64,12 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
         .stockMinimum(2L)
         .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.editProduct(productEditRequest));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.updateProduct(productEditRequest));
     }
 
     @Test
-    public void testUpdateProductCategory(){
+    @DisplayName("Should increment category total items when product category is updated")
+    public void updateProduct_changeCategory_incrementCategoryTotalItems() {
         Category category = Category.builder()
         .name("Shoes")
         .build();
@@ -82,12 +88,12 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
 
         Product savedProduct = productRepository.save(mockProduct);
 
-        ProductEditRequest request = ProductEditRequest.builder()
+        ProductUpdateRequest request = ProductUpdateRequest.builder()
         .id(savedProduct.getId())
         .categoryId(savedCategory.getId())
         .build();
 
-        ProductResponse editProductResponse = productService.editProduct(request);
+        ProductResponse editProductResponse = productService.updateProduct(request);
         Category updatedCategory = categoryRepository.findById(savedCategory.getId()).orElseThrow(() -> new IllegalArgumentException("N"));
         
         assertEquals(1L, updatedCategory.getTotalItems());
@@ -96,7 +102,8 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
     }
 
     @Test
-    public void testSetInactiveProduct_totalItemsOfCategoryShouldBeDecrease(){
+    @DisplayName("Should decrement category total items when product is deactivated")
+    public void deactivateProduct_validId_decrementCategoryTotalItemsAndReturnResponse(){
         Category category = Category.builder()
         .name("Shoes")
         .totalItems(10L)
@@ -117,7 +124,7 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
 
         Product savedProduct = productRepository.save(mockProduct);
 
-        ProductDeleteResponse setInactiveProduct = productService.setProductInactive(savedProduct.getId());
+        ProductDeleteResponse setInactiveProduct = productService.deactivateProduct(savedProduct.getId());
 
         Category updatedCategory = categoryRepository.findById(savedCategory.getId()).orElseThrow(() -> new IllegalArgumentException("N"));
         assertEquals(9L, updatedCategory.getTotalItems());
@@ -126,7 +133,8 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
     }
 
     @Test
-    public void testSetActiveProduct_totalItemsOfCategoryShouldBeIncrease(){
+    @DisplayName("Should increment category total items when product is activated")
+    public void activateProduct_validId_incrementCategoryTotalItemsAndReturnResponse(){
         Category category = Category.builder()
         .name("Shoes")
         .totalItems(10L)
@@ -148,7 +156,7 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
 
         Product savedProduct = productRepository.save(mockProduct);
 
-        ProductDeleteResponse setInactiveProduct = productService.setProductActive(savedProduct.getId());
+        ProductDeleteResponse setInactiveProduct = productService.activateProduct(savedProduct.getId());
 
         Category updatedCategory = categoryRepository.findById(savedCategory.getId()).orElseThrow(() -> new IllegalArgumentException("N"));
         assertEquals(11L, updatedCategory.getTotalItems());
@@ -157,36 +165,40 @@ public class ProductServiceEditTest extends BaseProductServiceTest {
     }
 
     @Test
-    public void testSetActiveProduct_shouldBeThrownBecauseOfAlreadyActive(){
+    @DisplayName("Should throw BoilerplateRequestException when activating an already active product")
+    public void activateProduct_alreadyActive_throwBoilerplateRequestException(){
         Product alreadyActiveProduct = Product.builder()
         .id(90L)
         .isActive(true)
         .build();
 
         when(productRepositoryMock.findById(90L)).thenReturn(Optional.of(alreadyActiveProduct));
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.setProductActive(90L));
+        assertThrows(BoilerplateRequestException.class, () -> productServiceMock.activateProduct(90L));
     }
 
     @Test
-    public void testSetActiveProduct_shouldBeThrownBecauseOfNotFoundProduct(){
+    @DisplayName("Should throw NotFoundEntityException when activating non-existent product ID")
+    public void activateProduct_idNotFound_throwNotFoundEntityException(){
         when(productRepositoryMock.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.setProductActive(1L));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.activateProduct(1L));
     }
 
     @Test
-    public void testSetInactiveProduct_shouldBeThrownBecauseOfAlreadyActive(){
+    @DisplayName("Should throw BoilerplateRequestException when deactivating an already inactive product")
+    public void deactivateProduct_alreadyInactive_throwBoilerplateRequestException(){
         Product alreadyInactiveProduct = Product.builder()
         .id(90L)
         .isActive(false)
         .build();
 
         when(productRepositoryMock.findById(90L)).thenReturn(Optional.of(alreadyInactiveProduct));
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.setProductInactive(90L));
+        assertThrows(BoilerplateRequestException.class, () -> productServiceMock.deactivateProduct(90L));
     }
 
     @Test
-    public void testSetInactiveProduct_shouldBeThrownBecauseOfNotFoundProduct(){
+    @DisplayName("Should throw NotFoundEntityException when deactivating non-existent product ID")
+    public void deactivateProduct_idNotFound_throwNotFoundEntityException(){
         when(productRepositoryMock.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.setProductInactive(1L));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.deactivateProduct(1L));
     }
 }

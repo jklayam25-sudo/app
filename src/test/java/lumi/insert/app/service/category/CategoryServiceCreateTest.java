@@ -7,16 +7,19 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.entity.Category;
+import lumi.insert.app.exception.DuplicateEntityException;
 
 public class CategoryServiceCreateTest extends BaseCategoryServiceTest{
 
     @Test
-    public void testCreateCategoryValid(){
+    @DisplayName("Should return created CategoryResponse DTO when request is valid")
+    public void createCategory_validRequest_returnResponseDTO(){
         when(categoryRepositoryMock.existsByName("Electronics")).thenReturn(false);
 
         CategoryCreateRequest categoryCreateRequest = CategoryCreateRequest.builder()
@@ -49,13 +52,14 @@ public class CategoryServiceCreateTest extends BaseCategoryServiceTest{
     }
 
     @Test
-    public void testCreateCategoryWithExistingName(){
+    @DisplayName("Should throw DuplicateEntityException when category name already exists")
+    public void createCategory_existingName_throwDuplicateEntityException(){
         when(categoryRepositoryMock.existsByName("Shoes")).thenReturn(true);
 
         CategoryCreateRequest categoryCreateRequest = CategoryCreateRequest.builder()
         .name("Shoes")
         .build();
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.createCategory(categoryCreateRequest));
+        assertThrows(DuplicateEntityException.class, () -> categoryServiceMock.createCategory(categoryCreateRequest));
     }
 }

@@ -9,15 +9,19 @@ import static org.mockito.Mockito.when;
 import java.security.InvalidParameterException;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.ProductCreateRequest; 
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.exception.DuplicateEntityException;
+import lumi.insert.app.exception.NotFoundEntityException;
 
 public class ProductServiceCreateTest extends BaseProductServiceTest{
     
     @Test
-    public void testCreateProductUncategorizedValid(){
+    @DisplayName("Should return ProductResponse DTO when creating product without category is successful")
+    public void createProduct_validUncategorizedRequest_returnProductResponseDTO(){
         ProductCreateRequest productCreateRequest = ProductCreateRequest.builder()
         .name("NIKE Flyway 3")
         .basePrice(100L)
@@ -45,7 +49,8 @@ public class ProductServiceCreateTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testCreateProductWithExistingName() {
+    @DisplayName("Should throw DuplicateEntityException when product name already exists")
+    public void createProduct_existingName_throwDuplicateEntityException() {
         ProductCreateRequest productCreateRequest = ProductCreateRequest.builder()
         .name("NIKE Jordan Low 3")
         .basePrice(10000L)
@@ -56,11 +61,12 @@ public class ProductServiceCreateTest extends BaseProductServiceTest{
 
         when(productRepositoryMock.existsByName("NIKE Jordan Low 3")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.createProduct(productCreateRequest));
+        assertThrows(DuplicateEntityException.class, () -> productServiceMock.createProduct(productCreateRequest));
     }
 
     @Test
-    public void testCreateProductWithInvalidCategory() {
+    @DisplayName("Should throw NotFoundEntityException when provided category ID does not exist")
+    public void createProduct_invalidCategoryId_throwNotFoundEntityException() {
         ProductCreateRequest productCreateRequest = ProductCreateRequest.builder()
         .name("NIKE Jordan Low 3")
         .basePrice(10000L)
@@ -73,6 +79,6 @@ public class ProductServiceCreateTest extends BaseProductServiceTest{
         when(productRepositoryMock.existsByName("NIKE Jordan Low 3")).thenReturn(false);
         when(categoryRepositoryMock.findById(12L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.createProduct(productCreateRequest));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.createProduct(productCreateRequest));
     }
 }

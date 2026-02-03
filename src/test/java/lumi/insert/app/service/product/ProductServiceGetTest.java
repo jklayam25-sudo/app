@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -30,11 +31,13 @@ import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.exception.NotFoundEntityException;
 
 public class ProductServiceGetTest extends BaseProductServiceTest{
     
     @Test
-    public void testGetProductStockWithValidId() {
+    @DisplayName("Should return ProductStockResponse when getting stock with valid ID")
+    public void getProductStock_validId_returnProductStockResponse(){
         when(productRepositoryMock.getStockById(1L)).thenReturn(Optional.of(50L));
         ProductStockResponse productStock = productServiceMock.getProductStock(1L);
 
@@ -45,16 +48,18 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductStockWithInvalidId() {
+    @DisplayName("Should throw NotFoundEntityException when getting stock with invalid ID")
+    public void getProductStock_invalidId_throwNotFoundEntityException() {
         when(productRepositoryMock.getStockById(2L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.getProductStock(2L));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.getProductStock(2L));
 
         verify(productRepositoryMock, times(1)).getStockById(2L);
     }
 
     @Test
-    public void testGetProductNameByQuery(){
+    @DisplayName("Should return Slice of ProductName when searching by valid name query")
+    public void searchProductNames_validQuery_returnSliceOfProductName(){
         List<Product> products = new ArrayList<Product>();
 
         for ( int i = 1; i <= 12; i++ ) {
@@ -79,7 +84,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .size(5)
         .build();
 
-        Slice<ProductName> allProductNames = productServiceMock.getAllProductNames(request);
+        Slice<ProductName> allProductNames = productServiceMock.searchProductNames(request);
 
         assertEquals(12, allProductNames.getNumberOfElements());
         assertEquals("Product 1", allProductNames.getContent().get(0).name());
@@ -90,7 +95,8 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductNameByQueryNotFound(){
+    @DisplayName("Should return empty Slice when searching product name with non-matching query")
+    public void searchProductNames_queryNotFound_returnEmptySlice(){
 
         Slice<Product> productSlice = new SliceImpl<>(List.of());
 
@@ -102,15 +108,16 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .size(5)
         .build();
 
-        Slice<ProductName> allProductNames = productServiceMock.getAllProductNames(request);
+        Slice<ProductName> allProductNames = productServiceMock.searchProductNames(request);
 
         assertEquals(0, allProductNames.getNumberOfElements());
         assertFalse(allProductNames.hasNext());
         assertTrue(allProductNames.isEmpty());
     }
 
-    @Test
-    public void testGetProductByIdValid(){
+   @Test
+    @DisplayName("Should return ProductResponse DTO when getting product by valid ID without category")
+    public void getProductById_validIdNoCategory_returnProductResponseDTO() {
         Product mockProduct = Product.builder()
         .name("NIKE Jordan Low 3")
         .basePrice(10000L)
@@ -121,7 +128,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .build();
 
         when(productRepositoryMock.findById(1L)).thenReturn(Optional.of(mockProduct));
-
+        // when(categoryMapper.createDtoSimpleResponseFromCategory(any())).thenReturn(null);
         ProductResponse productById = productServiceMock.getProductById(1L);
         verify(productMapper, times(1)).createDtoResponseFromProduct(mockProduct);
 
@@ -135,7 +142,8 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductByIdValidWithCategory(){
+    @DisplayName("Should return ProductResponse DTO with category details when getting product by valid ID")
+    public void getProductById_validIdWithCategory_returnProductResponseDTO(){
         Category mockCategory = Category.builder()
         .id(2L)
         .name("Shoes")
@@ -168,14 +176,16 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductByIdInvalid(){
+    @DisplayName("Should throw NotFoundEntityException when getting product by invalid ID")
+    public void getProductById_invalidId_throwNotFoundEntityException(){
         when(productRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.getProductById(1L));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.getProductById(1L));
     }
 
     @Test
-    public void testGetAllProducts(){
+    @DisplayName("Should return Slice of all ProductResponse DTOs based on pagination")
+    public void getProducts_validPagination_returnSliceOfProductResponseDTO(){
         List<Product> products = new ArrayList<Product>();
 
         for ( int i = 1; i <= 12; i++ ) {
@@ -201,7 +211,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .size(12)
         .build();
 
-        Slice<ProductResponse> allProducts = productServiceMock.getAllProducts(request);
+        Slice<ProductResponse> allProducts = productServiceMock.getProducts(request);
 
         verify(productMapper, times(12)).createDtoResponseFromProduct(any(Product.class));
 
@@ -220,7 +230,8 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductByCriteria(){
+    @DisplayName("Should return filtered Slice of ProductResponse based on multiple criteria")
+    public void getProductsByRequests_validFilter_returnFilteredSlice(){
 
         for ( int i = 1; i <= 12; i++ ) {
             Product dumpProduct = Product.builder()
@@ -280,7 +291,8 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     }
 
     @Test
-    public void testGetProductByCriteriaWithInvalidCategories(){
+    @DisplayName("Should throw NotFoundEntityException when filtering by non-existent category ID")
+    public void getProductsByRequests_invalidCategoryId_throwNotFoundEntityException(){
         when(categoryRepositoryMock.existsById(1L)).thenReturn(false);
 
         ProductGetByFilter productGetByFilter = ProductGetByFilter.builder()
@@ -294,7 +306,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .categoryId(1L)
         .build();
 
-        assertThrows(IllegalArgumentException.class, () -> productServiceMock.getProductsByRequests(productGetByFilter));
+        assertThrows(NotFoundEntityException.class, () -> productServiceMock.getProductsByRequests(productGetByFilter));
     }
 
 

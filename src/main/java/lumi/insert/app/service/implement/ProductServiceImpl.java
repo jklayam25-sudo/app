@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
-import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductResponse editProduct(ProductEditRequest request) {
+    public ProductResponse updateProduct(ProductUpdateRequest request) {
         Product existingProduct = productRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Product with ID " + request.getId() + " was not found"));
 
         productMapper.updateProductFromDto(request, existingProduct);
@@ -121,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Slice<ProductName> getAllProductNames(ProductGetNameRequest request) {
+    public Slice<ProductName> searchProductNames(ProductGetNameRequest request) {
         Sort sort = Sort.by("name").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
@@ -150,7 +150,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Slice<ProductResponse> getAllProducts(PaginationRequest request) {
+    public Slice<ProductResponse> getProducts(PaginationRequest request) {
         Sort sort = Sort.by("name").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
@@ -199,7 +199,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductDeleteResponse setProductInactive(Long id) {
+    public ProductDeleteResponse deactivateProduct(Long id) {
         Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
         if(!searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already inactive");
 
@@ -219,7 +219,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductDeleteResponse setProductActive(Long id) {
+    public ProductDeleteResponse activateProduct(Long id) {
         Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Product with ID " + id + " was not found"));
         if(searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already active");
 

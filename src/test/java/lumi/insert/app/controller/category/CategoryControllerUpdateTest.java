@@ -1,7 +1,7 @@
 package lumi.insert.app.controller.category;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when; 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import lumi.insert.app.dto.request.CategoryEditRequest;
+import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.BoilerplateRequestException;
@@ -28,7 +28,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
         Category mockCategory = CategoryUtils.getMockCategory();
         CategoryResponse dtoResponseFromCategory = categoryMapper.createDtoResponseFromCategory(mockCategory);
 
-        when(categoryService.editCategoryName(any(CategoryEditRequest.class))).thenReturn(dtoResponseFromCategory);
+        when(categoryService.updateCategoryName(any(CategoryUpdateRequest.class))).thenReturn(dtoResponseFromCategory);
 
          mockMvc.perform(
             put("/api/categories/1")
@@ -61,7 +61,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
     @Test
     @DisplayName("Should return 404 http status when requested entity is not found")
     public void editCategoryAPI_notFound_return404() throws Exception{ 
-        when(categoryService.editCategoryName(any())).thenThrow(new NotFoundEntityException("Category with ID " + 1 + " was not found"));
+        when(categoryService.updateCategoryName(any())).thenThrow(new NotFoundEntityException("Category with ID " + 1 + " was not found"));
         mockMvc.perform(
             put("/api/categories/1")
             .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -77,7 +77,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
     @Test
     @DisplayName("Should return 409 http status when request name already exists")
     public void editCategoryAPI_duplicateName_return409() throws Exception{ 
-        when(categoryService.editCategoryName(any())).thenThrow(new DuplicateEntityException("Category with Name Category already exists"));
+        when(categoryService.updateCategoryName(any())).thenThrow(new DuplicateEntityException("Category with Name Category already exists"));
         mockMvc.perform(
             put("/api/categories/1")
             .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -124,7 +124,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
 
         CategoryResponse deleteDtoResponseFromProduct = categoryMapper.createDtoResponseFromCategory(mockCategory);
 
-        when(categoryService.setCategoryInactive(1L)).thenReturn(deleteDtoResponseFromProduct);
+        when(categoryService.deactivateCategory(1L)).thenReturn(deleteDtoResponseFromProduct);
 
         mockMvc.perform(
             post("/api/categories/1/deactivate")
@@ -144,7 +144,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
 
         CategoryResponse deleteDtoResponseFromProduct = categoryMapper.createDtoResponseFromCategory(mockCategory);
 
-        when(categoryService.setCategoryActive(1L)).thenReturn(deleteDtoResponseFromProduct);
+        when(categoryService.activateCategory(1L)).thenReturn(deleteDtoResponseFromProduct);
 
         mockMvc.perform(
             post("/api/categories/1/activate")
@@ -159,7 +159,7 @@ public class CategoryControllerUpdateTest extends BaseCategoryControllerTest {
     @Test
     @DisplayName("Should response with BoilerplateRequest due to no change gonna happen even if method run")
     public void deactivateCategoryAPI_categoryAlreadyInactive_shouldThrownBoilerplateExc() throws Exception{
-        when(categoryService.setCategoryInactive(1L)).thenThrow(new BoilerplateRequestException("Category with ID 1 already inactive"));
+        when(categoryService.deactivateCategory(1L)).thenThrow(new BoilerplateRequestException("Category with ID 1 already inactive"));
         mockMvc.perform(
             post("/api/categories/1/deactivate")
             .accept(MediaType.APPLICATION_JSON_VALUE)

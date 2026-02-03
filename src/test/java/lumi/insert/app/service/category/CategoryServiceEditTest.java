@@ -7,16 +7,20 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import lumi.insert.app.dto.request.CategoryEditRequest;
+import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.entity.Category;
+import lumi.insert.app.exception.BoilerplateRequestException;
+import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CategoryServiceEditTest extends BaseCategoryServiceTest {
     
     @Test
-    public void testEditCategoryName_shouldBeChangeCategoryName(){
+    @DisplayName("Should return updated CategoryResponse DTO when category name update is successful")
+    public void updateCategoryName_validRequest_returnUpdatedResponseDTO(){
         Category mockCategory = Category.builder()
         .id(1L)
         .name("unChangedName")
@@ -31,7 +35,7 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
 
         when(categoryRepositoryMock.save(any(Category.class))).thenReturn(mockCategoryEdit);
 
-        CategoryEditRequest categoryEditRequest = CategoryEditRequest.builder()
+        CategoryUpdateRequest categoryEditRequest = CategoryUpdateRequest.builder()
         .id(1L)
         .name("changedName")
         .build();
@@ -40,26 +44,28 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
 
         when(categoryMapper.createDtoResponseFromCategory(mockCategoryEdit)).thenReturn(categoryResponse);
 
-        CategoryResponse editCategoryName = categoryServiceMock.editCategoryName(categoryEditRequest);
+        CategoryResponse editCategoryName = categoryServiceMock.updateCategoryName(categoryEditRequest);
 
         assertEquals("changedName", editCategoryName.name());
         assertEquals(1L, editCategoryName.id());
     }
 
     @Test
-    public void testEditCategoryName_shouldThrownError(){
+    @DisplayName("Should throw NotFoundEntityException when updating non-existent category ID")
+    public void updateCategoryName_idNotFound_throwNotFoundEntityException(){
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-        CategoryEditRequest categoryEditRequest = CategoryEditRequest.builder()
+        CategoryUpdateRequest categoryEditRequest = CategoryUpdateRequest.builder()
         .id(1L)
         .name("changedName")
         .build();
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.editCategoryName(categoryEditRequest));
+        assertThrows(NotFoundEntityException.class, () -> categoryServiceMock.updateCategoryName(categoryEditRequest));
     }
 
     @Test
-    public void testSetCategoryActive_shouldSetCategoryToActive(){
+    @DisplayName("Should return CategoryResponse with active status when activation is successful")
+    public void activateCategory_validId_returnActiveResponseDTO(){
         Category mockCategory = Category.builder()
         .name("mockCategory")
         .isActive(false)
@@ -76,20 +82,22 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         when(categoryMapper.createDtoResponseFromCategory(any(Category.class)))
         .thenReturn(response);
 
-        CategoryResponse editCategoryName = categoryServiceMock.setCategoryActive(1L);
+        CategoryResponse editCategoryName = categoryServiceMock.activateCategory(1L);
 
         assertEquals("mockCategory", editCategoryName.name());
     }
 
     @Test
-    public void testSetCategoryActive_shouldThrownAnErrorNotFound(){
+    @DisplayName("Should throw NotFoundEntityException when activating non-existent category ID")
+    public void activateCategory_idNotFound_throwNotFoundEntityException(){
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.setCategoryActive(1L));
+        assertThrows(NotFoundEntityException.class, () -> categoryServiceMock.activateCategory(1L));
     }
 
     @Test
-    public void testSetCategoryActive_shouldThrownAnErrorAlreadyActive(){
+    @DisplayName("Should throw BoilerplateRequestException when trying to activate an already active category")
+    public void activateCategory_alreadyActive_throwBoilerplateRequestException(){
         Category mockCategory = Category.builder()
         .name("mockCategory")
         .isActive(true)
@@ -97,11 +105,12 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
 
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.of(mockCategory));
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.setCategoryActive(1L));
+        assertThrows(BoilerplateRequestException.class, () -> categoryServiceMock.activateCategory(1L));
     }
 
     @Test
-    public void testSetCategoryInactive_shouldSetCategoryToInactive(){
+    @DisplayName("Should return CategoryResponse with inactive status when deactivation is successful")
+    public void deactivateCategory_validId_returnInactiveResponseDTO(){
         Category mockCategory = Category.builder()
         .name("mockCategory")
         .build();
@@ -117,20 +126,22 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         when(categoryMapper.createDtoResponseFromCategory(any(Category.class)))
         .thenReturn(response);
 
-        CategoryResponse editCategoryName = categoryServiceMock.setCategoryInactive(1L);
+        CategoryResponse editCategoryName = categoryServiceMock.deactivateCategory(1L);
 
         assertEquals("mockCategory", editCategoryName.name());
     }
 
     @Test
-    public void testSetCategoryInactive_shouldThrownAnErrorNotFound(){
+    @DisplayName("Should throw NotFoundEntityException when deactivating non-existent category ID")
+    public void deactivateCategory_idNotFound_throwNotFoundEntityException(){
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.setCategoryInactive(1L));
+        assertThrows(NotFoundEntityException.class, () -> categoryServiceMock.deactivateCategory(1L));
     }
 
     @Test
-    public void testSetCategoryInactive_shouldThrownAnErrorAlreadyActive(){
+    @DisplayName("Should throw BoilerplateRequestException when trying to deactivate an already inactive category")
+    public void deactivateCategory_alreadyInactive_throwBoilerplateRequestException(){
         Category mockCategory = Category.builder()
         .name("mockCategory")
         .isActive(false)
@@ -138,7 +149,7 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
 
         when(categoryRepositoryMock.findById(1L)).thenReturn(Optional.of(mockCategory));
 
-        assertThrows(IllegalArgumentException.class, () -> categoryServiceMock.setCategoryInactive(1L));
+        assertThrows(BoilerplateRequestException.class, () -> categoryServiceMock.deactivateCategory(1L));
     }
 
 }

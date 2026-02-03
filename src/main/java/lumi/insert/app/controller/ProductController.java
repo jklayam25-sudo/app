@@ -5,8 +5,9 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity; 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
-import lumi.insert.app.dto.request.ProductEditRequest;
+import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
@@ -39,9 +40,8 @@ public class ProductController {
     )
     ResponseEntity<WebResponse<ProductResponse>> getProduct(@PathVariable(value = "id") Long id){
         ProductResponse resultFromService = productService.getProductById(id);
-        WebResponse<ProductResponse> wrappedResult = WebResponse.<ProductResponse>builder()
-        .data(resultFromService)
-        .build();
+
+        WebResponse<ProductResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -50,11 +50,10 @@ public class ProductController {
         path = "/api/products/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductName>>> getProductsName(@Valid ProductGetNameRequest request){
-        Slice<ProductName> resultFromService = productService.getAllProductNames(request);
-        WebResponse<Slice<ProductName>> wrappedResult = WebResponse.<Slice<ProductName>>builder()
-        .data(resultFromService)
-        .build();
+    ResponseEntity<WebResponse<Slice<ProductName>>> searchProductNames(@Valid @ModelAttribute ProductGetNameRequest request){
+        Slice<ProductName> resultFromService = productService.searchProductNames(request);
+
+        WebResponse<Slice<ProductName>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -63,12 +62,10 @@ public class ProductController {
         path = "/api/products/filter",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProductByFilter(ProductGetByFilter request){
+    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProductByFilter(@ModelAttribute ProductGetByFilter request){
         Slice<ProductResponse> resultFromService = productService.getProductsByRequests(request);
 
-        WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.<Slice<ProductResponse>>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -77,12 +74,10 @@ public class ProductController {
         path = "/api/products",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProducts(PaginationRequest request){
-        Slice<ProductResponse> resultFromService = productService.getAllProducts(request);
+    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProducts(@ModelAttribute PaginationRequest request){
+        Slice<ProductResponse> resultFromService = productService.getProducts(request);
 
-        WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.<Slice<ProductResponse>>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -95,9 +90,7 @@ public class ProductController {
     ResponseEntity<WebResponse<ProductResponse>> createProduct(@Valid ProductCreateRequest request){
         ProductResponse resultFromService = productService.createProduct(request);
 
-        WebResponse<ProductResponse> wrappedResult = WebResponse.<ProductResponse>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<ProductResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
         .path("/" + resultFromService.id())
@@ -112,13 +105,11 @@ public class ProductController {
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<ProductResponse>> editProduct(@PathVariable(value = "id", required = true) Long id, ProductEditRequest request){
+    ResponseEntity<WebResponse<ProductResponse>> editProduct(@PathVariable(value = "id", required = true) Long id, @Valid ProductUpdateRequest request){
         request.setId(id);
-        ProductResponse resultFromService = productService.editProduct(request);
+        ProductResponse resultFromService = productService.updateProduct(request);
 
-        WebResponse<ProductResponse> wrappedResult = WebResponse.<ProductResponse>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<ProductResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -128,11 +119,9 @@ public class ProductController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     ResponseEntity<WebResponse<ProductDeleteResponse>> activateProduct(@PathVariable(value = "id", required = true) Long id ){ 
-        ProductDeleteResponse resultFromService = productService.setProductActive(id);
+        ProductDeleteResponse resultFromService = productService.activateProduct(id);
 
-        WebResponse<ProductDeleteResponse> wrappedResult = WebResponse.<ProductDeleteResponse>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<ProductDeleteResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -142,11 +131,9 @@ public class ProductController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     ResponseEntity<WebResponse<ProductDeleteResponse>> deactivateProduct(@PathVariable(value = "id", required = true) Long id ){ 
-        ProductDeleteResponse resultFromService = productService.setProductInactive(id);
+        ProductDeleteResponse resultFromService = productService.deactivateProduct(id);
 
-        WebResponse<ProductDeleteResponse> wrappedResult = WebResponse.<ProductDeleteResponse>builder()
-        .data(resultFromService)
-        .build();
+        WebResponse<ProductDeleteResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
