@@ -9,5 +9,5 @@ CREATE TABLE transaction_payments (
     version INTEGER DEFAULT 0 NOT NULL,
 
     CONSTRAINT fk_transaction_payments FOREIGN KEY (transaction_id)
-        REFERENCES transactions(id),
+        REFERENCES transactions(id)
 );
