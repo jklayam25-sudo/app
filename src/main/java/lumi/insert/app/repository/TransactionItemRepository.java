@@ -13,7 +13,7 @@ import lumi.insert.app.entity.TransactionItem;
 @Repository
 public interface TransactionItemRepository extends JpaRepository<TransactionItem, Long>{
     
-    Optional<TransactionItem> findByTransactionIdAndProductId(UUID transactionId, UUID productId);
+    Optional<TransactionItem> findByTransactionIdAndProductId(UUID transactionId, Long productId);
 
     Slice<TransactionItem> findAllByTransactionId(UUID transactionId, Pageable pageable);
 
