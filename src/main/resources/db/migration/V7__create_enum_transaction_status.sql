@@ -1,0 +1,1 @@
+CREATE TYPE transaction_status AS ENUM ('PENDING', 'PROCESS', 'COMPLETE', 'CANCELLED');
