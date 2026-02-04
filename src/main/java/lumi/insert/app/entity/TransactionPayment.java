@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "transaction_items")
+@Entity(name = "transaction_payments")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
