@@ -31,7 +31,7 @@ public class TransactionPayment extends TimestampAuditing{
     private Transaction transaction;
 
     @Column(nullable = false)
-    private Long quantity;
+    private Long totalPayment;
 
     @Column(nullable = false)
     private String paymentFrom;

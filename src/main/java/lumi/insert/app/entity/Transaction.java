@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity; 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -26,7 +28,7 @@ public class Transaction extends TimestampAuditing{
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 55)
     private String invoiceId;
 
     @Builder.Default 
@@ -50,8 +52,9 @@ public class Transaction extends TimestampAuditing{
     @Builder.Default
     private Long totalPaid = 0L;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private TransactionStatus transactionStatus = TransactionStatus.PENDING;
+    private TransactionStatus status = TransactionStatus.PENDING;
 
     @OneToMany(mappedBy = "transaction")
     private List<TransactionItem> transactionItems;
