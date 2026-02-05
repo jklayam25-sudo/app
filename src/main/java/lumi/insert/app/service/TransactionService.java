@@ -5,13 +5,14 @@ import java.util.UUID;
 import org.springframework.data.domain.Slice;
 
 import lumi.insert.app.dto.request.TransactionCreateRequest;
+import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionResponse;
 
 public interface TransactionService {
 
     TransactionResponse createTransaction(TransactionCreateRequest request);
 
-    Slice<TransactionResponse> searchTransactionsByRequests(TransactionCreateRequest request);
+    Slice<TransactionResponse> searchTransactionsByRequests(TransactionGetByFilter request);
 
     TransactionResponse setTransactionToProcess(UUID id);
 
