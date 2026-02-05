@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductUpdateRequest;
@@ -32,6 +33,7 @@ import lumi.insert.app.service.ProductService;
 import lumi.insert.app.utils.mapper.ProductMapper;
 
 @Service
+@Transactional
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
