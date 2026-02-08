@@ -226,8 +226,6 @@ public class TransactionRepositoryTest {
         assertEquals(1, transactions.getNumberOfElements());
         assertEquals(TransactionStatus.PENDING, transactions.getContent().getFirst().getStatus());
         assertEquals(matchInvoiceId, transactions.getContent().getFirst().getInvoiceId());
-        
-
     }
 
 
