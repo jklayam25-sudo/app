@@ -1,0 +1,65 @@
+package lumi.insert.app.service.transactionpayment;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional; 
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+ 
+import lumi.insert.app.dto.request.TransactionPaymentCreateRequest; 
+import lumi.insert.app.dto.response.TransactionPaymentResponse; 
+import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.TransactionValidationException;
+
+public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentServiceTest{
+    
+    @Test
+    @DisplayName("Should calcute Transaction total , return TransactionPaymentResponse DTO when creating transaction payment is successful")
+    public void createTransactionPayment_validRequest_returnTransactionPaymentResponse(){
+        setupTransaction.setTotalUnpaid(1000000L);
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentFrom("BCA - XXXXXX")
+        .paymentTo("SG BANK - 12XXXXXX")
+        .totalPayment(523000L)
+        .build();
+
+        when(transactionPaymentRepositoryMock.save(any())).thenAnswer((res) -> res.getArgument(0));
+
+        TransactionPaymentResponse transactionPayment = transactionPaymentServiceMock.createTransactionPayment(setupTransaction.getId(), request);
+
+        assertEquals(523000L, transactionPayment.totalPayment());
+        assertEquals(request.getPaymentFrom(), transactionPayment.paymentFrom());
+        assertEquals(setupTransaction.getId(), transactionPayment.transactionId());
+        assertEquals(477000L, setupTransaction.getTotalUnpaid());
+        assertEquals(523000L, setupTransaction.getTotalPaid()); 
+    }
+
+    @Test
+    @DisplayName("Should thrown not found error when transaction not found")
+    public void createTransactionPayment_invalidId_throwNotFoundError(){ 
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundEntityException.class, () -> transactionPaymentServiceMock.createTransactionPayment(null, null));
+    }
+
+    @Test
+    @DisplayName("Should thrown transactionValidate error when transaction total debt/unpaid lesser than request total payment < Overpayment")
+    public void createTransactionPayment_overPayment_throwTransactionValidateError(){
+        setupTransaction.setTotalUnpaid(10000L);
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentFrom("BCA - XXXXXX")
+        .paymentTo("SG BANK - 12XXXXXX")
+        .totalPayment(523000L)
+        .build();
+
+        assertThrows(TransactionValidationException.class, ()-> transactionPaymentServiceMock.createTransactionPayment(setupTransaction.getId(), request));
+    }
+}
