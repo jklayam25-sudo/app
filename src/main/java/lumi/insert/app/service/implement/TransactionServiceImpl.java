@@ -1,8 +1,14 @@
 package lumi.insert.app.service.implement;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function; 
+
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,13 +23,18 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
-import lumi.insert.app.dto.response.TransactionResponse; 
+import lumi.insert.app.dto.response.TransactionResponse;
+import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
+import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.entity.TransactionStatus;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
+import lumi.insert.app.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.service.TransactionService;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
@@ -34,8 +45,14 @@ import lumi.insert.app.utils.mapper.AllTransactionMapper;
 public class TransactionServiceImpl implements TransactionService{
 
     @Autowired
-    TransactionRepository transactionRepository; 
+    TransactionRepository transactionRepository;
+
+    @Autowired
+    ProductRepository productRepository;
     
+    @Autowired
+    TransactionItemRepository transactionItemRepository;
+
     @Autowired
     InvoiceGenerator invoiceGenerator;
 
@@ -92,12 +109,45 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse setTransactionToProcess(UUID id) {
+        List<String> additionalMessage= new ArrayList<>();
+
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+
+        if (searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+
+        List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
+        List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
+        List<Product> listProductFromTrxItemsUpdated = productRepository.findAllById(listProductIdFromTrxItems);
+
+        Map<Long, Product> productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        Set<UUID> listOfOutStockAndRemovedProduct = new HashSet<>();
+        transactionItems.forEach(item -> {
+            Product updatedProduct = productMap.get(item.getProduct().getId()); 
+
+            if(updatedProduct == null || updatedProduct.getStockQuantity() == 0) {
+                listOfOutStockAndRemovedProduct.add(item.getId());
+                additionalMessage.add("Item removed due to outOfStock or removed Product, Product item ID: " + item.getProduct().getId());
+                return;
+            }
+
+            item.setPrice(updatedProduct.getSellPrice());
+
+            if(updatedProduct.getStockQuantity() < item.getQuantity()){
+                additionalMessage.add(updatedProduct.getName() + " stock lesser than " + item.getQuantity() + ", quantity decreased to " + updatedProduct.getStockQuantity());
+                item.setQuantity(updatedProduct.getStockQuantity());
+            }
+            updatedProduct.setStockQuantity(updatedProduct.getStockQuantity()-item.getQuantity());
+        }); 
+
+        if (listOfOutStockAndRemovedProduct.size() != 0) {
+            transactionItemRepository.deleteAllByIdInBatch(listOfOutStockAndRemovedProduct);
+            transactionItems.removeIf(item -> listOfOutStockAndRemovedProduct.contains(item.getId()));
+        }
         
-        if(searchedTransaction.getStatus() == TransactionStatus.PROCESS) throw new BoilerplateRequestException("Transaction with ID " + id + " already process");
-        if(searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Transaction with ID " + id + " is " + searchedTransaction.getStatus() + " and can't be set to PROCESS");
-        
+        searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
+        searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
         searchedTransaction.setStatus(TransactionStatus.PROCESS);
 
         return allTransactionMapper.createTransactionResponseDto(searchedTransaction);
@@ -107,6 +157,7 @@ public class TransactionServiceImpl implements TransactionService{
     public TransactionResponse setTransactionToComplete(UUID id) {
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+            
         if(searchedTransaction.getStatus() == TransactionStatus.COMPLETE) throw new BoilerplateRequestException("Transaction with ID " + id + " already process");
         if(searchedTransaction.getStatus() != TransactionStatus.PROCESS) throw new ForbiddenRequestException("Transaction with ID " + id + " is " + searchedTransaction.getStatus() + " and can't be set to COMPLETE");
 
@@ -117,8 +168,30 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse cancelTransaction(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'cancelTransaction'");
+        Transaction searchedTransaction = transactionRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+
+        if (searchedTransaction.getStatus() != TransactionStatus.PROCESS && searchedTransaction.getStatus() != TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Couldn't cancel the transaction because Transaction Status is not PROCESS OR COMPLETE");
+
+        List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
+        List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
+        List<Product> listProductFromTrxItemsUpdated = productRepository.findAllById(listProductIdFromTrxItems);
+
+        Map<Long, Product> productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        for(TransactionItem item: transactionItems){
+            Product product = productMap.get(item.getProduct().getId());
+            if(product == null) continue;
+
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+        }
+        // searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid());
+        searchedTransaction.setTotalUnpaid(0L);
+        searchedTransaction.setTotalPaid(0L); 
+        searchedTransaction.setStatus(TransactionStatus.CANCELLED);
+
+        TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction);
+        return transactionResponseDto;
     }
 
     @Override
@@ -131,8 +204,37 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse refreshTransaction(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'refreshTransaction'");
+        List<String> additionalMessage= new ArrayList<>();
+
+        Transaction searchedTransaction = transactionRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+
+        if (searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+
+        List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
+        List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
+        List<ProductRefreshProjection> listProductFromTrxItemsUpdated = productRepository.searchIdUpdatedAtMoreThan(listProductIdFromTrxItems, searchedTransaction.getCreatedAt());
+
+        Map<Long, ProductRefreshProjection>productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(ProductRefreshProjection::getId, Function.identity()));
+
+        transactionItems.forEach(item -> {
+            ProductRefreshProjection updatedProduct = productMap.get(item.getProduct().getId());
+            if(updatedProduct == null) return;
+
+            item.setPrice(updatedProduct.getSellPrice());
+
+            if(updatedProduct.getStockQuantity() < item.getQuantity()){
+                additionalMessage.add("Product stock lesser than " + item.getQuantity() + ", transaction quantity decreased to " + updatedProduct.getStockQuantity());
+                item.setQuantity(updatedProduct.getStockQuantity());
+            }
+        });
+
+        searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
+        searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
+
+        TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction);
+        return transactionResponseDto;
+
     }
 
     @Override
