@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import lumi.insert.app.entity.TransactionItem;
 
 @Repository
-public interface TransactionItemRepository extends JpaRepository<TransactionItem, Long>{
+public interface TransactionItemRepository extends JpaRepository<TransactionItem, UUID>{
     
     Optional<TransactionItem> findByTransactionIdAndProductId(UUID transactionId, Long productId);
 
