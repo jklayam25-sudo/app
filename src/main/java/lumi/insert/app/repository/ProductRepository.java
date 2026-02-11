@@ -30,7 +30,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Boolean existsByName(String name);
 
-    @Query(value = "SELECT p.id, p.sellPrice, p.stockQuantity FROM products p WHERE p.id IN :ids AND p.updatedAt >= :updatedAt")
+    @Query(value = "SELECT p.id AS id, p.sellPrice AS sellPrice, p.stockQuantity AS stockQuantity FROM products p WHERE p.id IN :ids AND p.updatedAt >= :updatedAt")
     List<ProductRefreshProjection> searchIdUpdatedAtMoreThan(@Param("ids") List<Long> ids,@Param("updatedAt") LocalDateTime updatedAt); 
 
     @Query(value = "SELECT p FROM products p WHERE p.id IN :ids AND p.updatedAt >= :updatedAt")
