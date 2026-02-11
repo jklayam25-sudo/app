@@ -20,4 +20,7 @@ public interface TransactionItemService {
     Slice<TransactionItemResponse> getTransactionItemsByTransactionId(UUID transactionId, PaginationRequest paginationRequest);
 
     TransactionItemResponse getTransactionByTransactionIdAndProductId(UUID transactionId, Long ProductId);
+
+    TransactionItemResponse refundTransactionItem(UUID id, Long quantity);
+
 }
