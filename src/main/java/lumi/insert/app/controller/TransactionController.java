@@ -82,4 +82,28 @@ public class TransactionController {
  
         return ResponseEntity.ok(wrappedResult);   
     }
+
+    @PostMapping(
+        path = "/api/transactions/{id}/cancel",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<TransactionResponse>> cancelTransaction(@PathVariable(name = "id") UUID id){
+        TransactionResponse resultFromService = transactionService.cancelTransaction(id);
+ 
+        WebResponse<TransactionResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+ 
+        return ResponseEntity.ok(wrappedResult);   
+    }
+
+    @PostMapping(
+        path = "/api/transactions/{id}/refresh",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<TransactionResponse>> refreshTransaction(@PathVariable(name = "id") UUID id){
+        TransactionResponse resultFromService = transactionService.refreshTransaction(id);
+ 
+        WebResponse<TransactionResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+ 
+        return ResponseEntity.ok(wrappedResult);   
+    }
 }
