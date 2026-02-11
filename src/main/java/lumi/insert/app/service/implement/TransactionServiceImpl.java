@@ -171,7 +171,7 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
 
-        if (searchedTransaction.getStatus() != TransactionStatus.PROCESS && searchedTransaction.getStatus() != TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Couldn't cancel the transaction because Transaction Status is not PROCESS OR COMPLETE");
+        if (searchedTransaction.getStatus() != TransactionStatus.PROCESS && searchedTransaction.getStatus() != TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Unable to cancel transaction because Transaction Status is not PROCESS OR COMPLETE");
 
         List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
         List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
@@ -209,7 +209,7 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
 
-        if (searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+        if (searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Unable to refresh transaction because Transaction Status is not PENDING(CART)");
 
         List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
         List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
