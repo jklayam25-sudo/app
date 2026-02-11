@@ -1,5 +1,7 @@
 package lumi.insert.app.utils.mapper;
 
+import java.util.List;
+
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,6 +19,10 @@ import lumi.insert.app.entity.TransactionPayment;
 @Mapper(componentModel = "spring")
 public interface AllTransactionMapper {
     
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    @Mapping(target = "messages", source = "messages")
+    TransactionResponse createTransactionResponseDto(Transaction transaction, List<String> messages);
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
     TransactionResponse createTransactionResponseDto(Transaction transaction);
 
