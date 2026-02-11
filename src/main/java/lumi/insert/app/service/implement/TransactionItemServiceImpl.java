@@ -58,6 +58,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         TransactionItem transactionItem = TransactionItem.builder()
         .price(product.getSellPrice())
         .quantity(request.getQuantity())
+        .description(product.getName())
         .product(product)
         .transaction(transaction)
         .build();
@@ -132,6 +133,45 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         
        TransactionItemResponse result = allTransactionMapper.createTransactionItemResponseDto(searchedTransactionItem);
         return result;
+    }
+
+    @Override
+    public TransactionItemResponse refundTransactionItem(UUID id, Long quantity) {
+        TransactionItem transactionItem = transactionItemRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction Items with ID " + id + " was not found"));
+
+        if(quantity > transactionItem.getQuantity()) throw new ForbiddenRequestException("Refund quantity is more than actual bought, use valid quantity");
+        if(transactionItem.getQuantity() < 0)  throw new ForbiddenRequestException("Couldn't refund a refunded item");
+
+        Transaction transaction = transactionItem.getTransaction();
+
+        if (transaction.getStatus() != TransactionStatus.PROCESS && transaction.getStatus() != TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Couldn't refund the item because Transaction Status is not PROCESS OR COMPLETE");
+
+        Product product = transactionItem.getProduct();
+
+        product.setStockQuantity(product.getStockQuantity() + quantity);
+
+        Long customerRefund = quantity * transactionItem.getPrice();
+
+        if(transaction.getTotalUnpaid() - customerRefund < 0){
+            transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() + customerRefund - transaction.getTotalUnpaid());
+            transaction.setTotalUnpaid(0L);
+            transaction.setStatus(TransactionStatus.PROCESS);
+        } else {
+            transaction.setTotalUnpaid(transaction.getTotalUnpaid() - customerRefund);
+        }
+
+        TransactionItem refundTransactionItem = TransactionItem.builder()
+        .price(transactionItem.getPrice())
+        .quantity(-quantity)
+        .description("REFUND: " + product.getName())
+        .product(product)
+        .transaction(transaction)
+        .build();
+
+        TransactionItem savedRefundTransactionItem = transactionItemRepository.save(refundTransactionItem);
+        TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(savedRefundTransactionItem);
+        return transactionItemResponseDto;
     }
     
 }
