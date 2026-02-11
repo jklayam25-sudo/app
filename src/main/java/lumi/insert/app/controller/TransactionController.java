@@ -71,4 +71,15 @@ public class TransactionController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @PostMapping(
+        path = "/api/transactions/{id}/process",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<TransactionResponse>> processTransaction(@PathVariable(name = "id") UUID id){
+        TransactionResponse resultFromService = transactionService.setTransactionToProcess(id);
+ 
+        WebResponse<TransactionResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+ 
+        return ResponseEntity.ok(wrappedResult);   
+    }
 }
