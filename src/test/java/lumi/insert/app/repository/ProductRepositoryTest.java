@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +22,13 @@ import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.repository.projection.ProductRefreshProjection;
 
 @DataJpaTest
 @Transactional
+@Slf4j
 public class ProductRepositoryTest {
 
     @Autowired
@@ -215,5 +220,70 @@ public class ProductRepositoryTest {
         System.out.println(result.getContent());
         assertEquals(4, result.getNumberOfElements());
         assertEquals(4800L, result.getContent().getLast().getSellPrice());
+    }
+
+    @Test
+    @DisplayName("Should return List of ProductRefreshProjection<id, sPrice, stockQ>")
+    public void searchIdUpdatedAtMoreThan_validListId_returnListProductRefreshProjection(){
+        LocalDateTime time = LocalDateTime.now();
+        List<Long> ids = new ArrayList<>();
+        for ( int i = 1; i <= 2; i++ ) {
+            Product dumpProduct = Product.builder()
+            .name("Product " + i)
+            .basePrice(1000L * i)
+            .sellPrice(1200L * i)
+            .stockQuantity(10L * i)
+            .stockMinimum(1L * i)
+            .build();
+
+            Product saved = productRepository.save(dumpProduct);
+            ids.add(saved.getId());
+        }
+       List<ProductRefreshProjection> searchIdUpdatedAtMoreThan = productRepository.searchIdUpdatedAtMoreThan(ids, time);
+       log.info("x{}", searchIdUpdatedAtMoreThan.getLast());
+       assertEquals(2, searchIdUpdatedAtMoreThan.size());
+       assertEquals(2400L, searchIdUpdatedAtMoreThan.getLast().sellPrice());
+    }
+    
+    @Test
+    @DisplayName("Should return List of ProductRefreshProjection<id, sPrice, stockQ>")
+    public void searchIdUpdatedAtMoreThan_timeIsNewer_return0ProductRefreshProjection(){ 
+        List<Long> ids = new ArrayList<>();
+        for ( int i = 1; i <= 2; i++ ) {
+            Product dumpProduct = Product.builder()
+            .name("Product " + i)
+            .basePrice(1000L * i)
+            .sellPrice(1200L * i)
+            .stockQuantity(10L * i)
+            .stockMinimum(1L * i)
+            .build();
+
+            Product saved = productRepository.save(dumpProduct);
+            ids.add(saved.getId());
+        }
+       List<ProductRefreshProjection> searchIdUpdatedAtMoreThan = productRepository.searchIdUpdatedAtMoreThan(ids, LocalDateTime.now().plusDays(1));
+       assertEquals(0, searchIdUpdatedAtMoreThan.size()); 
+    }
+
+    @Test
+    @DisplayName("Should return List of Product Entity")
+    public void searchProductUpdatedAtMoreThan_validListId_returnListProduct(){
+        LocalDateTime time = LocalDateTime.now();
+        List<Long> ids = new ArrayList<>();
+        for ( int i = 1; i <= 2; i++ ) {
+            Product dumpProduct = Product.builder()
+            .name("Product " + i)
+            .basePrice(1000L * i)
+            .sellPrice(1200L * i)
+            .stockQuantity(10L * i)
+            .stockMinimum(1L * i)
+            .build();
+
+            Product saved = productRepository.save(dumpProduct);
+            ids.add(saved.getId());
+        }
+       List<Product> searchIdUpdatedAtMoreThan = productRepository.searchProductUpdatedAtMoreThan(ids, time); 
+       assertEquals(2, searchIdUpdatedAtMoreThan.size());
+       assertEquals(2400L, searchIdUpdatedAtMoreThan.getLast().getSellPrice());
     }
 }

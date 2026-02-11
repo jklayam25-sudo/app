@@ -1,7 +1,8 @@
 package lumi.insert.app.service.transactionpayment;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals; 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
  
 import lumi.insert.app.dto.request.TransactionPaymentCreateRequest; 
-import lumi.insert.app.dto.response.TransactionPaymentResponse; 
+import lumi.insert.app.dto.response.TransactionPaymentResponse;
+import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 
@@ -38,6 +41,28 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
         assertEquals(setupTransaction.getId(), transactionPayment.transactionId());
         assertEquals(477000L, setupTransaction.getTotalUnpaid());
         assertEquals(523000L, setupTransaction.getTotalPaid()); 
+        
+    }
+
+    @Test
+    @DisplayName("Should set transaction complete and calcute Transaction total , return TransactionPaymentResponse DTO when creating transaction payment is successful")
+    public void createTransactionPayment_fullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setTotalUnpaid(1000000L);
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentFrom("BCA - XXXXXX")
+        .paymentTo("SG BANK - 12XXXXXX")
+        .totalPayment(1000000L)
+        .build();
+
+        when(transactionPaymentRepositoryMock.save(any())).thenAnswer((res) -> res.getArgument(0));
+
+        transactionPaymentServiceMock.createTransactionPayment(setupTransaction.getId(), request);
+  
+        assertEquals(0L, setupTransaction.getTotalUnpaid());
+        assertEquals(1000000L, setupTransaction.getTotalPaid()); 
+        assertEquals(TransactionStatus.COMPLETE, setupTransaction.getStatus());
     }
 
     @Test
@@ -61,5 +86,106 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
         .build();
 
         assertThrows(TransactionValidationException.class, ()-> transactionPaymentServiceMock.createTransactionPayment(setupTransaction.getId(), request));
+    }
+
+    @Test
+    @DisplayName("Should calcute Transaction refund debt , return TransactionPaymentResponse DTO when creating refund transaction payment is successful")
+    public void refundTransactionPayment_nonFullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setTotalUnrefunded(1000000L);
+        setupTransaction.setTotalRefunded(12000L);
+        setupTransaction.setStatus(TransactionStatus.PROCESS);
+
+        setupTransactionPayment.setTransaction(setupTransaction);
+        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentTo("BCA - XXXXXX")
+        .paymentFrom("OUR COMPANY.SG BANK - 12XXXXXX")
+        .totalPayment(900000L)
+        .build();
+
+        when(transactionPaymentRepositoryMock.save(any())).thenAnswer((res) -> res.getArgument(0));
+
+        TransactionPaymentResponse refundTransactionPayment = transactionPaymentServiceMock.refundTransactionPayment(setupTransactionPayment.getId(), request);;
+  
+        assertEquals(100000L, setupTransaction.getTotalUnrefunded());
+        assertEquals(912000L, setupTransaction.getTotalRefunded()); 
+        assertEquals(TransactionStatus.PROCESS, setupTransaction.getStatus());
+        assertTrue(refundTransactionPayment.isForRefund());
+    }
+
+    @Test
+    @DisplayName("Should set transaction complete and calcute Transaction refund debt , return TransactionPaymentResponse DTO when creating refund transaction payment is successful")
+    public void refundTransactionPayment_fullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setTotalUnrefunded(1000000L);
+        setupTransaction.setTotalRefunded(12000L);
+        setupTransaction.setStatus(TransactionStatus.CANCELLED);
+
+        setupTransactionPayment.setTransaction(setupTransaction);
+        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentTo("BCA - XXXXXX")
+        .paymentFrom("OUR COMPANY.SG BANK - 12XXXXXX")
+        .totalPayment(1000000L)
+        .build();
+
+        when(transactionPaymentRepositoryMock.save(any())).thenAnswer((res) -> res.getArgument(0));
+
+        TransactionPaymentResponse refundTransactionPayment = transactionPaymentServiceMock.refundTransactionPayment(setupTransactionPayment.getId(), request);;
+  
+        assertEquals(0L, setupTransaction.getTotalUnrefunded());
+        assertEquals(1012000L, setupTransaction.getTotalRefunded()); 
+        assertEquals(TransactionStatus.COMPLETE, setupTransaction.getStatus());
+        assertTrue(refundTransactionPayment.isForRefund());
+    }
+
+    @Test
+    @DisplayName("Should throw NotFound when creating refund transaction to transaction that isn't found")
+    public void refundTransactionPayment_notFoundTransaction_throwForbidden(){  
+        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.empty());
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentTo("BCA - XXXXXX")
+        .paymentFrom("OUR COMPANY.SG BANK - 12XXXXXX")
+        .totalPayment(1000000L)
+        .build();
+
+        assertThrows(NotFoundEntityException.class, () -> transactionPaymentServiceMock.refundTransactionPayment(setupTransactionPayment.getId(), request));
+    }
+
+    @Test
+    @DisplayName("Should throw ForbiddenRequest when creating refund transaction to transaction that isn't CANCELLED OR PROCESS")
+    public void refundTransactionPayment_pendingTransaction_throwForbidden(){ 
+        setupTransaction.setStatus(TransactionStatus.COMPLETE);
+        setupTransactionPayment.setTransaction(setupTransaction);
+        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentTo("BCA - XXXXXX")
+        .paymentFrom("OUR COMPANY.SG BANK - 12XXXXXX")
+        .totalPayment(1000000L)
+        .build();
+
+        assertThrows(ForbiddenRequestException.class, () -> transactionPaymentServiceMock.refundTransactionPayment(setupTransactionPayment.getId(), request));
+    }
+
+    @Test
+    @DisplayName("Should throw TransactionValidation when creating over payment refund")
+    public void refundTransactionPayment_overPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setTotalUnrefunded(1000000L);
+        setupTransaction.setTotalRefunded(12000L);
+        setupTransaction.setStatus(TransactionStatus.CANCELLED);
+
+        setupTransactionPayment.setTransaction(setupTransaction);
+        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+
+        TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
+        .paymentTo("BCA - XXXXXX")
+        .paymentFrom("OUR COMPANY.SG BANK - 12XXXXXX")
+        .totalPayment(109900000L)
+        .build();
+ 
+        assertThrows(TransactionValidationException.class, () -> transactionPaymentServiceMock.refundTransactionPayment(setupTransactionPayment.getId(), request));
     }
 }

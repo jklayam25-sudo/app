@@ -15,8 +15,8 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest; 
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException; 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -65,7 +65,7 @@ public class TransactionRepositoryTest {
         .build();
         
         assertNull(transaction.getInvoiceId());
-        assertThrows(InvalidDataAccessResourceUsageException.class, () -> transactionRepository.saveAndFlush(transaction));
+        assertThrows(DataIntegrityViolationException.class, () -> transactionRepository.saveAndFlush(transaction));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class TransactionRepositoryTest {
         }; 
 
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable);
-        assertEquals(4, transactions.getNumberOfElements());
+        assertEquals(1, transactions.getNumberOfElements());
         assertEquals(TransactionStatus.CANCELLED, transactions.getContent().getFirst().getStatus());
 
     }
