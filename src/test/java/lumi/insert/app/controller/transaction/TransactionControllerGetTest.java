@@ -56,7 +56,7 @@ public class TransactionControllerGetTest extends BaseTransactionControllerTest{
     }
 
     @Test
-    @DisplayName("should return Transaction Response when request Trx id is not UUID")
+    @DisplayName("should return errors of invalid method when request Trx id is not UUID")
     public void getTransactionAPI_missMatch_shouldReturnErrors() throws Exception{ 
         mockMvc.perform(
             get("/api/transactions/" + true)
