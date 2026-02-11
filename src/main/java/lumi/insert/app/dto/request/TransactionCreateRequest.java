@@ -1,8 +1,8 @@
 package lumi.insert.app.dto.request;
 
 import java.util.UUID;
-
-import jakarta.validation.constraints.NotBlank;
+ 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,10 +10,10 @@ import lombok.Data;
 @Builder
 public class TransactionCreateRequest {
 
-    @NotBlank(message = "customerId cannot be empty")
+    @NotNull(message = "customerId cannot be empty")
     private UUID customerId;
 
-    @NotBlank(message = "staffId cannot be empty")
+    @NotNull(message = "staffId cannot be empty")
     private UUID staffId;
     
 }
