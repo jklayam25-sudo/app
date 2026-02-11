@@ -1,5 +1,6 @@
 package lumi.insert.app.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,14 +53,22 @@ public class Transaction extends TimestampAuditing{
     @Builder.Default
     private Long totalPaid = 0L;
 
+    @Builder.Default
+    private Long totalUnrefunded = 0L;
+
+    @Builder.Default
+    private Long totalRefunded = 0L;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private TransactionStatus status = TransactionStatus.PENDING;
 
     @OneToMany(mappedBy = "transaction")
-    private List<TransactionItem> transactionItems;
+    @Builder.Default
+    private List<TransactionItem> transactionItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "transaction")
-    private List<TransactionPayment> transactionPayments;
+    @Builder.Default
+    private List<TransactionPayment> transactionPayments = new ArrayList<>();
     
 }
