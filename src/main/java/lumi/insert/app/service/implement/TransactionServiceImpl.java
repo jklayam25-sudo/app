@@ -114,7 +114,7 @@ public class TransactionServiceImpl implements TransactionService{
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
         
-        if(searchedTransaction.getStatus() == null || searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+        if(searchedTransaction.getStatus() == null || searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Unable to process transaction because Transaction Status is not PENDING(CART)");
         List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems(); 
 
         List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
