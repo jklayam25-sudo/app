@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity(name = "transaction_items")
 @Data
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString(exclude = "transaction")
 public class TransactionItem extends TimestampAuditing{
 
     @Id
@@ -32,6 +34,8 @@ public class TransactionItem extends TimestampAuditing{
     @Builder.Default
     private Long quantity = 0L;
 
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, unique = true)
     private Product product;
@@ -39,5 +43,6 @@ public class TransactionItem extends TimestampAuditing{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id", nullable = false)
     private Transaction transaction;
+    
 
 }
