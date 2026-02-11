@@ -22,6 +22,8 @@ import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.dto.response.TransactionPaymentResponse;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionPayment;
+import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 import lumi.insert.app.repository.TransactionPaymentRepository;
@@ -60,6 +62,8 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
 
         if(transaction.getTotalUnpaid() < 0) throw new TransactionValidationException("Payment exceeds the remaining transaction debts with ID " + transactionId + ", enter an exact amount to proceed");
 
+        // Upcoming: integrate with email notification
+        if(transaction.getTotalUnpaid() == 0) transaction.setStatus(TransactionStatus.COMPLETE);
         TransactionPayment savedTransactionPayment = transactionPaymentRepository.save(transactionPayment);
         TransactionPaymentResponse transactionPaymentResponseDto = allTransactionMapper.createTransactionPaymentResponseDto(savedTransactionPayment);
 
@@ -113,6 +117,39 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
         Slice<TransactionPaymentResponse> result = transactionPayments.map(allTransactionMapper::createTransactionPaymentResponseDto);
 
         return result;
+    }
+
+    @Override
+    public TransactionPaymentResponse refundTransactionPayment(UUID id, TransactionPaymentCreateRequest request) {
+        TransactionPayment transactionPayment = transactionPaymentRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction Payment with ID " + id + " was not found"));
+
+        Transaction transaction = transactionPayment.getTransaction();
+        if (transaction.getStatus() == TransactionStatus.PENDING || transaction.getStatus() == TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Refund payment only to Transaction with status PROCESS(onGoing) or CANCELLED, check carefully");
+
+
+        TransactionPayment refundTransactionPayment = TransactionPayment.builder()
+        .transaction(transaction)
+        .paymentFrom(request.getPaymentFrom())
+        .paymentTo(request.getPaymentTo())
+        .totalPayment(request.getTotalPayment())
+        .isForRefund(true)
+        .build();
+
+        Long totalUnrefunded = transaction.getTotalUnrefunded();
+
+        if(request.getTotalPayment() > totalUnrefunded) throw new TransactionValidationException("Payment refund exceeds the remaining transaction unrefunded debt with ID " + transaction.getId() + ", enter an exact amount to proceed");
+
+        transaction.setTotalRefunded(transaction.getTotalRefunded() + request.getTotalPayment());
+        transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() - request.getTotalPayment());
+        
+        // Upcoming: integrate with email notification
+        if(transaction.getTotalUnrefunded() == 0) transaction.setStatus(TransactionStatus.COMPLETE);
+        TransactionPayment savedTransactionPayment = transactionPaymentRepository.save(refundTransactionPayment);
+        
+        TransactionPaymentResponse transactionPaymentResponseDto = allTransactionMapper.createTransactionPaymentResponseDto(savedTransactionPayment);
+        log.info("{}", transactionPaymentResponseDto);
+        return transactionPaymentResponseDto;
     }
     
 }
