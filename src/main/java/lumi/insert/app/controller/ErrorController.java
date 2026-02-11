@@ -10,7 +10,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
+import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.TransactionValidationException;
 
 @RestControllerAdvice
 public class ErrorController {
@@ -75,6 +77,32 @@ public class ErrorController {
 
         ResponseEntity<WebResponse<String>> response = ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(ForbiddenRequestException.class)
+    public ResponseEntity<WebResponse<String>> forbiddenRequestException(ForbiddenRequestException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(TransactionValidationException.class)
+    public ResponseEntity<WebResponse<String>> transactionValidationException(TransactionValidationException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.UNPROCESSABLE_CONTENT)
         .body(webResponse);
 
         return response;
