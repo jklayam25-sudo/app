@@ -109,14 +109,14 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse setTransactionToProcess(UUID id) {
-        List<String> additionalMessage= new ArrayList<>();
+        List<String> messages = new ArrayList<>();
 
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+        
+        if(searchedTransaction.getStatus() == null || searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+        List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems(); 
 
-        if (searchedTransaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
-
-        List<TransactionItem> transactionItems = searchedTransaction.getTransactionItems();
         List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
         List<Product> listProductFromTrxItemsUpdated = productRepository.findAllById(listProductIdFromTrxItems);
 
@@ -128,14 +128,14 @@ public class TransactionServiceImpl implements TransactionService{
 
             if(updatedProduct == null || updatedProduct.getStockQuantity() == 0) {
                 listOfOutStockAndRemovedProduct.add(item.getId());
-                additionalMessage.add("Item removed due to outOfStock or removed Product, Product item ID: " + item.getProduct().getId());
+                messages.add("Item removed due to outOfStock or removed Product, Product item ID: " + item.getProduct().getId());
                 return;
             }
 
             item.setPrice(updatedProduct.getSellPrice());
 
             if(updatedProduct.getStockQuantity() < item.getQuantity()){
-                additionalMessage.add(updatedProduct.getName() + " stock lesser than " + item.getQuantity() + ", quantity decreased to " + updatedProduct.getStockQuantity());
+                messages.add(updatedProduct.getName() + " stock lesser than " + item.getQuantity() + ", quantity decreased to " + updatedProduct.getStockQuantity());
                 item.setQuantity(updatedProduct.getStockQuantity());
             }
             updatedProduct.setStockQuantity(updatedProduct.getStockQuantity()-item.getQuantity());
@@ -145,12 +145,12 @@ public class TransactionServiceImpl implements TransactionService{
             transactionItemRepository.deleteAllByIdInBatch(listOfOutStockAndRemovedProduct);
             transactionItems.removeIf(item -> listOfOutStockAndRemovedProduct.contains(item.getId()));
         }
-        
+        searchedTransaction.setTotalItems(Long.valueOf(transactionItems.size()));
         searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
         searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
         searchedTransaction.setStatus(TransactionStatus.PROCESS);
 
-        return allTransactionMapper.createTransactionResponseDto(searchedTransaction);
+        return allTransactionMapper.createTransactionResponseDto(searchedTransaction, messages);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class TransactionServiceImpl implements TransactionService{
 
             product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
         }
-        // searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid());
+        searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid());
         searchedTransaction.setTotalUnpaid(0L);
         searchedTransaction.setTotalPaid(0L); 
         searchedTransaction.setStatus(TransactionStatus.CANCELLED);
@@ -204,7 +204,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse refreshTransaction(UUID id) {
-        List<String> additionalMessage= new ArrayList<>();
+        List<String> messages= new ArrayList<>();
 
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
@@ -215,24 +215,25 @@ public class TransactionServiceImpl implements TransactionService{
         List<Long> listProductIdFromTrxItems = transactionItems.stream().map(item -> item.getProduct().getId()).distinct().toList();
         List<ProductRefreshProjection> listProductFromTrxItemsUpdated = productRepository.searchIdUpdatedAtMoreThan(listProductIdFromTrxItems, searchedTransaction.getCreatedAt());
 
-        Map<Long, ProductRefreshProjection>productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(ProductRefreshProjection::getId, Function.identity()));
+        Map<Long, ProductRefreshProjection>productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(ProductRefreshProjection::id, Function.identity()));
 
         transactionItems.forEach(item -> {
             ProductRefreshProjection updatedProduct = productMap.get(item.getProduct().getId());
             if(updatedProduct == null) return;
 
-            item.setPrice(updatedProduct.getSellPrice());
+            item.setPrice(updatedProduct.sellPrice());
 
-            if(updatedProduct.getStockQuantity() < item.getQuantity()){
-                additionalMessage.add("Product stock lesser than " + item.getQuantity() + ", transaction quantity decreased to " + updatedProduct.getStockQuantity());
-                item.setQuantity(updatedProduct.getStockQuantity());
+            if(updatedProduct.stockQuantity() < item.getQuantity()){
+                messages.add("Product stock lesser than " + item.getQuantity() + ", transaction quantity decreased to " + updatedProduct.stockQuantity());
+                item.setQuantity(updatedProduct.stockQuantity());
             }
         });
-
+        
+        searchedTransaction.setTotalItems(Long.valueOf(transactionItems.size()));
         searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
         searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
 
-        TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction);
+        TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction, messages);
         return transactionResponseDto;
 
     }
