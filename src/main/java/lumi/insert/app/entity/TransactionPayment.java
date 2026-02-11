@@ -39,4 +39,7 @@ public class TransactionPayment extends TimestampAuditing{
     @Column(nullable = false)
     private String paymentTo;
 
+    @Builder.Default
+    private Boolean isForRefund = false;
+
 }
