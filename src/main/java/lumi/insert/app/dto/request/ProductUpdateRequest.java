@@ -8,8 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ProductUpdateRequest {
-    
-    @NotBlank(message = "Name cannot be empty")
+     
     private Long id;
 
     private String name;
