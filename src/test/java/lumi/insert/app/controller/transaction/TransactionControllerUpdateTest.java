@@ -1,6 +1,8 @@
 package lumi.insert.app.controller.transaction;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when; 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,6 +35,7 @@ public class TransactionControllerUpdateTest extends BaseTransactionControllerTe
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.invoiceId").value(transactionResponse.invoiceId()))
         .andExpect(jsonPath("$.errors").isEmpty());
+        verify(transactionService, times(1)).setTransactionToProcess(transactionResponse.id());
     }
 
     @Test
@@ -74,6 +77,98 @@ public class TransactionControllerUpdateTest extends BaseTransactionControllerTe
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.data").isEmpty())
         .andExpect(jsonPath("$.errors").value("Unable to process transaction because Transaction Status is not PENDING(CART)"));
+    }
+
+    @Test
+    @DisplayName("should return Transaction Response when cancel transaction success")
+    public void cancelTransactionAPI_validTransactionFromProcessOrComplete_shouldReturnEntity() throws Exception{
+        when(transactionService.cancelTransaction(transactionResponse.id())).thenReturn(transactionResponse);
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/cancel")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.invoiceId").value(transactionResponse.invoiceId()))
+        .andExpect(jsonPath("$.errors").isEmpty());
+
+        verify(transactionService, times(1)).cancelTransaction(transactionResponse.id());
+    }
+
+     @Test
+    @DisplayName("should return errors of notFoundEntity when request Trx id isn't valid")
+    public void cancelTransactionAPI_invalidId_shouldReturnErrors() throws Exception{
+        when(transactionService.cancelTransaction(any(UUID.class))).thenThrow(new NotFoundEntityException("Transaction with ID " + transactionResponse.id() + 1 + " was not found"));
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/cancel")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Transaction with ID " + transactionResponse.id() + 1 + " was not found"));
+        verify(transactionService, times(1)).cancelTransaction(transactionResponse.id());
+    }
+
+    @Test
+    @DisplayName("should return errors of ForbiddenRequest when request Trx is not pending > only procced or completed trx allowed to cancel")
+    public void cancelTransactionAPI_transactionNotProcessOrComplete_shouldReturnErrors() throws Exception{
+        when(transactionService.cancelTransaction(any(UUID.class))).thenThrow(new ForbiddenRequestException("Unable to cancel transaction because Transaction Status is not PROCESS OR COMPLETE"));
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/cancel")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Unable to cancel transaction because Transaction Status is not PROCESS OR COMPLETE"));
+        verify(transactionService, times(1)).cancelTransaction(transactionResponse.id());
+    }
+
+    @Test
+    @DisplayName("should return Transaction Response when refresh transaction success")
+    public void refreshTransactionAPI_validTransactionFromProcessOrComplete_shouldReturnEntity() throws Exception{
+        when(transactionService.refreshTransaction(transactionResponse.id())).thenReturn(transactionResponse);
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/refresh")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.invoiceId").value(transactionResponse.invoiceId()))
+        .andExpect(jsonPath("$.errors").isEmpty());
+
+        verify(transactionService, times(1)).refreshTransaction(transactionResponse.id());
+    }
+
+     @Test
+    @DisplayName("should return errors of notFoundEntity when request Trx id isn't valid")
+    public void refreshTransactionAPI_invalidId_shouldReturnErrors() throws Exception{
+        when(transactionService.refreshTransaction(any(UUID.class))).thenThrow(new NotFoundEntityException("Transaction with ID " + transactionResponse.id() + 1 + " was not found"));
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/refresh")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Transaction with ID " + transactionResponse.id() + 1 + " was not found"));
+        verify(transactionService, times(1)).refreshTransaction(transactionResponse.id());
+    }
+
+    @Test
+    @DisplayName("should return errors of ForbiddenRequest when request Trx is not pending < only pending / cart transaction is allowed to refresh")
+    public void refreshTransactionAPI_transactionNotPending_shouldReturnErrors() throws Exception{
+        when(transactionService.refreshTransaction(any(UUID.class))).thenThrow(new ForbiddenRequestException("Unable to refresh transaction because Transaction Status is not PENDING(CART)"));
+        mockMvc.perform(
+            post("/api/transactions/" + transactionResponse.id() + "/refresh")
+            .accept(MediaType.APPLICATION_JSON_VALUE)   
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Unable to refresh transaction because Transaction Status is not PENDING(CART)"));
+        verify(transactionService, times(1)).refreshTransaction(transactionResponse.id());
     }
 
 }
