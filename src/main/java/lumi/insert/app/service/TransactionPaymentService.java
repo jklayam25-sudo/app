@@ -18,4 +18,7 @@ public interface TransactionPaymentService {
     TransactionPaymentResponse getTransactionPayment(UUID id);
 
     Slice<TransactionPaymentResponse> getTransactionPaymentsByRequests(TransactionPaymentGetByFilter request);
+
+    TransactionPaymentResponse refundTransactionPayment(UUID id, TransactionPaymentCreateRequest request);
+
 }
