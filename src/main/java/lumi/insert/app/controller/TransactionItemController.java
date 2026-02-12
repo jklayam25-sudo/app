@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import jakarta.validation.Valid;
+import jakarta.validation.Valid; 
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
@@ -63,6 +64,18 @@ public class TransactionItemController {
     )
     ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id){
         TransactionItemResponse resultFromService = transactionItemService.getTransactionItem(id);
+ 
+        WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+
+        return ResponseEntity.ok(wrappedResult);   
+    }
+
+    @GetMapping(
+        path = "/api/transactions/{transactionId}/items/product/{productId}",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItemByProductId(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "productId") Long productId){
+        TransactionItemResponse resultFromService = transactionItemService.getTransactionByTransactionIdAndProductId(transactionId, productId);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
