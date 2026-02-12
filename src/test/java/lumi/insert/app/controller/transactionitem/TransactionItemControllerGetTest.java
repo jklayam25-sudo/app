@@ -7,19 +7,74 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 
+import lumi.insert.app.dto.request.PaginationRequest;
+import lumi.insert.app.dto.response.TransactionItemResponse;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionItemControllerGetTest  extends BaseTransactionItemControllerTest{
     
     @Test
+    @DisplayName("should return slice of Transaction item Response when request Trx item found")
+    public void getTransactionItemsAPI_validId_shouldReturnEntity() throws Exception{
+        Slice<TransactionItemResponse> slice = new SliceImpl<>(List.of(transactionItemResponse));
+        when(transactionItemService.getTransactionItemsByTransactionId(any(UUID.class), any(PaginationRequest.class))).thenReturn(slice);
+
+        mockMvc.perform(
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items")
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.content[0].id").value(transactionItemResponse.id().toString()))
+        .andExpect(jsonPath("$.data.content[0].transactionId").value(transactionItemResponse.transactionId().toString()))
+        .andExpect(jsonPath("$.data.content.length()").value(1))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return empty content when request Trx item not found")
+    public void getTransactionItemsAPI_invalidId_shouldReturnErrorNotFound() throws Exception{
+        Slice<TransactionItemResponse> slice = new SliceImpl<>(List.of());
+        when(transactionItemService.getTransactionItemsByTransactionId(any(UUID.class), any(PaginationRequest.class))).thenReturn(slice);
+
+        mockMvc.perform(
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items")
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.content").isEmpty())
+        .andExpect(jsonPath("$.data.content").isArray())
+        .andExpect(jsonPath("$.data.content.length()").value(0))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return errors missMatch when request Trx item id is not UUID")
+    public void getTransactionItemsAPI_missmatchId_shouldReturnErrorMethodArgs() throws Exception{ 
+
+        mockMvc.perform(
+            get("/api/transactions/" + true + "/items") 
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.data").isEmpty()) 
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+    
+    @Test
     @DisplayName("should return Transaction item Response when request Trx item found")
-    public void getTransactionItemAPI_validId_shouldReturnEntity() throws Exception{
+    public void getTransactionItemByIdAPI_validId_shouldReturnEntity() throws Exception{
         when(transactionItemService.getTransactionItem(any(UUID.class))).thenReturn(transactionItemResponse);
 
         mockMvc.perform(
@@ -36,7 +91,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
 
     @Test
     @DisplayName("should return errors notFound when request Trx item not found")
-    public void getTransactionItemAPI_invalidId_shouldReturnErrorNotFound() throws Exception{
+    public void getTransactionItemByIdAPI_invalidId_shouldReturnErrorNotFound() throws Exception{
         when(transactionItemService.getTransactionItem(any(UUID.class))).thenThrow(new NotFoundEntityException("Transaction Items with ID " + 231 + " was not found"));
 
         mockMvc.perform(
@@ -51,7 +106,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
 
     @Test
     @DisplayName("should return errors missMatch when request Trx item id is not UUID")
-    public void getTransactionItemAPI_missmatchId_shouldReturnErrorMethodArgs() throws Exception{ 
+    public void getTransactionItemByIdAPI_missmatchId_shouldReturnErrorMethodArgs() throws Exception{ 
 
         mockMvc.perform(
             get("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + true) 
