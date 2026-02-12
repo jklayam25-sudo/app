@@ -173,5 +173,14 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(savedRefundTransactionItem);
         return transactionItemResponseDto;
     }
+
+    @Override
+    public TransactionItemResponse getTransactionItem(UUID id) {
+        TransactionItem transactionItem = transactionItemRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction Items with ID " + id + " was not found"));
+
+        TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(transactionItem);
+        return transactionItemResponseDto;
+    }
     
 }
