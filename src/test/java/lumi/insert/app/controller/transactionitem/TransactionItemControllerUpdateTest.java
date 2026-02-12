@@ -1,0 +1,142 @@
+package lumi.insert.app.controller.transactionitem;
+
+import static org.mockito.Mockito.when; 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+
+
+import lumi.insert.app.exception.ForbiddenRequestException;
+import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.TransactionValidationException;
+
+public class TransactionItemControllerUpdateTest extends BaseTransactionItemControllerTest{
+    
+    @Test
+    @DisplayName("should return transaction item dto when request Trx item to update quantity success")
+    public void updateTransactionItemQuantityAPI_validId_shouldReturnDTO() throws Exception{  
+        when(transactionItemService.updateTransactionItemQuantity(transactionItemResponse.id(), 5L)).thenReturn(transactionItemResponse);
+
+        mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/quantity")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.id").value(transactionItemResponse.id().toString()))
+        .andExpect(jsonPath("$.data.quantity").value(5L))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error not found when request Trx item Not Found")
+    public void updateTransactionItemQuantityAPI_invalidId_shouldReturnErrorNotFound() throws Exception{ 
+        when(transactionItemService.updateTransactionItemQuantity(transactionItemResponse.id(), 5L)).thenThrow(new NotFoundEntityException("Transaction Items with ID " + 1L + " was not found"));
+        
+       mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/quantity")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isNotFound()) 
+        .andExpect(jsonPath("$.errors").value("Transaction Items with ID " + 1L + " was not found"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error forbiddenrequest when request Transaction is not pending")
+    public void updateTransactionItemQuantityAPI_nonPendingTrx_shouldReturnErrorForbiddenRequest() throws Exception{ 
+        when(transactionItemService.updateTransactionItemQuantity(transactionItemResponse.id(), 5L)).thenThrow(new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)"));
+
+       mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/quantity")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.errors").value("Couldn't delete the item because Transaction Status is not PENDING(CART)"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error transactionvalidation when request product stock lesser than requested quantity")
+    public void updateTransactionItemQuantityAPI_outOfStock_shouldReturnErrorTransactionValidation() throws Exception{ 
+        when(transactionItemService.updateTransactionItemQuantity(transactionItemResponse.id(), 10L)).thenThrow(new TransactionValidationException("Product stocks with ID " + 1L + " doesn't meet buyer quantity, stock left: " + 5L));
+
+       mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/quantity")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "10")
+        )
+        .andDo(print()) 
+        .andExpect(status().isUnprocessableContent()) 
+        .andExpect(jsonPath("$.errors").value("Product stocks with ID " + 1L + " doesn't meet buyer quantity, stock left: " + 5L))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return transaction item dto when refund Trx item success")
+    public void refundTransactionItemAPI_validId_shouldReturnDTO() throws Exception{  
+        when(transactionItemService.refundTransactionItem(transactionItemResponse.id(), 5L)).thenReturn(transactionItemResponse);
+
+        mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/refund")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.id").value(transactionItemResponse.id().toString()))
+        .andExpect(jsonPath("$.data.quantity").value(5L))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error not found when request Trx item Not Found")
+    public void refundTransactionItemAPI_invalidId_shouldReturnErrorNotFound() throws Exception{ 
+        when(transactionItemService.refundTransactionItem(transactionItemResponse.id(), 5L)).thenThrow(new NotFoundEntityException("Transaction Items with ID " + 1L + " was not found"));
+        
+       mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/refund")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isNotFound()) 
+        .andExpect(jsonPath("$.errors").value("Transaction Items with ID " + 1L + " was not found"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error forbiddenrequest when request Transaction is not pending")
+    public void refundTransactionItemAPI_nonPendingTrx_shouldReturnErrorForbiddenRequest() throws Exception{ 
+        when(transactionItemService.refundTransactionItem(transactionItemResponse.id(), 5L)).thenThrow(new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)"));
+
+       mockMvc.perform(
+            post("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString() + "/refund")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .param("quantity", "5")
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.errors").value("Couldn't delete the item because Transaction Status is not PENDING(CART)"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+}
