@@ -23,4 +23,6 @@ public interface TransactionItemService {
 
     TransactionItemResponse refundTransactionItem(UUID id, Long quantity);
 
+    TransactionItemResponse getTransactionItem(UUID id);
+
 }
