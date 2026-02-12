@@ -38,19 +38,37 @@ public class TransactionItemServiceGetTest extends BaseTransactionItemServiceTes
 
     @Test
     @DisplayName("Should thrown not found error when transaction item not found")
-    public void getTransactionByTransactionIdAndProductId_invalidId_throwNotFoundError(){ 
+    public void getTransactionItemByTransactionIdAndProductId_invalidId_throwNotFoundError(){ 
         when(transactionItemRepositoryMock.findByTransactionIdAndProductId(any(), any())).thenReturn(Optional.empty()); 
 
         assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionByTransactionIdAndProductId(null, null));
     }
 
     @Test
-    @DisplayName("Should thrown not found error when transaction item not found")
-    public void getTransactionByTransactionIdAndProductId_validId_throwNotFoundError(){ 
+    @DisplayName("Should return TransactionItemResponse when trxitem found")
+    public void getTransactionItemByTransactionIdAndProductId_validId_throwNotFoundError(){ 
         when(transactionItemRepositoryMock.findByTransactionIdAndProductId(any(), any())).thenReturn(Optional.of(setupTransactionItem)); 
 
          TransactionItemResponse transactionByTransactionIdAndProductId = transactionItemServiceMock.getTransactionByTransactionIdAndProductId(null, null);
 
          assertEquals(setupTransactionItem.getId(), transactionByTransactionIdAndProductId.id());
+    }
+
+    @Test
+    @DisplayName("Should return TransactionItemResponse when trxitem found")
+    public void getTransactionItem_validId_returnTrxItemResponse(){ 
+        when(transactionItemRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionItem)); 
+
+        TransactionItemResponse TransactionItemResponse = transactionItemServiceMock.getTransactionItem(null);
+
+         assertEquals(setupTransactionItem.getId(), TransactionItemResponse.id());
+    }
+
+    @Test
+    @DisplayName("Should thrown not found error when transaction item not found")
+    public void getTransactionItem_invalidId_throwNotFoundError(){ 
+        when(transactionItemRepositoryMock.findById(any())).thenReturn(Optional.empty()); 
+
+        assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionItem(UUID.randomUUID()));
     }
 }
