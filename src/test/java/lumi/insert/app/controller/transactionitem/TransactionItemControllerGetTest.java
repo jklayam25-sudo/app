@@ -23,7 +23,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
         when(transactionItemService.getTransactionItem(any(UUID.class))).thenReturn(transactionItemResponse);
 
         mockMvc.perform(
-            get("/api/transactions/" + transactionItemResponse.id().toString() + "/items")
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString())
             .accept(MediaType.APPLICATION_JSON_VALUE) 
         )
         .andDo(print()) 
@@ -40,7 +40,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
         when(transactionItemService.getTransactionItem(any(UUID.class))).thenThrow(new NotFoundEntityException("Transaction Items with ID " + 231 + " was not found"));
 
         mockMvc.perform(
-            get("/api/transactions/" + transactionItemResponse.id().toString() + "/items")
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + transactionItemResponse.id().toString())
             .accept(MediaType.APPLICATION_JSON_VALUE) 
         )
         .andDo(print()) 
@@ -54,7 +54,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
     public void getTransactionItemAPI_missmatchId_shouldReturnErrorMethodArgs() throws Exception{ 
 
         mockMvc.perform(
-            get("/api/transactions/" + true + "/items")
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/" + true) 
             .accept(MediaType.APPLICATION_JSON_VALUE) 
         )
         .andDo(print()) 
