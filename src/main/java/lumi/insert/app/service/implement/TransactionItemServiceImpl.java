@@ -1,4 +1,5 @@
 package lumi.insert.app.service.implement;
+ 
 
 import java.util.UUID;
 
@@ -80,7 +81,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         
         Transaction transaction = transactionItem.getTransaction();
  
-        if (transaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Couldn't delete the item because Transaction Status is not PENDING(CART)");
+        if (transaction.getStatus() != TransactionStatus.PENDING) throw new ForbiddenRequestException("Unable to delete the item because Transaction Status is not PENDING(CART)");
 
         transaction.setTotalItems(transaction.getTotalItems() - 1);
         transaction.setSubTotal(transaction.getSubTotal() - (transactionItem.getQuantity() * transactionItem.getPrice()));
@@ -102,7 +103,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
 
         Product product = transactionItem.getProduct();
 
-        if(product.getStockQuantity() < quantity) throw new TransactionValidationException("Product stocks with ID " + product.getId() + " doesn't meet buyer quantity");
+        if(product.getStockQuantity() < quantity) throw new TransactionValidationException("Product stocks with ID " + product.getId() + " doesn't meet buyer quantity, stock left: " + product.getStockQuantity());
 
         Long transactionItemOldSubTotal = transactionItem.getQuantity() * transactionItem.getPrice();
 
