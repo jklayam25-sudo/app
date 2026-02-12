@@ -4,16 +4,19 @@ import java.net.URI;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
-import lumi.insert.app.controller.wrapper.WebResponse; 
+import lumi.insert.app.controller.wrapper.WebResponse;
+import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemResponse; 
 import lumi.insert.app.service.TransactionItemService;
@@ -43,10 +46,22 @@ public class TransactionItemController {
     }
 
     @GetMapping(
-        path = "/api/transactions/{id}/items",
+        path = "/api/transactions/{transactionId}/items",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItem(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItems(@PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute PaginationRequest request){
+        Slice<TransactionItemResponse> resultFromService = transactionItemService.getTransactionItemsByTransactionId(transactionId, request);
+ 
+        WebResponse<Slice<TransactionItemResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+
+        return ResponseEntity.ok(wrappedResult);   
+    }
+
+    @GetMapping(
+        path = "/api/transactions/{transactionId}/items/{id}",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id){
         TransactionItemResponse resultFromService = transactionItemService.getTransactionItem(id);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
