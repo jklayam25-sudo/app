@@ -53,7 +53,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         Product product = productRepository.findById(request.getProductId())
             .orElseThrow(() -> new NotFoundEntityException("Product with ID " + request.getProductId() + " was not found"));
 
-        if(product.getStockQuantity() < request.getQuantity()) throw new TransactionValidationException("Product stocks with ID " + request.getProductId() + " doesn't meet buyer quantity");
+        if(product.getStockQuantity() < request.getQuantity()) throw new TransactionValidationException("Product stocks with ID " + request.getProductId() + " doesn't meet buyer quantity, stock left: " + product.getStockQuantity());
  
         TransactionItem transactionItem = TransactionItem.builder()
         .price(product.getSellPrice())
