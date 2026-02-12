@@ -9,11 +9,11 @@ import lombok.Data;
 @Builder
 public class TransactionItemCreateRequest {
     
-    @NotNull
+    @NotNull(message =  "productId must not be null")
     Long productId;
 
-    @NotNull
-    @Min(value = 1)
+    @NotNull(message =  "quantity must not be null")
+    @Min(message = "quantity minimal value is 1", value = 1)
     Long quantity;
 
 }
