@@ -118,4 +118,49 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
         .andExpect(jsonPath("$.errors").isNotEmpty());
     }
 
+    @Test
+    @DisplayName("should return Transaction item Response when request Trx item found")
+    public void getTransactionItemByTrxIdProIdAPI_validId_shouldReturnEntity() throws Exception{
+        when(transactionItemService.getTransactionByTransactionIdAndProductId(any(UUID.class), any(Long.class))).thenReturn(transactionItemResponse);
+
+        mockMvc.perform(
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/product/" + 1L)
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.id").value(transactionItemResponse.id().toString()))
+        .andExpect(jsonPath("$.data.transactionId").value(transactionItemResponse.transactionId().toString()))
+        .andExpect(jsonPath("$.data.productId").value(transactionItemResponse.productId()))
+        .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return error notFound when request Trx item not found")
+    public void getTransactionItemByTrxIdProIdAPI_invalidProductId_shouldReturnErrorNotFound() throws Exception{
+        when(transactionItemService.getTransactionByTransactionIdAndProductId(any(UUID.class), any(Long.class))).thenThrow(new NotFoundEntityException("Transaction Items was not found"));
+
+        mockMvc.perform(
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/product/" + 1L)
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("Transaction Items was not found"));
+    }
+
+    @Test
+    @DisplayName("should return error missmatch when request Trx item not found")
+    public void getTransactionItemByTrxIdProIdAPI_invalidProductId_shouldReturnErrorMissMatch() throws Exception{ 
+        mockMvc.perform(
+            get("/api/transactions/" + UUID.randomUUID().toString() + "/items/product/" + true)
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
 }
