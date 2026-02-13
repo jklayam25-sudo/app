@@ -122,4 +122,36 @@ public class TransactionControllerGetTest extends BaseTransactionControllerTest{
         .andExpect(jsonPath("$.data").isEmpty()) 
         .andExpect(jsonPath("$.errors").isNotEmpty());
     }
+
+    @Test
+    @DisplayName("should return errors of min constraint when request parameter invalid")
+    public void getTransactionsAPI_minusParamFilter_shouldReturnErrorsMissMatch() throws Exception{
+        Slice<TransactionResponse> slice = new SliceImpl<>(List.of());
+        when(transactionService.searchTransactionsByRequests(any(TransactionGetByFilter.class))).thenReturn(slice);
+
+        mockMvc.perform(
+            get("/api/transactions/filter?minTotalItems=" + -2)
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty()) 
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("should return errors of pattern constraint when request parameter invalid")
+    public void getTransactionsAPI_sortBySpec_shouldReturnErrorsMissMatch() throws Exception{
+        Slice<TransactionResponse> slice = new SliceImpl<>(List.of());
+        when(transactionService.searchTransactionsByRequests(any(TransactionGetByFilter.class))).thenReturn(slice);
+
+        mockMvc.perform(
+            get("/api/transactions/filter?sortBy=" + -2)
+            .accept(MediaType.APPLICATION_JSON_VALUE) 
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty()) 
+        .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
 }

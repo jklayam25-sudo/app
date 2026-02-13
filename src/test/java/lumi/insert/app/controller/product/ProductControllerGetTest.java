@@ -173,6 +173,32 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
     }
 
     @Test
+    @DisplayName("Should return error badRequest when filter parameter type violate ")
+    public void getProductByFilterAPI_violateParameter_return400StatusAndErrorResponse() throws Exception{
+         mockMvc.perform(
+            get("/api/products/filter?minPrice=-5")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.errors").value("minPrice minimal value is 0"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return error badRequest when filter parameter type violate ")
+    public void getProductByFilterAPI_violateParameter2_return400StatusAndErrorResponse() throws Exception{
+         mockMvc.perform(
+            get("/api/products/filter?sortBy=sds")
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.errors").value("check documentation for sortBy specification"));
+    }
+
+    @Test
     @DisplayName("Should return 200 http status and product list with custom pagination")
     public void getAllProductsAPI_withParam_return200StatusAndPaginatedList() throws Exception{
         ArgumentCaptor<PaginationRequest> captor = ArgumentCaptor.forClass(PaginationRequest.class);
