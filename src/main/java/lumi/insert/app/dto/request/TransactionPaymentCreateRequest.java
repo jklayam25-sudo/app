@@ -9,14 +9,14 @@ import lombok.Data;
 @Builder
 public class TransactionPaymentCreateRequest {
     
-    @NotNull
+    @NotNull(message = "paymentFrom must not be null")
     String paymentFrom;
 
-    @NotNull
+    @NotNull(message = "paymentTo must not be null")
     String paymentTo;
 
-    @NotNull
-    @Min(value = 1)
+    @NotNull(message = "totalPayment must not be null")
+    @Min(value = 1, message = "totalPayment minimal value is 1")
     Long totalPayment;
 
 }
