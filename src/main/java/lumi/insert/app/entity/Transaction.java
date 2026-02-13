@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
 @Entity(name = "transactions")
 @Data

@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionControllerGetTest extends BaseTransactionControllerTest{

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemResponse;
 import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException; 

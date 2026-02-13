@@ -28,7 +28,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionStatus; 
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 
 @DataJpaTest

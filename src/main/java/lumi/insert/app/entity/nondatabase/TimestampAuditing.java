@@ -1,4 +1,4 @@
-package lumi.insert.app.entity;
+package lumi.insert.app.entity.nondatabase;
 
 import java.time.LocalDateTime;
 

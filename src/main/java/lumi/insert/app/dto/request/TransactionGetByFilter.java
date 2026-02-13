@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
 @Data
 @SuperBuilder

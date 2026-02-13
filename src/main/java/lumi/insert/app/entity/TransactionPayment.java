@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 
 @Entity(name = "transaction_payments")
 @Data

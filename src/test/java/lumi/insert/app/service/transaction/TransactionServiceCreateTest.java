@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionStatus;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
 public class TransactionServiceCreateTest extends BaseTransactionServiceTest{
     
