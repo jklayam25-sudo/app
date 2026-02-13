@@ -63,7 +63,7 @@ public class ProductController {
         path = "/api/products/filter",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProductByFilter(@ModelAttribute ProductGetByFilter request){
+    ResponseEntity<WebResponse<Slice<ProductResponse>>> getProductByFilter(@ModelAttribute @Valid ProductGetByFilter request){
         Slice<ProductResponse> resultFromService = productService.getProductsByRequests(request);
 
         WebResponse<Slice<ProductResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
