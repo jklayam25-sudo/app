@@ -120,13 +120,15 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
     }
 
     @Override
-    public TransactionPaymentResponse refundTransactionPayment(UUID id, TransactionPaymentCreateRequest request) {
-        TransactionPayment transactionPayment = transactionPaymentRepository.findById(id)
-            .orElseThrow(() -> new NotFoundEntityException("Transaction Payment with ID " + id + " was not found"));
-
-        Transaction transaction = transactionPayment.getTransaction();
+    public TransactionPaymentResponse refundTransactionPayment(UUID transactionId, TransactionPaymentCreateRequest request) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + transactionId + " was not found"));
+ 
         if (transaction.getStatus() == TransactionStatus.PENDING || transaction.getStatus() == TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Refund payment only to Transaction with status PROCESS(onGoing) or CANCELLED, check carefully");
 
+        Long totalUnrefunded = transaction.getTotalUnrefunded();
+
+        if(request.getTotalPayment() > totalUnrefunded) throw new TransactionValidationException("Payment refund exceeds the remaining transaction unrefunded debt with ID " + transaction.getId() + ", enter an exact amount to proceed");
 
         TransactionPayment refundTransactionPayment = TransactionPayment.builder()
         .transaction(transaction)
@@ -135,10 +137,6 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
         .totalPayment(request.getTotalPayment())
         .isForRefund(true)
         .build();
-
-        Long totalUnrefunded = transaction.getTotalUnrefunded();
-
-        if(request.getTotalPayment() > totalUnrefunded) throw new TransactionValidationException("Payment refund exceeds the remaining transaction unrefunded debt with ID " + transaction.getId() + ", enter an exact amount to proceed");
 
         transaction.setTotalRefunded(transaction.getTotalRefunded() + request.getTotalPayment());
         transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() - request.getTotalPayment());
