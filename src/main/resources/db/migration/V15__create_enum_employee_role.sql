@@ -1,0 +1,1 @@
+CREATE TYPE employee_role AS ENUM ('CASHIER', 'FINANCE', 'WAREHOUSE', 'OWNER');
