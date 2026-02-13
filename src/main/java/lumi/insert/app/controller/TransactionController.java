@@ -63,7 +63,7 @@ public class TransactionController {
         path = "/api/transactions/filter",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<TransactionResponse>>> getTransactions(@ModelAttribute TransactionGetByFilter request){
+    ResponseEntity<WebResponse<Slice<TransactionResponse>>> getTransactions(@ModelAttribute @Valid TransactionGetByFilter request){
         Slice<TransactionResponse> resultFromService = transactionService.searchTransactionsByRequests(request);
         
         WebResponse<Slice<TransactionResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
