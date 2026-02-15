@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.EmployeeCreateRequest;
+import lumi.insert.app.dto.request.EmployeeUpdateRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.EmployeeResponse;
 import lumi.insert.app.entity.Employee;
@@ -87,9 +88,16 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
 
     @Override
-    public EmployeeResponse updateEmployee(UUID id, String password) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateEmployee'");
+    public EmployeeResponse updateEmployee(UUID id, EmployeeUpdateRequest request) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new NotFoundEntityException("Employee with ID " + id + " was not found"));
+
+        if(request.getUsername() != null){
+            if(employeeRepository.existsByUsername(request.getUsername())) throw new DuplicateEntityException("Employee with username " + request.getUsername() + " already exists");  
+        }
+
+        employeeMapper.updateEmployeeFromDto(request, employee);
+        return employeeMapper.createDtoResponseFromEmployee(employee);
     }
     
 }
