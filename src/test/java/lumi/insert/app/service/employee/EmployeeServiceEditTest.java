@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.EmployeeUpdateRequest;
 import lumi.insert.app.dto.response.EmployeeResponse;
 import lumi.insert.app.entity.Employee;
+import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 
@@ -51,11 +52,13 @@ public class EmployeeServiceEditTest extends BaseEmployeeServiceTest{
         
         EmployeeUpdateRequest employeeUpdateRequest = EmployeeUpdateRequest.builder()
         .fullname("NEW NAME")
+        .role("FINANCE")
         .build();
 
         EmployeeResponse employeeDTO = employeeServiceMock.updateEmployee(setupEmployee.getId(), employeeUpdateRequest);
         assertEquals(setupEmployee.getUsername(), employeeDTO.username());
         assertEquals("NEW NAME", employeeDTO.fullname()); 
+        assertEquals(EmployeeRole.FINANCE, employeeDTO.role());
         verify(employeeMapperImpl, times(1)).updateEmployeeFromDto(employeeUpdateRequest, setupEmployee);
     }
 

@@ -29,7 +29,7 @@ public class EmployeeServiceImpl implements EmployeeService{
     @Autowired
     EmployeeRepository employeeRepository;
 
-    @Autowired 
+    @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
