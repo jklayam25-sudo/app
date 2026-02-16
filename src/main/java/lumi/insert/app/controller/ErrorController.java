@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import lumi.insert.app.controller.wrapper.WebResponse;
@@ -57,9 +58,22 @@ public class ErrorController {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<WebResponse<String>> methodArgumentNotValidException(MethodArgumentNotValidException exception){
+    public ResponseEntity<WebResponse<String>> methodArgumentNotValidException(MethodArgumentNotValidException exception){ 
         WebResponse<String> webResponse = WebResponse.<String>builder()
         .errors(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<WebResponse<String>> handlerMethodValidationException(HandlerMethodValidationException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getAllErrors().getFirst().getDefaultMessage())
         .build();
 
         ResponseEntity<WebResponse<String>> response = ResponseEntity
