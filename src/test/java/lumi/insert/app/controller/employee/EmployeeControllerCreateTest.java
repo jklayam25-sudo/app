@@ -1,0 +1,103 @@
+package lumi.insert.app.controller.employee;
+ 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when; 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;  
+
+import lumi.insert.app.dto.request.EmployeeCreateRequest;
+import lumi.insert.app.exception.DuplicateEntityException;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
+public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
+    
+    @Test
+    @DisplayName("should return employee entity with code created Response when create succesfully")
+    public void createEmployeeAPI_validRequest_shouldReturnCreatedEntity() throws Exception{
+        EmployeeCreateRequest request = EmployeeCreateRequest.builder()
+        .username(employeeResponse.username())
+        .fullname(employeeResponse.fullname())
+        .password("secret$")
+        .build();
+
+        when(employeeService.createEmployee(request)).thenReturn(employeeResponse);
+
+        mockMvc.perform(
+            post("/api/employees")
+            .with(csrf())
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("username", employeeResponse.username())
+            .param("fullname", employeeResponse.fullname()) 
+            .param("password", "secret$") 
+        )
+        .andDo(print()) 
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id").value(employeeResponse.id().toString()))
+        .andExpect(jsonPath("$.data.fullname").value(employeeResponse.fullname())) 
+        .andExpect(jsonPath("$.errors").isEmpty());
+        verify(employeeService, times(1)).createEmployee(request);
+    }
+
+    @Test
+    @DisplayName("should return error validation with code badreq when password value doesn't meet pattern")
+    public void createEmployeeAPI_illegalParam_shouldReturnError() throws Exception{
+        EmployeeCreateRequest request = EmployeeCreateRequest.builder()
+        .username(employeeResponse.username())
+        .fullname(employeeResponse.fullname())
+        .password("se$")
+        .build();
+
+        when(employeeService.createEmployee(request)).thenReturn(employeeResponse);
+
+        mockMvc.perform(
+            post("/api/employees")
+            .with(csrf())
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("username", employeeResponse.username())
+            .param("fullname", employeeResponse.fullname()) 
+            .param("password", "stfwa  42$") 
+        )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.data").isEmpty())  
+        .andExpect(jsonPath("$.errors").value("password has to be 5-50 length and has atleast 1 unique char"));
+        verify(employeeService, times(0)).createEmployee(request);
+    }
+
+    @Test
+    @DisplayName("should return error DuplicateEnt when username already exists")
+    public void createEmployeeAPI_duplicateUsername_shouldReturnBadRequest() throws Exception{
+        EmployeeCreateRequest request = EmployeeCreateRequest.builder()
+        .username(employeeResponse.username())
+        .fullname(employeeResponse.fullname())
+        .password("secret$")
+        .build();
+
+        when(employeeService.createEmployee(request)).thenThrow(new DuplicateEntityException("Employee with username " + request.getUsername() + " already exists"));
+
+        mockMvc.perform(
+            post("/api/employees")
+            .with(csrf())
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("username", employeeResponse.username())
+            .param("fullname", employeeResponse.fullname()) 
+            .param("password", "secret$") 
+        )
+        .andDo(print()) 
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.data").isEmpty())  
+        .andExpect(jsonPath("$.errors").value("Employee with username " + request.getUsername() + " already exists"));
+        verify(employeeService, times(1)).createEmployee(request);
+    }
+}
