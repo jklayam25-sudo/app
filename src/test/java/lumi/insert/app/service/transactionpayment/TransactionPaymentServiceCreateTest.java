@@ -96,7 +96,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
         setupTransaction.setStatus(TransactionStatus.PROCESS);
 
         setupTransactionPayment.setTransaction(setupTransaction);
-        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
         TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
         .paymentTo("BCA - XXXXXX")
@@ -122,7 +122,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
         setupTransaction.setStatus(TransactionStatus.CANCELLED);
 
         setupTransactionPayment.setTransaction(setupTransaction);
-        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
         TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
         .paymentTo("BCA - XXXXXX")
@@ -143,7 +143,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     @Test
     @DisplayName("Should throw NotFound when creating refund transaction to transaction that isn't found")
     public void refundTransactionPayment_notFoundTransaction_throwForbidden(){  
-        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.empty());
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
         TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
         .paymentTo("BCA - XXXXXX")
@@ -159,7 +159,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     public void refundTransactionPayment_pendingTransaction_throwForbidden(){ 
         setupTransaction.setStatus(TransactionStatus.COMPLETE);
         setupTransactionPayment.setTransaction(setupTransaction);
-        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
         TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
         .paymentTo("BCA - XXXXXX")
@@ -178,7 +178,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
         setupTransaction.setStatus(TransactionStatus.CANCELLED);
 
         setupTransactionPayment.setTransaction(setupTransaction);
-        when(transactionPaymentRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionPayment));
+        when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
         TransactionPaymentCreateRequest request = TransactionPaymentCreateRequest.builder()
         .paymentTo("BCA - XXXXXX")
