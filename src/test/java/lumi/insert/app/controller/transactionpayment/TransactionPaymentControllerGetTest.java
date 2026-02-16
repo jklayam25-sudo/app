@@ -23,7 +23,6 @@ import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionPaymentControllerGetTest extends BaseTransactionPaymentControllerTest{
     
-
     @Test
     @DisplayName("Should return transactionPayment DTO when found")
     void getTransactionPaymentAPI_validRequest_shouldReturnEntityDTO() throws Exception{
@@ -164,6 +163,6 @@ public class TransactionPaymentControllerGetTest extends BaseTransactionPaymentC
         )
         .andDo(print())
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.errors").value("check documentation for sortBy supported value"));
+        .andExpect(jsonPath("$.errors").value("check documentation for sortBy specification"));
     }
 }

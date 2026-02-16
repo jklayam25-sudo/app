@@ -133,14 +133,7 @@ public class TransactionPaymentControllerCreateTest extends BaseTransactionPayme
         .andExpect(jsonPath("$.errors").isNotEmpty()); 
     }
 
-
-
-
-
-
-
-
-
+ 
     @Test
     @DisplayName("should return Transaction Payment Response when create succesfully")
     public void refundTransactionPaymentAPI_validRequest_shouldReturnCreatedEntity() throws Exception{ 
