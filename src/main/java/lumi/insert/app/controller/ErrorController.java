@@ -1,14 +1,20 @@
 package lumi.insert.app.controller;
 
-import org.springframework.http.HttpStatus; 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import lumi.insert.app.controller.wrapper.WebResponse;
+import lumi.insert.app.exception.AuthenticationTokenException;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.ForbiddenRequestException;
@@ -117,6 +123,64 @@ public class ErrorController {
 
         ResponseEntity<WebResponse<String>> response = ResponseEntity
         .status(HttpStatus.UNPROCESSABLE_CONTENT)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(AccountExpiredException.class)
+    public ResponseEntity<WebResponse<String>> accountExpiredException(AccountExpiredException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<WebResponse<String>> badCredentialsException(BadCredentialsException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<WebResponse<String>> missingRequestCookieException(MissingRequestCookieException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage().split("'")[1] + " at cookie is missing, try to login first")
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(AuthenticationTokenException.class)
+    public ResponseEntity<WebResponse<String>> authenticationTokenException(AuthenticationTokenException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
+        .maxAge(0)
+        .path("/")
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
         .body(webResponse);
 
         return response;
