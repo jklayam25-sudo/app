@@ -18,6 +18,7 @@ import lumi.insert.app.dto.response.EmployeeResponse;
 import lumi.insert.app.entity.Employee;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.repository.AuthTokenRepository;
 import lumi.insert.app.repository.EmployeeRepository;
 import lumi.insert.app.service.EmployeeService;
 import lumi.insert.app.utils.mapper.EmployeeMapper;
@@ -28,6 +29,9 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Autowired
     EmployeeRepository employeeRepository;
+
+    @Autowired
+    AuthTokenRepository authTokenRepository;
 
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -83,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         
         Employee savedEmployee = employeeRepository.save(employee);
 
-        // authTokenRepository.deleteByEmployeeId(employee.getId());
+        authTokenRepository.deleteByEmployeeId(employee.getId());
         return employeeMapper.createDtoResponseFromEmployee(savedEmployee);
     }
 
@@ -97,6 +101,9 @@ public class EmployeeServiceImpl implements EmployeeService{
         }
 
         employeeMapper.updateEmployeeFromDto(request, employee);
+
+        if(!employee.isActive()) authTokenRepository.deleteByEmployeeId(employee.getId());
+
         return employeeMapper.createDtoResponseFromEmployee(employee);
     }
     
