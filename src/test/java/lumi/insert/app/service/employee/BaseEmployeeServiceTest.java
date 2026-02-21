@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import lumi.insert.app.entity.Employee;
+import lumi.insert.app.repository.AuthTokenRepository;
 import lumi.insert.app.repository.EmployeeRepository; 
 import lumi.insert.app.service.implement.EmployeeServiceImpl;
 import lumi.insert.app.utils.mapper.EmployeeMapperImpl;
@@ -28,6 +29,9 @@ public abstract class BaseEmployeeServiceTest {
     @Mock
     BCryptPasswordEncoder passwordEncoder;
 
+    @Mock
+    AuthTokenRepository authTokenRepositoryMock;
+
     @Spy
     EmployeeMapperImpl employeeMapperImpl = new EmployeeMapperImpl();
 
@@ -43,6 +47,7 @@ public abstract class BaseEmployeeServiceTest {
         .password("SECRET")
         .joinDate(LocalDateTime.of(2020, 10, 10, 10, 10))
         .lastIp("xxx.xxx.xxx.xxx")
+        .isActive(false)
         .build();
     }
 
