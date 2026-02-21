@@ -35,6 +35,7 @@ public class EmployeeServiceEditTest extends BaseEmployeeServiceTest{
         assertEquals(setupEmployee.getFullname(), employeeDTO.fullname());
         verify(passwordEncoder).encode(argThat(arg -> !arg.equals("decodedSECRET")));
         verify(employeeRepositoryMock).save(argThat(arg -> arg.getPassword().equals("decodedSECRET")));
+        verify(authTokenRepositoryMock, times(1)).deleteByEmployeeId(employeeDTO.id());
     }
 
     @Test
@@ -53,12 +54,15 @@ public class EmployeeServiceEditTest extends BaseEmployeeServiceTest{
         EmployeeUpdateRequest employeeUpdateRequest = EmployeeUpdateRequest.builder()
         .fullname("NEW NAME")
         .role("FINANCE")
+        .isActive(false)
         .build();
 
         EmployeeResponse employeeDTO = employeeServiceMock.updateEmployee(setupEmployee.getId(), employeeUpdateRequest);
+
         assertEquals(setupEmployee.getUsername(), employeeDTO.username());
         assertEquals("NEW NAME", employeeDTO.fullname()); 
         assertEquals(EmployeeRole.FINANCE, employeeDTO.role());
+        verify(authTokenRepositoryMock, times(1)).deleteByEmployeeId(employeeDTO.id());
         verify(employeeMapperImpl, times(1)).updateEmployeeFromDto(employeeUpdateRequest, setupEmployee);
     }
 
