@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional; 
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,23 +60,17 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     @Test
     @DisplayName("Should return Slice of ProductName when searching by valid name query")
     public void searchProductNames_validQuery_returnSliceOfProductName(){
-        List<Product> products = new ArrayList<Product>();
+        List<ProductName> products = new ArrayList<ProductName>();
 
         for ( int i = 1; i <= 12; i++ ) {
-            Product dumpProduct = Product.builder()
-            .name("Product " + i)
-            .basePrice(1000L * i)
-            .sellPrice(1200L * i)
-            .stockQuantity(10L * i)
-            .stockMinimum(1L * i)
-            .build();
-
+            ProductName dumpProduct = new ProductName(Long.valueOf(i), "Product " + i);
+ 
             products.add(dumpProduct);
         }
 
-        Slice<Product> productSlice = new SliceImpl<>(products);
+        Slice<ProductName> productSlice = new SliceImpl<>(products);
 
-        when(productRepositoryMock.findAllByNameContainingAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
+        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
 
         ProductGetNameRequest request = ProductGetNameRequest.builder()
         .name("Pro")
@@ -98,9 +92,9 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
     @DisplayName("Should return empty Slice when searching product name with non-matching query")
     public void searchProductNames_queryNotFound_returnEmptySlice(){
 
-        Slice<Product> productSlice = new SliceImpl<>(List.of());
+        Slice<ProductName> productSlice = new SliceImpl<>(List.of());
 
-        when(productRepositoryMock.findAllByNameContainingAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
+        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
 
         ProductGetNameRequest request = ProductGetNameRequest.builder()
         .name("Pro")

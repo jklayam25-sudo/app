@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
 
@@ -110,9 +111,9 @@ public class ProductRepositoryTest {
 
         Pageable pageable = PageRequest.of(0, 5, Sort.by("name").ascending());
 
-        Slice<Product> products = productRepository.findAllByNameContainingAndIsActiveTrue("Jordan", pageable);
-        Slice<Product> productsNike = productRepository.findAllByNameContainingAndIsActiveTrue("NIKE", pageable);
-        Slice<Product> productsSomething = productRepository.findAllByNameContainingAndIsActiveTrue("Something", pageable);
+        Slice<ProductName> products = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("Jordan", pageable);
+        Slice<ProductName> productsNike = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("NIKE", pageable);
+        Slice<ProductName> productsSomething = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("Something", pageable);
 
         assertEquals(1, products.getNumberOfElements());
         assertEquals(2, productsNike.getNumberOfElements());
