@@ -28,7 +28,7 @@ import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.CategoryRepository;
-import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.ProductRepository; 
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.utils.mapper.ProductMapper;
 
@@ -127,18 +127,9 @@ public class ProductServiceImpl implements ProductService {
         Sort sort = Sort.by("name").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
-        Slice<Product> allByNameContaining = productRepository.findAllByNameContainingAndIsActiveTrue(request.getName(), pageable);
-
-        Slice<ProductName> map = allByNameContaining.map(product -> {
-            ProductName productNameResponse = ProductName.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .build();
-        
-            return productNameResponse;
-        });
-
-        return map;
+        Slice<ProductName> allByNameContaining = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue(request.getName(), pageable);
+ 
+        return allByNameContaining;
     }
 
 
