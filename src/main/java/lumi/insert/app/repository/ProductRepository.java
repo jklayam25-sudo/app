@@ -13,7 +13,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import lumi.insert.app.entity.Product;
+import lumi.insert.app.dto.response.ProductName;
+import lumi.insert.app.entity.Product; 
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
 
 @Repository
@@ -24,7 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     Set<Product> findAllByNameContaining(String name);
 
-    Slice<Product> findAllByNameContainingAndIsActiveTrue(String name, Pageable pageable);
+    Slice<ProductName> getByNameContainingIgnoreCaseAndIsActiveTrue(String name, Pageable pageable);
 
     Slice<Product> findAllBy(Pageable pageable);
 
