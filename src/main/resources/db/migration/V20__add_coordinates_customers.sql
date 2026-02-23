@@ -1,0 +1,5 @@
+ALTER TABLE customers 
+    ADD COLUMN latitude DOUBLE PRECISION;
+
+ALTER TABLE customers 
+    ADD COLUMN longitude DOUBLE PRECISION;
