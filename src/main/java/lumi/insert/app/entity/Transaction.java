@@ -8,14 +8,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
@@ -65,12 +69,18 @@ public class Transaction extends TimestampAuditing{
     @Builder.Default
     private TransactionStatus status = TransactionStatus.PENDING;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false) 
+    private Customer customer;
+
     @OneToMany(mappedBy = "transaction")
     @Builder.Default
+    @ToString.Exclude
     private List<TransactionItem> transactionItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "transaction")
     @Builder.Default
+    @ToString.Exclude
     private List<TransactionPayment> transactionPayments = new ArrayList<>();
     
 }
