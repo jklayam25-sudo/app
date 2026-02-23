@@ -11,7 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
+ 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
@@ -39,7 +41,24 @@ public class TransactionRepositoryTest {
     @Autowired
     TransactionRepository transactionRepository;
 
+    @Autowired
+    CustomerRepository customerRepository;
+
     InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
+
+    Customer setupCustomer;
+
+    @BeforeEach
+    public void setup(){
+        Customer customer1 = Customer.builder()
+        .name("Customer 1")
+        .email("TEST@mail.com")
+        .contact("081234567890")
+        .shippingAddress("Jl. xxx")
+        .build();
+
+        setupCustomer = customerRepository.saveAndFlush(customer1);
+    }
 
     @Test
     @DisplayName("Should add transaction entity to database when base field < invoiceId required is valid")
@@ -48,6 +67,7 @@ public class TransactionRepositoryTest {
 
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceId)
+        .customer(setupCustomer)
         .build();
 
       Transaction savedTransaction = transactionRepository.save(transaction);
@@ -62,6 +82,7 @@ public class TransactionRepositoryTest {
     @DisplayName("Should thrown jpa data error when base field < invoiceId is null")
     public void createTransaction_nullableField_throwError(){
         Transaction transaction = Transaction.builder() 
+        .customer(setupCustomer)
         .build();
         
         assertNull(transaction.getInvoiceId());
@@ -75,6 +96,7 @@ public class TransactionRepositoryTest {
 
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceId)
+        .customer(setupCustomer)
         .build();
 
         transactionRepository.saveAndFlush(transaction);
@@ -104,12 +126,14 @@ public class TransactionRepositoryTest {
                 Transaction transaction = Transaction.builder()
                     .invoiceId(invoiceGenerator.generate())
                     .status(TransactionStatus.CANCELLED)
+                    .customer(setupCustomer)
                     .build();
 
                  pendingTransactions.add(transaction);
             } else {
                 Transaction transaction = Transaction.builder()
                     .invoiceId(invoiceGenerator.generate())
+                    .customer(setupCustomer)
                     .build();
 
                  pendingTransactions.add(transaction);
@@ -138,6 +162,10 @@ public class TransactionRepositoryTest {
             if(request.getStatus() != null){
                 predicates.add(builder.equal(root.get("status"), request.getStatus()));
             }
+            if(request.getCustomerId() != null){
+                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
+            }
+            
             if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
                 predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
             }
@@ -164,6 +192,7 @@ public class TransactionRepositoryTest {
         Transaction matchTransaction = Transaction.builder()
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
+        .customer(setupCustomer)
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -171,6 +200,7 @@ public class TransactionRepositoryTest {
         Transaction unmatchTransaction2 = Transaction.builder()
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
+        .customer(setupCustomer)
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -179,6 +209,7 @@ public class TransactionRepositoryTest {
         .invoiceId(invoiceGenerator.generate())
         .status(TransactionStatus.CANCELLED)
         .totalPaid(150L)
+        .customer(setupCustomer)
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -209,6 +240,9 @@ public class TransactionRepositoryTest {
             if(request.getStatus() != null){
                 predicates.add(builder.equal(root.get("status"), request.getStatus()));
             }
+            if(request.getCustomerId() != null){
+                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
+            }
             if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
                 predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
             }
@@ -226,6 +260,76 @@ public class TransactionRepositoryTest {
         assertEquals(1, transactions.getNumberOfElements());
         assertEquals(TransactionStatus.PENDING, transactions.getContent().getFirst().getStatus());
         assertEquals(matchInvoiceId, transactions.getContent().getFirst().getInvoiceId());
+    }
+
+    @Test
+    @DisplayName("Should return filtered transaction case 3: get only customer 1")
+    public void findAllCriteria_customerCase_returnCombinedFilter(){
+        String matchInvoiceId = invoiceGenerator.generate();
+ 
+        Customer customer2 = Customer.builder()
+        .name("Customer 2")
+        .email("TEST1@mail.com")
+        .contact("0812314567890")
+        .shippingAddress("Jl. xx1x")
+        .build();
+
+        Customer savedCustomer2 = customerRepository.saveAndFlush(customer2);;
+
+        Transaction matchTransaction = Transaction.builder()
+        .invoiceId(matchInvoiceId)
+        .totalPaid(150L)
+        .customer(setupCustomer)
+        .build();
+
+        matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
+
+        Transaction unmatchTransaction2 = Transaction.builder()
+        .invoiceId(invoiceGenerator.generate())
+        .totalPaid(350L)
+        .customer(savedCustomer2)
+        .build();
+
+        transactionRepository.saveAllAndFlush(List.of(matchTransaction, unmatchTransaction2));
+
+        TransactionGetByFilter request = TransactionGetByFilter.builder()
+        .customerId(setupCustomer.getId())
+        .build();
+
+        Sort sort = Sort.by(request.getSortBy());
+
+        if(request.getSortDirection().equalsIgnoreCase("DESC")){
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        Specification<Transaction> specification = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+
+            if(request.getStatus() != null){
+                predicates.add(builder.equal(root.get("status"), request.getStatus()));
+            }
+            if(request.getCustomerId() != null){
+                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
+            }
+            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
+                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
+            }
+           
+            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
+            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
+            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
+            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
+
+            return builder.and(predicates);
+        }; 
+
+        Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable); 
+        assertEquals(1, transactions.getNumberOfElements());
+        assertEquals(setupCustomer.getId(), transactions.getContent().getFirst().getCustomer().getId()); 
     }
 
 

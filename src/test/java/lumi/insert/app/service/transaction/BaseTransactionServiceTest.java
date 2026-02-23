@@ -14,6 +14,7 @@ import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.entity.TransactionPayment;
+import lumi.insert.app.repository.CustomerRepository;
 import lumi.insert.app.repository.ProductRepository;
 import lumi.insert.app.repository.TransactionRepository; 
 import lumi.insert.app.service.implement.TransactionServiceImpl;
@@ -33,6 +34,9 @@ public abstract class BaseTransactionServiceTest {
 
     @Mock
     ProductRepository productRepositoryMock;
+
+    @Mock
+    CustomerRepository customerRepositoryMock;
 
     @Spy
     AllTransactionMapper allTransactionMapper = new AllTransactionMapperImpl();
