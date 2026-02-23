@@ -12,8 +12,6 @@ public class TransactionCreateRequest {
 
     @NotNull(message = "customerId cannot be empty")
     private UUID customerId;
-
-    @NotNull(message = "staffId cannot be empty")
-    private UUID staffId;
+ 
     
 }

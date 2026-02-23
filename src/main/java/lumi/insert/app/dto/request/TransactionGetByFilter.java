@@ -1,6 +1,7 @@
 package lumi.insert.app.dto.request;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -52,6 +53,8 @@ public class TransactionGetByFilter extends PaginationRequest{
     Long maxTotalPaid = 9999999999990L;
 
     TransactionStatus status;
+
+    UUID customerId;
 
     LocalDateTime minCreatedAt;
 
