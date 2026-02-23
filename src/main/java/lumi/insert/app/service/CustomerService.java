@@ -1,0 +1,27 @@
+package lumi.insert.app.service;
+
+import java.util.UUID;
+
+import org.springframework.data.domain.Slice;
+
+import lumi.insert.app.dto.request.CustomerCreateRequest;
+import lumi.insert.app.dto.request.CustomerGetByFilter;
+import lumi.insert.app.dto.request.CustomerGetNameRequest;
+import lumi.insert.app.dto.request.CustomerUpdateRequest;
+import lumi.insert.app.dto.response.CustomerDetailResponse;
+import lumi.insert.app.dto.response.CustomerNameResponse;
+import lumi.insert.app.dto.response.CustomerResponse;
+
+public interface CustomerService {
+    
+    CustomerDetailResponse createCustomer(CustomerCreateRequest request);
+
+    CustomerDetailResponse getCustomer(UUID id);
+
+    Slice<CustomerResponse> getCustomers(CustomerGetByFilter request);
+
+    Slice<CustomerNameResponse> searchProductNames(CustomerGetNameRequest request);
+
+    CustomerDetailResponse updateCustomer(UUID id, CustomerUpdateRequest request); 
+
+}
