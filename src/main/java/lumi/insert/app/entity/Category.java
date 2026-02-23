@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 
 @Entity(name = "categories")
@@ -30,6 +31,7 @@ public class Category extends TimestampAuditing {
     private String name;
 
     @OneToMany(mappedBy = "category")
+    @ToString.Exclude
     private List<Product> product;
 
     @Builder.Default

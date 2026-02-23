@@ -12,8 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.NoArgsConstructor; 
 import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 
 @Entity(name = "transaction_items")
@@ -21,8 +20,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@ToString(exclude = "transaction")
+@Builder 
 public class TransactionItem extends TimestampAuditing{
 
     @Id
@@ -38,11 +36,11 @@ public class TransactionItem extends TimestampAuditing{
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false, unique = true)
+    @JoinColumn(name = "product_id", nullable = false, unique = true) 
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id", nullable = false)
+    @JoinColumn(name = "transaction_id", nullable = false) 
     private Transaction transaction;
     
 
