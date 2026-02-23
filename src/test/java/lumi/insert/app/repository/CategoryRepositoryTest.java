@@ -13,11 +13,13 @@ import org.springframework.data.domain.Slice;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
 
 @DataJpaTest
 @Transactional
+@Slf4j
 public class CategoryRepositoryTest {
     
     @Autowired
@@ -76,7 +78,7 @@ public class CategoryRepositoryTest {
         entityManager.clear();
         
         Category foundCategory = categoryRepository.findById(savedCategory.getId()).orElseThrow();
-        
+        log.info("Found category: {}", foundCategory);
         List<Product> product = foundCategory.getProduct();
         assertEquals(1, product.size());
         assertEquals("NIKE Jordan Low 3", product.getFirst().getName());
