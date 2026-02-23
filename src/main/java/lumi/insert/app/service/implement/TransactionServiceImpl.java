@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionResponse;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
@@ -31,6 +32,8 @@ import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.TransactionValidationException;
+import lumi.insert.app.repository.CustomerRepository;
 import lumi.insert.app.repository.ProductRepository;
 import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
@@ -54,6 +57,9 @@ public class TransactionServiceImpl implements TransactionService{
     TransactionItemRepository transactionItemRepository;
 
     @Autowired
+    CustomerRepository customerRepository;
+
+    @Autowired
     InvoiceGenerator invoiceGenerator;
 
     @Autowired
@@ -61,8 +67,14 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
+        Customer customer = customerRepository.findById(request.getCustomerId())
+            .orElseThrow(() -> new NotFoundEntityException("Customer with ID " + request.getCustomerId() + " is not found"));
+
+        if(customer.getIsActive() == false) throw new TransactionValidationException("Customer with ID " + request.getCustomerId() + " is not active");
+
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceGenerator.generate())
+        .customer(customer)
         .build();
 
         log.info("{}", transaction);
@@ -88,6 +100,9 @@ public class TransactionServiceImpl implements TransactionService{
 
             if(request.getStatus() != null){
                 predicates.add(builder.equal(root.get("status"), request.getStatus()));
+            }
+            if(request.getCustomerId() != null){
+                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
             }
             if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
                 predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
