@@ -24,8 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.entity.AuthToken;
-import lumi.insert.app.exception.AuthenticationTokenException;
-import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.AuthenticationTokenException; 
 
 public class AuthTokenServiceTest extends BaseAuthTokenServiceTest{
     
@@ -133,7 +132,7 @@ public class AuthTokenServiceTest extends BaseAuthTokenServiceTest{
     void refreshAuthToken_invalidToken_throwNotGoundExc(){ 
         when(authTokenRepository.findByRefreshToken(setupAuthToken.getRefreshToken())).thenReturn(Optional.empty());   
 
-        assertThrows(NotFoundEntityException.class, () -> authTokenServiceMock.refreshAuthToken(setupAuthToken.getRefreshToken())); 
+        assertThrows(AuthenticationTokenException.class, () -> authTokenServiceMock.refreshAuthToken(setupAuthToken.getRefreshToken())); 
  
     }
 
