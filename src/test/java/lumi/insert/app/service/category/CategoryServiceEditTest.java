@@ -14,6 +14,7 @@ import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.BoilerplateRequestException;
+import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CategoryServiceEditTest extends BaseCategoryServiceTest {
@@ -61,6 +62,19 @@ public class CategoryServiceEditTest extends BaseCategoryServiceTest {
         .build();
 
         assertThrows(NotFoundEntityException.class, () -> categoryServiceMock.updateCategoryName(categoryEditRequest));
+    }
+
+    @Test
+    @DisplayName("Should throw DuplicateEntityException when request name is exists")
+    public void updateCategoryName_duplicateName_throwDuplicateEntityException(){
+        when(categoryRepositoryMock.existsByName("changedName")).thenReturn(true);
+
+        CategoryUpdateRequest categoryEditRequest = CategoryUpdateRequest.builder()
+        .id(1L)
+        .name("changedName")
+        .build();
+
+        assertThrows(DuplicateEntityException.class, () -> categoryServiceMock.updateCategoryName(categoryEditRequest));
     }
 
     @Test
