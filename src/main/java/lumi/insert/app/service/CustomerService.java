@@ -20,7 +20,7 @@ public interface CustomerService {
 
     Slice<CustomerResponse> getCustomers(CustomerGetByFilter request);
 
-    Slice<CustomerNameResponse> searchProductNames(CustomerGetNameRequest request);
+    Slice<CustomerNameResponse> searchCustomerNames(CustomerGetNameRequest request);
 
     CustomerDetailResponse updateCustomer(UUID id, CustomerUpdateRequest request); 
 
