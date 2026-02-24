@@ -60,7 +60,7 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
         .name("tes")
         .build();
 
-        Slice<CustomerNameResponse> customer = customerServiceMock.searchProductNames(request);
+        Slice<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
         assertEquals(1, customer.getNumberOfElements());
         assertEquals(setupCustomer.getName(), customer.getContent().getFirst().name());
         verify(customerRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
@@ -77,7 +77,7 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
         .name("tes")
         .build();
 
-        Slice<CustomerNameResponse> customer = customerServiceMock.searchProductNames(request);
+        Slice<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
         assertEquals(0, customer.getNumberOfElements());
         assertEquals(List.of(), customer.getContent());
         verify(customerRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
