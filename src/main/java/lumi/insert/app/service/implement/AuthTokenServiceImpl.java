@@ -17,8 +17,7 @@ import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.entity.AuthToken;
 import lumi.insert.app.entity.Employee;
-import lumi.insert.app.exception.AuthenticationTokenException; 
-import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.AuthenticationTokenException;  
 import lumi.insert.app.repository.AuthTokenRepository;
 import lumi.insert.app.repository.EmployeeRepository;
 import lumi.insert.app.service.AuthTokenService;
@@ -47,7 +46,7 @@ public class AuthTokenServiceImpl implements AuthTokenService{
     @Override
     public AuthTokenResponse createAuthToken(AuthTokenCreateRequest request) {
         Employee employee = employeeRepository.findByUsername(request.getUsername())
-            .orElseThrow(() -> new NotFoundEntityException("Employee with username " + request.getUsername() + " is not found"));
+            .orElseThrow(() -> new AuthenticationTokenException("Employee with username " + request.getUsername() + " is not found"));
         
         if(!employee.isActive()) throw new AccountExpiredException("Employee with username " + request.getUsername() + " is not active");    
 
