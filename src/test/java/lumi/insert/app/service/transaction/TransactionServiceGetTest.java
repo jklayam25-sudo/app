@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
@@ -56,7 +57,8 @@ public class TransactionServiceGetTest extends BaseTransactionServiceTest{
         .build();
 
         Page<Transaction> transactions = new PageImpl<>(List.of(mockTransaction));
-
+        when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
+        when(jpaSpecGenerator.transactionSpecification(any())).thenReturn(Specification.anyOf(List.of()));
         when(transactionRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(transactions);
 
         Slice<TransactionResponse> result = transactionServiceMock.searchTransactionsByRequests(TransactionGetByFilter.builder().build());

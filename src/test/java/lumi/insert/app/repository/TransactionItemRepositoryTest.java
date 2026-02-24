@@ -18,6 +18,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem; 
@@ -41,9 +42,14 @@ public class TransactionItemRepositoryTest {
     @Autowired 
     InvoiceGenerator invoiceGenerator;
 
-    @BeforeEach
-    public void setUp(){
+    @Autowired
+    CustomerRepository customerRepository;
 
+    Customer customer;
+
+    @BeforeEach
+    void setup(){ 
+        customer = customerRepository.save(Customer.builder().name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
     }
 
     @Test
@@ -53,6 +59,7 @@ public class TransactionItemRepositoryTest {
 
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceId)
+        .customer(customer)
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -84,6 +91,7 @@ public class TransactionItemRepositoryTest {
 
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceId)
+        .customer(customer)
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -124,6 +132,7 @@ public class TransactionItemRepositoryTest {
 
             Transaction transaction = Transaction.builder()
             .invoiceId(invoiceId)
+            .customer(customer)
             .build();
 
             Transaction savedTransaction = transactionRepository.save(transaction);

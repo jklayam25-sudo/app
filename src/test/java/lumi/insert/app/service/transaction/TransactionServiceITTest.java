@@ -3,6 +3,7 @@ package lumi.insert.app.service.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
  
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired; 
@@ -11,10 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.response.TransactionResponse;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.repository.CustomerRepository;
 import lumi.insert.app.repository.ProductRepository;
 import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
@@ -38,16 +41,27 @@ public class TransactionServiceITTest {
     TransactionService transactionService;
 
     @Autowired
+    CustomerRepository customerRepository;
+
+    @Autowired
     InvoiceGenerator invoiceGenerator;
 
     @Autowired
     EntityManager entityManager;
+
+    Customer customer;
+
+    @BeforeEach
+    void setup(){ 
+        customer = customerRepository.save(Customer.builder().name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
+    }
     
     @Test
     @DisplayName("Should return TransactionResponse DTO when set transaction.status to Process succeed")
     public void setTransactionToProcess_validRequest_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
             .invoiceId(invoiceGenerator.generate())
+            .customer(customer)
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
@@ -99,6 +113,7 @@ public class TransactionServiceITTest {
     public void refreshTransaction_validRequest_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
             .invoiceId(invoiceGenerator.generate())
+            .customer(customer)
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
@@ -151,6 +166,7 @@ public class TransactionServiceITTest {
             .invoiceId(invoiceGenerator.generate())
             .status(TransactionStatus.PROCESS)
             .totalPaid(4000L)
+            .customer(customer)
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -63,6 +64,8 @@ public class TransactionPaymentServiceGetTest extends BaseTransactionPaymentServ
     public void getTransactionPaymentsByRequest_validTrxId_returnSliceTransactionPaymentDTO(){
         setupTransactionPayment.setTotalPayment(1000L);
         Page<TransactionPayment> slices = new PageImpl<TransactionPayment>((List.of(setupTransactionPayment)));
+        when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
+        when(jpaSpecGenerator.transactionPaymentSpecification(any())).thenReturn(Specification.anyOf(List.of()));
         when(transactionPaymentRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
 
         Slice<TransactionPaymentResponse> result = transactionPaymentServiceMock.getTransactionPaymentsByRequests(TransactionPaymentGetByFilter.builder().build());

@@ -19,6 +19,7 @@ import lumi.insert.app.repository.ProductRepository;
 import lumi.insert.app.repository.TransactionRepository; 
 import lumi.insert.app.service.implement.TransactionServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
 import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
 
@@ -37,6 +38,9 @@ public abstract class BaseTransactionServiceTest {
 
     @Mock
     CustomerRepository customerRepositoryMock;
+
+    @Mock
+    JpaSpecGenerator jpaSpecGenerator;
 
     @Spy
     AllTransactionMapper allTransactionMapper = new AllTransactionMapperImpl();
