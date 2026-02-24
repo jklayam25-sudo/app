@@ -17,5 +17,9 @@ public class PaginationRequest {
 
     @Builder.Default
     private Integer size = 10;
+
+    String sortBy;
+
+    String sortDirection;
     
 }
