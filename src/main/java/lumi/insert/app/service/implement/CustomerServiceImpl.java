@@ -74,13 +74,15 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
-    public Slice<CustomerNameResponse> searchProductNames(CustomerGetNameRequest request) {
+    public Slice<CustomerNameResponse> searchCustomerNames(CustomerGetNameRequest request) {
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(Sort.by("name").descending());
         return customerRepository.getByNameContainingIgnoreCase(request.getName(), pageable);
     }
 
     @Override
     public CustomerDetailResponse updateCustomer(UUID id, CustomerUpdateRequest request) {
+        if(request.getName() != null && customerRepository.existsByName(request.getName())) throw new DuplicateEntityException("Customer with name " + request.getName() + " already exists");
+
         Customer customer = customerRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Customer with id " + id + " is not found"));
 
