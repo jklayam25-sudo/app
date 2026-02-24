@@ -10,15 +10,12 @@ import java.util.function.Function;
 
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
@@ -40,6 +37,7 @@ import lumi.insert.app.repository.TransactionRepository;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.service.TransactionService;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @Service
@@ -65,6 +63,9 @@ public class TransactionServiceImpl implements TransactionService{
     @Autowired
     AllTransactionMapper allTransactionMapper;
 
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
+
     @Override
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -85,35 +86,9 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public Slice<TransactionResponse> searchTransactionsByRequests(TransactionGetByFilter request) {
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
-
-        Specification<Transaction> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-
-            if(request.getStatus() != null){
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
-            }
-            if(request.getCustomerId() != null){
-                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
-            }
-            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
-                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-            } 
-            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
-            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
-            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
-            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
-
-            return builder.and(predicates);
-        }; 
+        Specification<Transaction> specification = jpaSpecGenerator.transactionSpecification(request);
 
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable);
 

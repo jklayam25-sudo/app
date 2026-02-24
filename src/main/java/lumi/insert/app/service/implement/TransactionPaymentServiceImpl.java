@@ -1,7 +1,5 @@
 package lumi.insert.app.service.implement;
-
-import java.util.ArrayList;
-import java.util.List;
+ 
 import java.util.UUID;
  
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +26,7 @@ import lumi.insert.app.exception.TransactionValidationException;
 import lumi.insert.app.repository.TransactionPaymentRepository;
 import lumi.insert.app.repository.TransactionRepository;
 import lumi.insert.app.service.TransactionPaymentService;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @Service
@@ -44,6 +42,9 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
 
     @Autowired
     AllTransactionMapper allTransactionMapper;
+
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
 
     @Override
     public TransactionPaymentResponse createTransactionPayment(UUID transactionId, TransactionPaymentCreateRequest request) {
@@ -92,26 +93,9 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
 
     @Override
     public Slice<TransactionPaymentResponse> getTransactionPaymentsByRequests(TransactionPaymentGetByFilter request) {
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
-
-        Specification<TransactionPayment> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if(request.getTransactionId() != null) predicates.add(builder.equal(root.get("transaction").get("id"), request.getTransactionId()));
-            if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-
-            predicates.add(builder.between(root.get("totalPayment"), request.getMinTotalPayment(), request.getMaxTotalPayment()));
-
-            return builder.and(predicates);
-        };
+        Specification<TransactionPayment> specification = jpaSpecGenerator.transactionPaymentSpecification(request);
 
         Slice<TransactionPayment> transactionPayments = transactionPaymentRepository.findAll(specification, pageable);
         Slice<TransactionPaymentResponse> result = transactionPayments.map(allTransactionMapper::createTransactionPaymentResponseDto);

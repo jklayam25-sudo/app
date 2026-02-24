@@ -1,7 +1,5 @@
 package lumi.insert.app.service.implement;
-
-import java.util.ArrayList;
-import java.util.List;
+ 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +8,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
@@ -30,6 +27,7 @@ import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.CategoryRepository;
 import lumi.insert.app.repository.ProductRepository; 
 import lumi.insert.app.service.ProductService;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.ProductMapper;
 
 @Service
@@ -44,6 +42,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     ProductMapper productMapper;
+
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
 
     @Override
     public ProductResponse createProduct(ProductCreateRequest request) {
@@ -160,32 +161,11 @@ public class ProductServiceImpl implements ProductService {
             throw new NotFoundEntityException("Category with ID " + request.getCategoryId() + " was not found");
         }
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
+        Specification<Product> productSpecification = jpaSpecGenerator.productSpecification(request);
 
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
-
-        Specification<Product> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-
-            if(request.getCategoryId() != null){
-                predicates.add(builder.equal(root.get("category").get("id"), request.getCategoryId()));
-            }
-            if (request.getName() != null) {
-                predicates.add(builder.like(builder.lower(root.get("name")), "%" + request.getName() + "%"));
-            }
-            predicates.add(builder.isTrue(root.get("isActive")));
-            predicates.add(builder.between(root.get("sellPrice"), request.getMinPrice(), request.getMaxPrice()));
-
-            return builder.and(predicates);
-        }; 
-
-        Slice<Product> result = productRepository.findAll(specification, pageable);
+        Slice<Product> result = productRepository.findAll(productSpecification, pageable);
         Slice<ProductResponse> resultMap = result.map(productMapper::createDtoResponseFromProduct);;
         return resultMap;
     }
