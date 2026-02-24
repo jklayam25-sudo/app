@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalDateTime; 
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,14 +16,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.dao.DataIntegrityViolationException; 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;  
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
@@ -32,10 +29,12 @@ import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
 @DataJpaTest
 @Transactional
 @Slf4j
+@Import(JpaSpecGenerator.class)
 public class TransactionRepositoryTest {
     
     @Autowired
@@ -43,6 +42,9 @@ public class TransactionRepositoryTest {
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
 
     InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
 
@@ -146,38 +148,10 @@ public class TransactionRepositoryTest {
         .status(TransactionStatus.CANCELLED)
         .build();
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
-
-        Specification<Transaction> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-
-            if(request.getStatus() != null){
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
-            }
-            if(request.getCustomerId() != null){
-                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
-            }
-            
-            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
-                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-            }
-           
-            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
-            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
-            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
-            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
-
-            return builder.and(predicates);
-        }; 
-
+        Specification<Transaction> specification = jpaSpecGenerator.transactionSpecification(request);
+         
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable);
         assertEquals(1, transactions.getNumberOfElements());
         assertEquals(TransactionStatus.CANCELLED, transactions.getContent().getFirst().getStatus());
@@ -224,36 +198,9 @@ public class TransactionRepositoryTest {
         .maxCreatedAt(LocalDateTime.of(2027, 1, 10, 10, 10))
         .build();
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
-
-        Specification<Transaction> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-
-            if(request.getStatus() != null){
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
-            }
-            if(request.getCustomerId() != null){
-                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
-            }
-            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
-                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-            }
-           
-            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
-            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
-            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
-            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
-
-            return builder.and(predicates);
-        }; 
+        Specification<Transaction> specification = jpaSpecGenerator.transactionSpecification(request);
 
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable);
         log.info("haleak, {}" + transactions.getContent().getFirst().getCreatedAt());
@@ -296,36 +243,9 @@ public class TransactionRepositoryTest {
         .customerId(setupCustomer.getId())
         .build();
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
-
-        Specification<Transaction> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-
-            if(request.getStatus() != null){
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
-            }
-            if(request.getCustomerId() != null){
-                predicates.add(builder.equal(root.get("customer").get("id"), request.getCustomerId()));
-            }
-            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
-                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-            }
-           
-            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
-            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
-            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
-            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
-
-            return builder.and(predicates);
-        }; 
+        Specification<Transaction> specification = jpaSpecGenerator.transactionSpecification(request);
 
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable); 
         assertEquals(1, transactions.getNumberOfElements());

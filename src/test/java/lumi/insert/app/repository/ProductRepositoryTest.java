@@ -16,24 +16,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
 @DataJpaTest
 @Transactional
 @Slf4j
+@Import(JpaSpecGenerator.class)
 public class ProductRepositoryTest {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
 
     @Test
     public void testSaveProduct() {
@@ -205,18 +211,19 @@ public class ProductRepositoryTest {
 
             productRepository.save(dumpProduct);
         }
+        ProductGetByFilter request = ProductGetByFilter.builder()
+        .size(5)
+        .sortBy("sellPrice")
+        .sortDirection("ASC")
+        .name("pro")
+        .minPrice(0L)
+        .maxPrice(5000L)
+        .build();
 
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("sellPrice").ascending());
-
-        Specification<Product> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<Predicate>();
-            predicates.add(builder.like(builder.lower(root.get("name")), "%" + "pro" + "%"));
-            predicates.add(builder.between(root.get("sellPrice"), 0L, 5000L));
-
-            return builder.and(predicates);
-        }; 
-
-       Slice<Product> result = productRepository.findAll(specification, pageable);
+        Pageable pageable = jpaSpecGenerator.pageable(request);
+        Specification<Product> specification = jpaSpecGenerator.productSpecification(request);
+ 
+        Slice<Product> result = productRepository.findAll(specification, pageable);
 
         System.out.println(result.getContent());
         assertEquals(4, result.getNumberOfElements());

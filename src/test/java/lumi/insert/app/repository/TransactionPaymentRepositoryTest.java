@@ -3,8 +3,7 @@ package lumi.insert.app.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
- 
-import java.util.ArrayList;
+  
 import java.util.List;
 import java.util.UUID;
 
@@ -19,17 +18,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
-import jakarta.persistence.criteria.Predicate;
+ 
 import jakarta.transaction.Transactional; 
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Transaction; 
 import lumi.insert.app.entity.TransactionPayment; 
 import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
 @DataJpaTest
 @Transactional
-@Import(InvoiceGenerator.class)
+@Import({InvoiceGenerator.class, JpaSpecGenerator.class}) 
 public class TransactionPaymentRepositoryTest {
 
     @Autowired
@@ -38,13 +38,22 @@ public class TransactionPaymentRepositoryTest {
     @Autowired
     TransactionPaymentRepository transactionPaymentRepository; 
 
+    @Autowired
+    CustomerRepository customerRepository;
+
     @Autowired 
     InvoiceGenerator invoiceGenerator;
 
-    @BeforeEach
-    public void setUp(){
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
 
+    Customer customer;
+
+    @BeforeEach
+    void setup(){
+        customer = customerRepository.save(Customer.builder().name("Test").contact("test").shippingAddress("test").build());
     }
+ 
 
     @Test
     @DisplayName("Should add transaction_items entity to database when base field < invoiceId required is valid")
@@ -53,6 +62,7 @@ public class TransactionPaymentRepositoryTest {
 
         Transaction transaction = Transaction.builder()
         .invoiceId(invoiceId)
+        .customer(customer)
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -78,6 +88,7 @@ public class TransactionPaymentRepositoryTest {
 
             Transaction transaction = Transaction.builder()
             .invoiceId(invoiceId)
+            .customer(customer)
             .build();
 
             Transaction savedTransaction = transactionRepository.save(transaction);
@@ -116,6 +127,7 @@ public class TransactionPaymentRepositoryTest {
 
         Transaction transaction = Transaction.builder()
             .invoiceId(invoiceId)
+            .customer(customer)
             .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -141,26 +153,9 @@ public class TransactionPaymentRepositoryTest {
         .maxTotalPayment(2000L)
         .build();
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
-
-        Specification<TransactionPayment> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if(request.getTransactionId() != null) predicates.add(builder.equal(root.get("transaction").get("id"), request.getTransactionId()));
-            if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-
-            predicates.add(builder.between(root.get("totalPayment"), request.getMinTotalPayment(), request.getMaxTotalPayment()));
-
-            return builder.and(predicates);
-        };
+        Specification<TransactionPayment> specification = jpaSpecGenerator.transactionPaymentSpecification(request);
 
         Slice<TransactionPayment> transactionPayments = transactionPaymentRepository.findAll(specification, pageable);
         assertEquals(1, transactionPayments.getNumberOfElements());
@@ -174,10 +169,12 @@ public class TransactionPaymentRepositoryTest {
 
         Transaction transactionA = Transaction.builder()
             .invoiceId(invoiceIdA)
+            .customer(customer)
             .build();
 
         Transaction transactionB = Transaction.builder()
             .invoiceId(invoiceGenerator.generate())
+            .customer(customer)
             .build();
 
         List<Transaction> savedTransaction = transactionRepository.saveAllAndFlush(List.of(transactionA, transactionB));
@@ -204,26 +201,9 @@ public class TransactionPaymentRepositoryTest {
         .transactionId(savedTransaction.getLast().getId())
         .build();
 
-        Sort sort = Sort.by(request.getSortBy());
+        Pageable pageable = jpaSpecGenerator.pageable(request);
 
-        if(request.getSortDirection().equalsIgnoreCase("DESC")){
-            sort = sort.descending();
-        } else {
-            sort = sort.ascending();
-        }
-
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
-
-        Specification<TransactionPayment> specification = (root, criteria, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if(request.getTransactionId() != null) predicates.add(builder.equal(root.get("transaction").get("id"), request.getTransactionId()));
-            if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
-
-            predicates.add(builder.between(root.get("totalPayment"), request.getMinTotalPayment(), request.getMaxTotalPayment()));
-
-            return builder.and(predicates);
-        };
+        Specification<TransactionPayment> specification = jpaSpecGenerator.transactionPaymentSpecification(request);
 
         Slice<TransactionPayment> transactionPayments = transactionPaymentRepository.findAll(specification, pageable);
         assertEquals(1, transactionPayments.getNumberOfElements());
