@@ -1,25 +1,33 @@
 package lumi.insert.app.repository;
 
 import java.time.LocalDateTime;
-import java.util.List; 
+import java.util.UUID;
 
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import lumi.insert.app.dto.response.MemoResponse;
 import lumi.insert.app.entity.Memo; 
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 @Repository
 public interface MemoRepository extends JpaRepository<Memo, Long>{
      
-    @Query("SELECT m FROM memos m WHERE m.isActive = true " +
-        "AND (m.role = :role OR m.role IS NULL) " +
-        "AND m.updatedAt > :time ORDER BY m.updatedAt ASC")
-    List<Memo> findActiveMemosByRoleOrPublic(@Param("role") EmployeeRole role, 
-                                         @Param("time") LocalDateTime time);
+    @Query("SELECT m.id as id, m.title as title, m.body as body, m.images as images, m.role as role, " + 
+       "(CASE WHEN mv.id IS NULL THEN false ELSE true END) as isRead " + 
+       "FROM memos m " + 
+       "LEFT JOIN memo_views mv ON mv.memo = m AND mv.employee.id = :employeeId " + 
+       "WHERE m.isActive = true " +
+       "AND (m.role = :role OR m.role IS NULL) " +
+       "AND m.updatedAt > :time ORDER BY m.updatedAt ASC") 
+    Slice<MemoResponse> findActiveMemosByRoleOrPublic(
+                                            @Param("employeeId") UUID id,
+                                            @Param("role") EmployeeRole role, 
+                                            @Param("time") LocalDateTime time);
 
     @Modifying
     @Query("UPDATE memos m SET m.isActive = false WHERE m.id = :id")
