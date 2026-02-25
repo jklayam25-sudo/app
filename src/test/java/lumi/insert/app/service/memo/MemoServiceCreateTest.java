@@ -1,0 +1,77 @@
+package lumi.insert.app.service.memo;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+ 
+import org.junit.jupiter.api.Test;
+
+import jakarta.validation.ConstraintViolationException;
+import lumi.insert.app.dto.request.MemoCreateRequest;
+import lumi.insert.app.dto.response.MemoResponse;
+import lumi.insert.app.entity.Employee;
+import lumi.insert.app.entity.Memo;
+import lumi.insert.app.entity.MemoView;
+
+public class MemoServiceCreateTest extends BaseMemoServiceTest{
+    
+    @Test
+    void createMemo_validRequest_returnDTO(){
+        MemoCreateRequest request = MemoCreateRequest.builder()
+        .title("Test Title")
+        .body("Body Title")
+        .build();
+
+        when(memoRepository.save(any(Memo.class))).thenAnswer(arg -> arg.getArgument(0));
+
+        MemoResponse memo = memoService.createMemo(request);
+        assertEquals(request.getBody(), memo.body());
+        assertNull(memo.isRead());
+
+        verify(memoRepository, times(1)).save(argThat(arg -> arg.getTitle().equals(request.getTitle())));
+    }
+
+    @Test
+    void createMemoView_validRequest_returnTrue(){
+        UUID employeeId = UUID.randomUUID();
+
+        Employee employee = new Employee(); 
+        employee.setId(employeeId);
+  
+        Memo memo = new Memo();
+        memo.setId(1L);
+
+        when(memoRepository.getReferenceById(any())).thenReturn(memo);
+        when(employeeRepository.getReferenceById(any())).thenReturn(employee);
+        when(memoViewRepository.save(any(MemoView.class))).thenAnswer(arg -> arg.getArgument(0));
+ 
+        assertTrue(memoService.createMemoView(1L, employeeId));
+        verify(memoViewRepository, times(1)).save(argThat(arg-> arg.getId().equals("1" + employeeId)));
+    }
+
+    @Test
+    void createMemoView_invalidRequest_returnFalse(){
+        UUID employeeId = UUID.randomUUID();
+
+        Employee employee = new Employee(); 
+        employee.setId(employeeId);
+  
+        Memo memo = new Memo();
+        memo.setId(1L);
+
+        when(memoRepository.getReferenceById(any())).thenReturn(memo);
+        when(employeeRepository.getReferenceById(any())).thenReturn(employee);
+        when(memoViewRepository.save(any(MemoView.class))).thenThrow(new ConstraintViolationException("", null));
+ 
+        assertFalse(memoService.createMemoView(1L, employeeId));
+        
+    }
+}
