@@ -18,8 +18,10 @@ public class PaginationRequest {
     @Builder.Default
     private Integer size = 10;
 
-    String sortBy;
+    @Builder.Default
+    String sortBy = "createdAt";
 
-    String sortDirection;
+    @Builder.Default
+    String sortDirection ="DESC";
     
 }
