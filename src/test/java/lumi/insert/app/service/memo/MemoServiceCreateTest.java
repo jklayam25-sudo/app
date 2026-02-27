@@ -20,6 +20,8 @@ import lumi.insert.app.dto.response.MemoResponse;
 import lumi.insert.app.entity.Employee;
 import lumi.insert.app.entity.Memo;
 import lumi.insert.app.entity.MemoView;
+import lumi.insert.app.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 public class MemoServiceCreateTest extends BaseMemoServiceTest{
     
@@ -28,6 +30,7 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
         MemoCreateRequest request = MemoCreateRequest.builder()
         .title("Test Title")
         .body("Body Title")
+        .role("FINANCE")
         .build();
 
         when(memoRepository.save(any(Memo.class))).thenAnswer(arg -> arg.getArgument(0));
@@ -36,7 +39,7 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
         assertEquals(request.getBody(), memo.body());
         assertNull(memo.isRead());
 
-        verify(memoRepository, times(1)).save(argThat(arg -> arg.getTitle().equals(request.getTitle())));
+        verify(memoRepository, times(1)).save(argThat(arg -> arg.getTitle().equals(request.getTitle())  && arg.getRole().equals(EmployeeRole.FINANCE)));
     }
 
     @Test
@@ -49,11 +52,17 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
         Memo memo = new Memo();
         memo.setId(1L);
 
+        EmployeeLogin login = EmployeeLogin.builder()
+        .id(employeeId)
+        .role(EmployeeRole.CASHIER)
+        .username("Employee A")
+        .build();
+
         when(memoRepository.getReferenceById(any())).thenReturn(memo);
         when(employeeRepository.getReferenceById(any())).thenReturn(employee);
         when(memoViewRepository.save(any(MemoView.class))).thenAnswer(arg -> arg.getArgument(0));
  
-        assertTrue(memoService.createMemoView(1L, employeeId));
+        assertTrue(memoService.createMemoView(login, 1L));
         verify(memoViewRepository, times(1)).save(argThat(arg-> arg.getId().equals("1" + employeeId)));
     }
 
@@ -67,11 +76,17 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
         Memo memo = new Memo();
         memo.setId(1L);
 
+        EmployeeLogin login = EmployeeLogin.builder()
+        .id(employeeId)
+        .role(EmployeeRole.CASHIER)
+        .username("Employee A")
+        .build();
+
         when(memoRepository.getReferenceById(any())).thenReturn(memo);
         when(employeeRepository.getReferenceById(any())).thenReturn(employee);
         when(memoViewRepository.save(any(MemoView.class))).thenThrow(new ConstraintViolationException("", null));
  
-        assertFalse(memoService.createMemoView(1L, employeeId));
+        assertFalse(memoService.createMemoView(login, 1L));
         
     }
 }

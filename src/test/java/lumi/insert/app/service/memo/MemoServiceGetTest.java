@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.SliceImpl;
 
 import lumi.insert.app.dto.response.MemoResponse;
 import lumi.insert.app.entity.Memo;
+import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
 
@@ -53,22 +57,34 @@ public class MemoServiceGetTest extends BaseMemoServiceTest{
         .build();
 
         Slice<MemoResponse> slices = new SliceImpl<>(List.of(memoResponse));
+        EmployeeLogin login = EmployeeLogin.builder()
+        .id(UUID.randomUUID())
+        .role(EmployeeRole.CASHIER)
+        .username("Employee A")
+        .build();
+
         when(memoRepository.findActiveMemosByRoleOrPublic(any(UUID.class), any(EmployeeRole.class), any())).thenReturn(slices);
     
-        Slice<MemoResponse> memos = memoService.getMemos(UUID.randomUUID(), EmployeeRole.CASHIER, LocalDateTime.now());;
+        Slice<MemoResponse> memos = memoService.getMemos(login, LocalDateTime.now());
 
         assertEquals(1, memos.getNumberOfElements());
 
         assertTrue(memos.getContent().getFirst().isRead());
+        verify(memoRepository, times(1)).findActiveMemosByRoleOrPublic(eq(login.getId()), eq(login.getRole()), any(LocalDateTime.class));
     }
 
     @Test
     void getMemos_notFoundEntity_returnSliceDTO(){  
+        EmployeeLogin login = EmployeeLogin.builder()
+        .id(UUID.randomUUID())
+        .role(EmployeeRole.CASHIER)
+        .username("Employee A")
+        .build();
 
         Slice<MemoResponse> slices = new SliceImpl<>(List.of());
         when(memoRepository.findActiveMemosByRoleOrPublic(any(UUID.class), any(EmployeeRole.class), any())).thenReturn(slices);
     
-        Slice<MemoResponse> memos = memoService.getMemos(UUID.randomUUID(), EmployeeRole.CASHIER, LocalDateTime.now());;
+        Slice<MemoResponse> memos = memoService.getMemos(login, LocalDateTime.now());
 
         assertEquals(0, memos.getNumberOfElements());
 

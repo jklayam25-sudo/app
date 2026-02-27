@@ -1,7 +1,6 @@
 package lumi.insert.app.service.memo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals; 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.MemoUpdateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
 import lumi.insert.app.entity.Memo;
+import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class MemoServiceEditTest extends BaseMemoServiceTest{
@@ -24,20 +24,24 @@ public class MemoServiceEditTest extends BaseMemoServiceTest{
         Memo memo = Memo.builder()
         .id(1L)
         .body("Lorem Ipsum")
+        .role(EmployeeRole.FINANCE)
         .build();
 
         when(memoRepository.findById(1L)).thenReturn(Optional.of(memo));
         
         MemoUpdateRequest request = MemoUpdateRequest.builder()
         .body("revised")
+        .role("OWNER")
         .build();
 
         MemoResponse updateMemo = memoService.updateMemo(1L, request);
         assertEquals(request.getBody(), updateMemo.body());
+        assertEquals(EmployeeRole.OWNER, updateMemo.role());
         assertEquals(1L, updateMemo.id());
 
         verify(memoViewRepository, times(1)).deleteMemoView(1L);
     }
+
 
     @Test
     void updateMemo_notFound_throwNotFound(){ 
