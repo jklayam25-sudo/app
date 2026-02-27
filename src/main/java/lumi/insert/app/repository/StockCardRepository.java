@@ -6,13 +6,14 @@ import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import lumi.insert.app.dto.response.StockCardResponse;
 import lumi.insert.app.entity.StockCard; 
 
-public interface StockCardRepository extends JpaRepository<StockCard, UUID>{
+public interface StockCardRepository extends JpaRepository<StockCard, UUID>, JpaSpecificationExecutor<StockCard>{
     
     @Query("SELECT s.id as id, s.referenceId as referenceId, s.product.id as productId, s.productName as productName, s.quantity as quantity, s.oldStock as oldStock, s.newStock as newStock, s.basePrice as basePrice, s.type as type, s.description as description, s.createdAt as createdAt " + 
         "FROM stock_cards s WHERE " +
