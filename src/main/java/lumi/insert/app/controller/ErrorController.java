@@ -1,5 +1,7 @@
 package lumi.insert.app.controller;
 
+import java.nio.file.AccessDeniedException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import com.auth0.jwt.exceptions.JWTVerificationException;
 
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.exception.AuthenticationTokenException;
@@ -181,6 +185,38 @@ public class ErrorController {
         ResponseEntity<WebResponse<String>> response = ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
         .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<WebResponse<String>> jwtVerificationException(JWTVerificationException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors("Access token invalid, try to login again")
+        .build();
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
+        .maxAge(0)
+        .path("/")
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .body(webResponse);
+
+        return response;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<WebResponse<String>> accessDeniedException(AccessDeniedException exception){
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+        .errors(exception.getLocalizedMessage())
+        .build();
+
+        ResponseEntity<WebResponse<String>> response = ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
         .body(webResponse);
 
         return response;
