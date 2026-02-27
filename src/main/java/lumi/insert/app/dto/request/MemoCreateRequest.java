@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,4 +19,7 @@ public class MemoCreateRequest {
     String body;
 
     List<MultipartFile> images;
+
+    @Pattern(regexp = "FINANCE|CASHIER|WAREHOUSE|OWNER", message = "check documentation for role specification")
+    private String role;
 }
