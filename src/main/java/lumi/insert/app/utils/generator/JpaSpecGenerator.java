@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
+import lumi.insert.app.dto.request.StockCardGetByFilter;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.StockCard;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionPayment;
 
@@ -110,6 +112,20 @@ public class JpaSpecGenerator {
             if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
 
             predicates.add(builder.between(root.get("totalPayment"), request.getMinTotalPayment(), request.getMaxTotalPayment()));
+
+            return builder.and(predicates);
+        };
+        return specification;
+    }
+
+    public Specification<StockCard> stockCardSpecification(StockCardGetByFilter request){
+        Specification<StockCard> specification = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
+            if(request.getProductId() != null) predicates.add(builder.equal(root.get("product").get("id"), request.getProductId()));
+            if(request.getType() != null) predicates.add(builder.equal(root.get("type"), request.getType()));
+            if(request.getLastId() != null) predicates.add(builder.greaterThan(root.get("id"), request.getLastId())); 
 
             return builder.and(predicates);
         };
