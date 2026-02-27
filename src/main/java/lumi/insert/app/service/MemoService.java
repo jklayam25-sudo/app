@@ -1,14 +1,13 @@
 package lumi.insert.app.service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.LocalDateTime; 
 
 import org.springframework.data.domain.Slice;
 
 import lumi.insert.app.dto.request.MemoCreateRequest;
 import lumi.insert.app.dto.request.MemoUpdateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.entity.nondatabase.EmployeeLogin; 
 
 public interface MemoService {
     MemoResponse createMemo(MemoCreateRequest request);
@@ -19,7 +18,7 @@ public interface MemoService {
 
     MemoResponse getMemo(Long id);
 
-    Slice<MemoResponse> getMemos(UUID employeeId, EmployeeRole role, LocalDateTime time);
+    Slice<MemoResponse> getMemos(EmployeeLogin login, LocalDateTime time);
 
-    Boolean createMemoView(Long id, UUID employeeId);
+    Boolean createMemoView(EmployeeLogin login, Long id);
 }

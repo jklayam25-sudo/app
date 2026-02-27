@@ -1,10 +1,9 @@
 package lumi.insert.app.service.implement;
 
-import java.time.LocalDateTime; 
-import java.util.UUID;
+import java.time.LocalDateTime;  
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Slice;
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.data.domain.Slice; 
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import lumi.insert.app.dto.response.MemoResponse;
 import lumi.insert.app.entity.Employee;
 import lumi.insert.app.entity.Memo;
 import lumi.insert.app.entity.MemoView;
+import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.EmployeeRepository;
@@ -45,6 +45,7 @@ public class MemoServiceImpl implements MemoService{
         .body(request.getBody())
         .build();
 
+        if(request.getRole() != null) memo.setRole(EmployeeRole.valueOf(request.getRole()));
         Memo savedMemo = memoRepository.save(memo);
 
         if(!(request.getImages() == null)){
@@ -69,7 +70,7 @@ public class MemoServiceImpl implements MemoService{
     @Override
     public MemoResponse archiveMemo(Long id) {
         Memo memo = memoRepository.findById(id)
-            .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " was not found"));
+            .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " is not found"));
 
         memo.setIsActive(false);
         return mapper.createDtoResponseFromMemo(memo);
@@ -78,21 +79,21 @@ public class MemoServiceImpl implements MemoService{
     @Override
     public MemoResponse getMemo(Long id) {
         Memo memo = memoRepository.findById(id)
-            .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " was not found"));
+            .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " is not found"));
  
         return mapper.createDtoResponseFromMemo(memo);
     }
 
     @Override
-    public Slice<MemoResponse> getMemos(UUID employeeId, EmployeeRole role, LocalDateTime time) {
-        return memoRepository.findActiveMemosByRoleOrPublic(employeeId, role, time);
+    public Slice<MemoResponse> getMemos(EmployeeLogin login, LocalDateTime time) { 
+        return memoRepository.findActiveMemosByRoleOrPublic(login.getId(), login.getRole(), time);
     }
 
     @Override
-    public Boolean createMemoView(Long id, UUID employeeId) {
+    public Boolean createMemoView(EmployeeLogin login, Long id) {
         try {
             Memo memo = memoRepository.getReferenceById(id);
-            Employee employee = employeeRepository.getReferenceById(employeeId);
+            Employee employee = employeeRepository.getReferenceById(login.getId());
             MemoView memoView = new MemoView(memo, employee);
             memoViewRepository.save(memoView);
             return true;
