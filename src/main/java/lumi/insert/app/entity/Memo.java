@@ -1,5 +1,7 @@
 package lumi.insert.app.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,7 +36,7 @@ public class Memo extends TimestampAuditing{
     private String body;
 
     @Column(nullable = true)
-    private String[] images;
+    private List<String> images;
 
     @Builder.Default
     private Boolean isActive = true;
