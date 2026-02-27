@@ -26,6 +26,7 @@ public class JwtUtils {
         String accessToken = JWT.create()
         .withIssuer(issuer)
         .withIssuedAt(Instant.now())
+        .withClaim("id", employee.getId().toString())
         .withClaim("username", employee.getUsername())
         .withClaim("role", employee.getRole().toString()) 
         .withExpiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
