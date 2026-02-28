@@ -24,5 +24,7 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID>, Jpa
                                         @Param("maxTime") LocalDateTime maxTime, 
                                         @Param("lastId") UUID lastId, 
                                         Pageable pageable);
+
+    Slice<StockCard> findAllByReferenceId(UUID refId);
  
 }
