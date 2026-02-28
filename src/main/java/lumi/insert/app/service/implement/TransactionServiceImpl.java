@@ -1,9 +1,9 @@
 package lumi.insert.app.service.implement;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Map; 
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function; 
@@ -23,8 +23,10 @@ import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.StockCard;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
+import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
@@ -32,6 +34,7 @@ import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 import lumi.insert.app.repository.CustomerRepository;
 import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.StockCardRepository;
 import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
@@ -56,6 +59,9 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    StockCardRepository stockCardRepository;
 
     @Autowired
     InvoiceGenerator invoiceGenerator;
@@ -113,8 +119,13 @@ public class TransactionServiceImpl implements TransactionService{
         Map<Long, Product> productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
 
         Set<UUID> listOfOutStockAndRemovedProduct = new HashSet<>();
+
+        List<StockCard> stockCards = new ArrayList<>();
+
         transactionItems.forEach(item -> {
             Product updatedProduct = productMap.get(item.getProduct().getId()); 
+
+            Long oldStock = updatedProduct.getStockQuantity();
 
             if(updatedProduct == null || updatedProduct.getStockQuantity() == 0) {
                 listOfOutStockAndRemovedProduct.add(item.getId());
@@ -129,12 +140,28 @@ public class TransactionServiceImpl implements TransactionService{
                 item.setQuantity(updatedProduct.getStockQuantity());
             }
             updatedProduct.setStockQuantity(updatedProduct.getStockQuantity()-item.getQuantity());
+
+            StockCard stockCard = StockCard.builder()
+                .referenceId(item.getId())
+                .product(updatedProduct)
+                .productName(updatedProduct.getName())
+                .quantity(-item.getQuantity())
+                .oldStock(oldStock)
+                .newStock(updatedProduct.getStockQuantity())
+                .type(StockMove.SALE)
+                .basePrice(updatedProduct.getBasePrice())
+                .description("Product sale(OUT)")
+                .build();
+
+            stockCards.add(stockCard);
         }); 
 
         if (listOfOutStockAndRemovedProduct.size() != 0) {
             transactionItemRepository.deleteAllByIdInBatch(listOfOutStockAndRemovedProduct);
             transactionItems.removeIf(item -> listOfOutStockAndRemovedProduct.contains(item.getId()));
         }
+
+        stockCardRepository.saveAll(stockCards);
         searchedTransaction.setTotalItems(Long.valueOf(transactionItems.size()));
         searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
         searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
@@ -168,14 +195,76 @@ public class TransactionServiceImpl implements TransactionService{
         List<Product> listProductFromTrxItemsUpdated = productRepository.findAllById(listProductIdFromTrxItems);
 
         Map<Long, Product> productMap = listProductFromTrxItemsUpdated.stream().collect(Collectors.toMap(Product::getId, Function.identity()));
+ 
+        Map<Long, List<TransactionItem>> listRefunded = transactionItems.stream().filter(item -> item.getQuantity() < 0).collect(Collectors.groupingBy(
+            item -> item.getProduct().getId()));
+
+        List<StockCard> stockCards = new ArrayList<>();
+
+        List<TransactionItem> toRefundItems = new ArrayList<>();
 
         for(TransactionItem item: transactionItems){
+            if(item.getQuantity() < 0) { 
+                continue;
+            }; 
+
+            List<TransactionItem> transactionItem = listRefunded.get(item.getProduct().getId());
+
             Product product = productMap.get(item.getProduct().getId());
             if(product == null) continue;
 
-            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+            Long cancelledQuantity;
+
+            if(transactionItem != null){
+                Long totalRefund = transactionItem.stream().mapToLong(reduce -> reduce.getQuantity()).sum();
+
+                TransactionItem reverseItem = TransactionItem.builder()
+                .price(item.getPrice())
+                .quantity(-(item.getQuantity() + totalRefund))
+                .description("CANCELLED: " + product.getName())
+                .product(product)
+                .transaction(searchedTransaction)
+                .build();
+
+                cancelledQuantity = item.getQuantity() + totalRefund;
+
+                toRefundItems.add(reverseItem);
+            } else {
+                TransactionItem reverseItem = TransactionItem.builder()
+                .price(item.getPrice())
+                .quantity(-(item.getQuantity()))
+                .description("CANCELLED: " + product.getName())
+                .product(product)
+                .transaction(searchedTransaction)
+                .build();
+
+                cancelledQuantity = item.getQuantity();
+                toRefundItems.add(reverseItem);
+            }
+
+            Long oldStock = product.getStockQuantity();
+
+            product.setStockQuantity(product.getStockQuantity() + cancelledQuantity);
+
+            StockCard stockCard = StockCard.builder()
+                .referenceId(item.getId())
+                .product(product)
+                .productName(product.getName())
+                .quantity(cancelledQuantity)
+                .oldStock(oldStock)
+                .newStock(product.getStockQuantity())
+                .type(StockMove.CUSTOMER_IN)
+                .basePrice(product.getBasePrice())
+                .description("Transaction Cancelled, Product refunded. Status: CUSTOMER_IN(IN)")
+                .build();
+            log.info("{}", stockCard);
+            stockCards.add(stockCard);
         }
-        searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid());
+
+        transactionItemRepository.saveAll(toRefundItems);
+        stockCardRepository.saveAll(stockCards);
+
+        searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid() - searchedTransaction.getTotalRefunded());
         searchedTransaction.setTotalUnpaid(0L);
         searchedTransaction.setTotalPaid(0L); 
         searchedTransaction.setStatus(TransactionStatus.CANCELLED);
