@@ -17,13 +17,16 @@ import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
 import lumi.insert.app.dto.response.TransactionItemResponse;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.StockCard;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
+import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.StockCardRepository;
 import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
 import lumi.insert.app.service.TransactionItemService;
@@ -42,6 +45,9 @@ public class TransactionItemServiceImpl implements TransactionItemService{
 
     @Autowired
     TransactionItemRepository transactionItemRepository;
+
+    @Autowired
+    StockCardRepository stockCardRepository;
 
     @Autowired
     AllTransactionMapper allTransactionMapper;
@@ -150,6 +156,8 @@ public class TransactionItemServiceImpl implements TransactionItemService{
 
         Product product = transactionItem.getProduct();
 
+        Long oldStock = product.getStockQuantity();
+
         product.setStockQuantity(product.getStockQuantity() + quantity);
 
         Long customerRefund = quantity * transactionItem.getPrice();
@@ -163,13 +171,27 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         }
 
         TransactionItem refundTransactionItem = TransactionItem.builder()
-        .price(transactionItem.getPrice())
-        .quantity(-quantity)
-        .description("REFUND: " + product.getName())
-        .product(product)
-        .transaction(transaction)
-        .build();
+            .price(transactionItem.getPrice())
+            .quantity(-quantity)
+            .description("REFUND: " + product.getName())
+            .product(product)
+            .transaction(transaction)
+            .build();
 
+        StockCard stockCard = StockCard.builder()
+            .referenceId(transaction.getId())
+            .product(product)
+            .productName(product.getName())
+            .quantity(quantity)
+            .oldStock(oldStock)
+            .newStock(product.getStockQuantity())
+            .type(StockMove.CUSTOMER_IN)
+            .basePrice(product.getBasePrice())
+            .description("Transaction Cancelled, Product refunded. Status: CUSTOMER_IN(IN)")
+            .build();
+
+        stockCardRepository.save(stockCard);
+        
         TransactionItem savedRefundTransactionItem = transactionItemRepository.save(refundTransactionItem);
         TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(savedRefundTransactionItem);
         return transactionItemResponseDto;
