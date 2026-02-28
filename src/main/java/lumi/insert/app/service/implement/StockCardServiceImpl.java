@@ -51,20 +51,20 @@ public class StockCardServiceImpl implements StockCardService{
     public StockCardResponse createStockCard(StockCardCreateRequest request) {
         if((request.getType() == StockMove.CUSTOMER_IN.toString() || request.getType() == StockMove.SUPPLIER_IN.toString() ||
             request.getType() == StockMove.REPAIRED.toString()) && request.getQuantity() < 0L) {
-                throw new TransactionValidationException("");
+                throw new TransactionValidationException("Stock 'IN' type should be positive quantity");
         }
 
         if((request.getType() == StockMove.CUSTOMER_OUT.toString() || request.getType() == StockMove.SUPPLIER_OUT.toString() ||
             request.getType() == StockMove.DEFECT.toString()) && request.getQuantity() > 0L) {
-                throw new TransactionValidationException("");
+                throw new TransactionValidationException("Stock 'OUT' type should be negative quantity");
         }
 
         if((request.getType() == StockMove.CUSTOMER_IN.toString() || request.getType() == StockMove.CUSTOMER_OUT.toString()) && !transactionItemRepository.existsById(request.getReferenceId())) {
-            throw new NotFoundEntityException("");
+            throw new NotFoundEntityException("Transaction Items with ID " + request.getReferenceId() + " was not found");
         }
 
         Product product = productRepository.findById(request.getProductId())
-            .orElseThrow(() -> new NotFoundEntityException(null));
+            .orElseThrow(() -> new NotFoundEntityException("Product with ID " + request.getProductId() + " was not found"));
 
         Long oldStock = product.getStockQuantity();
 
@@ -92,13 +92,14 @@ public class StockCardServiceImpl implements StockCardService{
     @Override
     public StockCardResponse getStockCard(UUID id) {
         StockCard stockCard = stockCardRepository.findById(id)
-            .orElseThrow(() -> new NotFoundEntityException(null));
+            .orElseThrow(() -> new NotFoundEntityException("StockCard with ID " + id + " was not found"));
 
         return stockCardMapper.createDtoResponseFromStockCard(stockCard);
     }
 
     @Override
     public Slice<StockCardResponse> getStockCards(UUID lastId, PaginationRequest request) {
+        if(lastId != null) request.setPage(0);
         Pageable pageable = jpaSpecGenerator.pageable(request);
 
         Slice<StockCardResponse> slices = stockCardRepository.findByIndexPagination(LocalDateTime.of(1900, 10, 10, 10, 10), LocalDateTime.of(3000, 10, 10, 10, 10), lastId, pageable);
