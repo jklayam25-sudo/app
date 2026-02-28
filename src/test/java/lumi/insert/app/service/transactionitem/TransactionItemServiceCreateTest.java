@@ -3,6 +3,9 @@ package lumi.insert.app.service.transactionitem;
 import static org.junit.jupiter.api.Assertions.assertEquals; 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemResponse;
 import lumi.insert.app.entity.Transaction;
+import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
@@ -87,6 +91,7 @@ public class TransactionItemServiceCreateTest extends BaseTransactionItemService
         setupTransactionItem.setProduct(setupProduct); 
         when(transactionItemRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransactionItem));
         when(transactionItemRepositoryMock.save(any())).thenAnswer(res -> res.getArgument(0));
+        when(stockCardRepositoryMock.save(any())).thenAnswer(res -> res.getArgument(0));
         TransactionItemResponse transactionItem = transactionItemServiceMock.refundTransactionItem(setupTransactionItem.getId(), 2L);
 
         assertEquals(1000L, transactionItem.price());
@@ -95,6 +100,8 @@ public class TransactionItemServiceCreateTest extends BaseTransactionItemService
         assertEquals(1000L, setupTransaction.getTotalUnpaid());
         assertEquals(TransactionStatus.COMPLETE, setupTransaction.getStatus());
         assertEquals("REFUND: " + setupProduct.getName(), transactionItem.description());
+
+        verify(stockCardRepositoryMock, times(1)).save(argThat(arg -> arg.getOldStock() == 1L && arg.getQuantity() == 2L && arg.getNewStock() == 3L && arg.getType() == StockMove.CUSTOMER_IN));
     }
     
     @Test
