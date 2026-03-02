@@ -15,12 +15,16 @@ import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
 import lumi.insert.app.dto.request.SupplierGetByFilter;
+import lumi.insert.app.dto.request.SupplyGetByFilter;
+import lumi.insert.app.dto.request.SupplyPaymentGetByFilter;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.StockCard;
 import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.entity.Supply;
+import lumi.insert.app.entity.SupplyPayment;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionPayment;
 
@@ -158,5 +162,42 @@ public class JpaSpecGenerator {
         };
         
         return specifications;
+    }
+
+    public Specification<Supply> supplySpecification(SupplyGetByFilter request){
+        Specification<Supply> specification = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+
+            if(request.getStatus() != null){
+                predicates.add(builder.equal(root.get("status"), request.getStatus()));
+            }
+            if(request.getSupplierId() != null){
+                predicates.add(builder.equal(root.get("supplier").get("id"), request.getSupplierId()));
+            }
+            if (request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) {
+                predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
+            } 
+            predicates.add(builder.between(root.get("totalItems"), request.getMinTotalItems(), request.getMaxTotalItems()));
+            predicates.add(builder.between(root.get("grandTotal"), request.getMinGrandTotal(), request.getMaxGrandTotal()));
+            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
+            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid()));
+
+            return builder.and(predicates);
+        }; 
+        return specification;
+    }
+
+    public Specification<SupplyPayment> supplyPaymentSpecification(SupplyPaymentGetByFilter request){
+        Specification<SupplyPayment> specification = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if(request.getSupplyId() != null) predicates.add(builder.equal(root.get("supply").get("id"), request.getSupplyId()));
+            if(request.getMinCreatedAt() != null && request.getMaxCreatedAt() != null) predicates.add(builder.between(root.get("createdAt"), request.getMinCreatedAt(), request.getMaxCreatedAt()));
+
+            predicates.add(builder.between(root.get("totalPayment"), request.getMinTotalPayment(), request.getMaxTotalPayment()));
+
+            return builder.and(predicates);
+        };
+        return specification;
     }
 }
