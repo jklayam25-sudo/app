@@ -1,0 +1,2 @@
+ALTER TABLE supplies ADD COLUMN total_unrefunded BIGINT DEFAULT 0;
+ALTER TABLE supplies ADD COLUMN total_refunded BIGINT DEFAULT 0;

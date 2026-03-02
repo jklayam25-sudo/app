@@ -1,0 +1,1 @@
+CREATE TYPE supply_status AS ENUM ('UNPAID', 'COMPLETE', 'CANCELLED');
