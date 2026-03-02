@@ -14,11 +14,13 @@ import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
+import lumi.insert.app.dto.request.SupplierGetByFilter;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.StockCard;
+import lumi.insert.app.entity.Supplier;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionPayment;
 
@@ -130,5 +132,31 @@ public class JpaSpecGenerator {
             return builder.and(predicates);
         };
         return specification;
+    }
+
+    public Specification<Supplier> supplierSpecification(SupplierGetByFilter request){
+        Specification<Supplier> specifications = (root, criteria, builder) -> {
+            List<Predicate> predicates = new ArrayList<Predicate>();
+
+            if(request.getName() != null){
+                predicates.add(builder.equal(root.get("name"), request.getName()));
+            }
+            if(request.getContact() != null){
+                predicates.add(builder.equal(root.get("contact"), request.getContact()));
+            }
+            if(request.getEmail() != null){
+                predicates.add(builder.equal(root.get("email"), request.getEmail()));
+            }
+            if(request.getIsActive() != null){
+                predicates.add(builder.equal(root.get("isActive"), request.getIsActive()));
+            }
+
+            predicates.add(builder.between(root.get("totalTransaction"), request.getMinTotalTransaction(), request.getMaxTotalTransaction()));
+            predicates.add(builder.between(root.get("totalUnpaid"), request.getMinTotalUnpaid(), request.getMaxTotalUnpaid()));
+            predicates.add(builder.between(root.get("totalPaid"), request.getMinTotalPaid(), request.getMaxTotalPaid())); 
+            return builder.and(predicates);
+        };
+        
+        return specifications;
     }
 }
