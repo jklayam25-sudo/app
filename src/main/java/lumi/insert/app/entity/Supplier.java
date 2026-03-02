@@ -49,8 +49,8 @@ public class Supplier extends TimestampAuditing{
     @Builder.Default
     private Long totalPaid = 0L;
 
-    // @OneToMany(mappedBy = "suppliers")
-    // @Builder.Default
-    // @ToString.Exclude
-    // private List<Transaction> supplies = new ArrayList<>();
+    @OneToMany(mappedBy = "supplier")
+    @Builder.Default
+    @ToString.Exclude
+    private List<Supply> supplies = new ArrayList<>();
 }
