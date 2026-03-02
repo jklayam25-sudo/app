@@ -1,0 +1,213 @@
+package lumi.insert.app.repository;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+  
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+  
+import jakarta.transaction.Transactional;
+import lumi.insert.app.dto.request.SupplyPaymentGetByFilter;
+import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.entity.Supply; 
+import lumi.insert.app.entity.SupplyPayment; 
+import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
+
+@DataJpaTest
+@Transactional
+@Import({InvoiceGenerator.class, JpaSpecGenerator.class}) 
+public class SupplyPaymentRepositoryTest {
+
+    @Autowired
+    SupplyRepository supplyRepository;
+    
+    @Autowired
+    SupplyPaymentRepository supplyPaymentRepository; 
+
+    @Autowired
+    SupplierRepository supplierRepository;
+
+    @Autowired 
+    InvoiceGenerator invoiceGenerator;
+
+    @Autowired
+    JpaSpecGenerator jpaSpecGenerator;
+
+    Supplier supplier;
+
+    @BeforeEach
+    void setup(){
+        supplier = supplierRepository.save(Supplier.builder().name("Test").contact("test").build());
+    }
+ 
+
+    @Test
+    @DisplayName("Should add supply_items entity to database when base field < invoiceId required is valid")
+    public void createSupplyPayments_baseField_returnSavedEntity(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Supply supply = Supply.builder()
+        .invoiceId(invoiceId)
+        .supplier(supplier)
+        .build();
+
+       Supply savedSupply = supplyRepository.save(supply);
+ 
+        SupplyPayment supplyPayment = SupplyPayment.builder()
+        .supply(savedSupply)
+        .totalPayment(1000L)
+        .paymentFrom("Incart Global Lte - 2432131")
+        .paymentTo("PT. Juke Ner - BCA 14123124")
+        .build();
+
+        SupplyPayment savedSupplyPayment= supplyPaymentRepository.saveAndFlush(supplyPayment);
+
+        assertNotNull(savedSupplyPayment.getCreatedAt()); 
+        assertEquals(savedSupply.getId(), savedSupplyPayment.getSupply().getId());
+        assertEquals("Incart Global Lte - 2432131", savedSupplyPayment.getPaymentFrom());
+    }
+
+    @Test
+    @DisplayName("Should return Slice of supply_items entity")
+    public void findAllBySupplyId_validRequest_returnPageableEntity(){
+        String invoiceId = invoiceGenerator.generate();
+
+            Supply supply = Supply.builder()
+            .invoiceId(invoiceId)
+            .supplier(supplier)
+            .build();
+
+            Supply savedSupply = supplyRepository.save(supply);
+
+            
+        for (int i = 0; i < 3; i++) {
+            SupplyPayment supplyPayment = SupplyPayment.builder()
+                .supply(savedSupply)
+                .totalPayment(1000L * i)
+                .paymentFrom("Incart Global Lte - 2432131")
+                .paymentTo("PT. Juke Ner - BCA 14123124")
+                .build();
+
+            supplyPaymentRepository.saveAndFlush(supplyPayment);
+        }
+        PageRequest pageable = PageRequest.of(0, 2, Sort.by("createdAt").ascending());
+        Slice<SupplyPayment> searchedItem = supplyPaymentRepository.findAllBySupplyId(savedSupply.getId(), pageable);
+
+        assertEquals(2, searchedItem.getNumberOfElements());
+        assertTrue(searchedItem.hasNext());
+        assertEquals(1000L, searchedItem.getContent().getLast().getTotalPayment());
+    }
+
+    @Test
+    @DisplayName("Should return Optional Empty entity when supply and product id is not valid")
+    public void findAllBySupplyId_invalidId_returnOptionalEmptyEntity(){
+        Slice<SupplyPayment> searchedItem = supplyPaymentRepository.findAllBySupplyId(UUID.randomUUID(), PageRequest.of(0, 2, Sort.by("createdAt").ascending()));
+
+        assertTrue(searchedItem.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return filtered supply payment case 1: totalPayment between 1000 - 2000")
+    public void findAllCriteria_totalPaymentBetween_returnTotalPayment1000To2000(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Supply supply = Supply.builder()
+            .invoiceId(invoiceId)
+            .supplier(supplier)
+            .build();
+
+        Supply savedSupply = supplyRepository.save(supply);
+
+        SupplyPayment supplyPaymentSuccess = SupplyPayment.builder()
+        .paymentFrom("from")
+        .paymentTo("to")
+        .totalPayment(1500L)
+        .supply(savedSupply)
+        .build();
+
+        SupplyPayment supplyPaymentFail = SupplyPayment.builder()
+        .paymentFrom("from")
+        .paymentTo("to")
+        .totalPayment(2100L)
+        .supply(savedSupply)
+        .build();
+
+        supplyPaymentRepository.saveAllAndFlush(List.of(supplyPaymentSuccess, supplyPaymentFail));
+
+        SupplyPaymentGetByFilter request = SupplyPaymentGetByFilter.builder()
+        .minTotalPayment(1000L)
+        .maxTotalPayment(2000L)
+        .build();
+
+        Pageable pageable = jpaSpecGenerator.pageable(request);
+
+        Specification<SupplyPayment> specification = jpaSpecGenerator.supplyPaymentSpecification(request);
+
+        Slice<SupplyPayment> supplyPayments = supplyPaymentRepository.findAll(specification, pageable);
+        assertEquals(1, supplyPayments.getNumberOfElements());
+        assertEquals(1500L, supplyPayments.getContent().getFirst().getTotalPayment());
+    }
+
+    @Test
+    @DisplayName("Should return filtered supply payment case 1: totalPayment between 1000 - 3000 and only from trx A")
+    public void findAllCriteria_createdAtBetween_returnEmpty(){
+        String invoiceIdA = invoiceGenerator.generate();
+
+        Supply supplyA = Supply.builder()
+            .invoiceId(invoiceIdA)
+            .supplier(supplier)
+            .build();
+
+        Supply supplyB = Supply.builder()
+            .invoiceId(invoiceGenerator.generate())
+            .supplier(supplier)
+            .build();
+
+        List<Supply> savedSupply = supplyRepository.saveAllAndFlush(List.of(supplyA, supplyB));
+
+        SupplyPayment supplyPaymentSuccess = SupplyPayment.builder()
+        .paymentFrom("from")
+        .paymentTo("to")
+        .totalPayment(1500L)
+        .supply(savedSupply.getFirst())
+        .build();
+
+        SupplyPayment supplyPaymentFail = SupplyPayment.builder()
+        .paymentFrom("from")
+        .paymentTo("to")
+        .totalPayment(2100L)
+        .supply(savedSupply.getLast())
+        .build();
+
+        supplyPaymentRepository.saveAllAndFlush(List.of(supplyPaymentSuccess, supplyPaymentFail));
+
+        SupplyPaymentGetByFilter request = SupplyPaymentGetByFilter.builder()
+        .minTotalPayment(1000L)
+        .maxTotalPayment(3000L)
+        .supplyId(savedSupply.getLast().getId())
+        .build();
+
+        Pageable pageable = jpaSpecGenerator.pageable(request);
+
+        Specification<SupplyPayment> specification = jpaSpecGenerator.supplyPaymentSpecification(request);
+
+        Slice<SupplyPayment> supplyPayments = supplyPaymentRepository.findAll(specification, pageable);
+        assertEquals(1, supplyPayments.getNumberOfElements());
+        assertEquals(2100L, supplyPayments.getContent().getFirst().getTotalPayment());
+    }
+
+}
