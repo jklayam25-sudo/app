@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
+import java.util.List; 
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Supplier;
@@ -71,6 +73,7 @@ public class SupplyItemRepositoryTest {
        Product savedProduct = productRepository.save(mockCategorizedProduct);
 
        SupplyItem supplyItem = SupplyItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
        .supply(savedSupply)
        .product(savedProduct)
        .price(savedProduct.getBasePrice())
@@ -103,6 +106,7 @@ public class SupplyItemRepositoryTest {
        Product savedProduct = productRepository.save(mockCategorizedProduct);
 
        SupplyItem supplyItem = SupplyItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
        .supply(savedSupply)
        .product(savedProduct)
        .price(savedProduct.getBasePrice())
@@ -111,16 +115,17 @@ public class SupplyItemRepositoryTest {
 
         supplyItemRepository.saveAndFlush(supplyItem);
 
-        SupplyItem searchedItem = supplyItemRepository.findBySupplyIdAndProductId(savedSupply.getId(), savedProduct.getId()).orElseThrow();
+        List<SupplyItem> searchedItem = supplyItemRepository.findBySupplyIdAndProductId(savedSupply.getId(), savedProduct.getId());
 
-        assertEquals(savedProduct.getId(), searchedItem.getProduct().getId());
-        assertEquals(savedSupply.getId(), searchedItem.getSupply().getId());
+        assertEquals(1, searchedItem.size());
+        assertEquals(savedProduct.getId(), searchedItem.getFirst().getProduct().getId());
+        assertEquals(savedSupply.getId(), searchedItem.getFirst().getSupply().getId());
     }
 
     @Test
     @DisplayName("Should return Optional Empty entity when supply and product id is not valid")
     public void findBySupplyIdAndProductId_invalidId_returnOptionalEmptyEntity(){
-        Optional<SupplyItem> searchedItem = supplyItemRepository.findBySupplyIdAndProductId(UUID.randomUUID(), 15L);
+        List<SupplyItem> searchedItem = supplyItemRepository.findBySupplyIdAndProductId(UUID.randomUUID(), 15L);
 
         assertTrue(searchedItem.isEmpty());
     }
@@ -146,6 +151,7 @@ public class SupplyItemRepositoryTest {
             Product savedProduct = productRepository.save(mockCategorizedProduct);
 
             SupplyItem supplyItem = SupplyItem.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .supply(savedSupply)
             .product(savedProduct)
             .price(savedProduct.getBasePrice())
