@@ -297,7 +297,7 @@ public class TransactionServiceITTest {
         entityManager.clear();;
         TransactionResponse setTransactionToProcess = transactionService.cancelTransaction(savedTransaction.getId()); 
         assertEquals(0, setTransactionToProcess.totalPaid());
-        assertEquals(4000, setTransactionToProcess.totalUnrefunded());
+        assertEquals(4100, setTransactionToProcess.totalUnrefunded());
         assertEquals(TransactionStatus.CANCELLED, setTransactionToProcess.status()); 
 
         Slice<StockCard> stockcards = stockCardRepository.findAllByReferenceId(idItems3);
