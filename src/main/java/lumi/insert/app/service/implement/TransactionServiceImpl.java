@@ -264,7 +264,7 @@ public class TransactionServiceImpl implements TransactionService{
         transactionItemRepository.saveAll(toRefundItems);
         stockCardRepository.saveAll(stockCards);
 
-        searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid() - searchedTransaction.getTotalRefunded());
+        searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid() + searchedTransaction.getTotalUnrefunded());
         searchedTransaction.setTotalUnpaid(0L);
         searchedTransaction.setTotalPaid(0L); 
         searchedTransaction.setStatus(TransactionStatus.CANCELLED);
