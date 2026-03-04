@@ -69,6 +69,8 @@ public class Supply extends TimestampAuditing{
     @Builder.Default
     private SupplyStatus status = SupplyStatus.UNPAID;
 
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false) 
     private Supplier supplier;
