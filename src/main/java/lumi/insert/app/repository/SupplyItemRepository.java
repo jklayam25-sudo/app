@@ -1,6 +1,6 @@
 package lumi.insert.app.repository;
  
-import java.util.Optional;
+import java.util.List; 
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -13,7 +13,7 @@ import lumi.insert.app.entity.SupplyItem;
 @Repository
 public interface SupplyItemRepository extends JpaRepository<SupplyItem, UUID>{
     
-    Optional<SupplyItem> findBySupplyIdAndProductId(UUID supplyId, Long productId);
+    List<SupplyItem> findBySupplyIdAndProductId(UUID supplyId, Long productId);
 
     Slice<SupplyItem> findAllBySupplyId(UUID supplyId, Pageable pageable);
 
