@@ -9,6 +9,7 @@ import org.mapstruct.ReportingPolicy;
 
 import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
+import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.entity.Product;
 
@@ -26,4 +27,6 @@ public interface ProductMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
     ProductDeleteResponse createDeleteDtoResponseFromProduct(Product entity);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    ProductName createNameResponseFromProduct(Product entity);
 }
