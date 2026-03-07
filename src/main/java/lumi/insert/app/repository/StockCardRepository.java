@@ -15,7 +15,7 @@ import lumi.insert.app.entity.StockCard;
 
 public interface StockCardRepository extends JpaRepository<StockCard, UUID>, JpaSpecificationExecutor<StockCard>{
     
-    @Query("SELECT s.id as id, s.referenceId as referenceId, s.product.id as productId, s.productName as productName, s.quantity as quantity, s.oldStock as oldStock, s.newStock as newStock, s.basePrice as basePrice, s.type as type, s.description as description, s.createdAt as createdAt " + 
+    @Query("SELECT s.id as id, s.referenceId as referenceId, s.product.id as productId, s.productName as productName, s.quantity as quantity, s.oldStock as oldStock, s.newStock as newStock, s.oldPrice as oldPrice, s.newPrice as newPrice, s.type as type, s.description as description, s.createdAt as createdAt " + 
         "FROM stock_cards s WHERE " +
         "s.createdAt between :minTime and :maxTime " +
         "AND :lastId IS NULL OR s.id > :lastId " +
