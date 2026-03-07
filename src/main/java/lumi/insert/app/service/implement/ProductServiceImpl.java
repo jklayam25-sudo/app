@@ -1,5 +1,4 @@
 package lumi.insert.app.service.implement;
- 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +20,7 @@ import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
@@ -122,15 +122,14 @@ public class ProductServiceImpl implements ProductService {
         return dtoResponseFromProduct;
     }
 
-
     @Override
-    public Slice<ProductName> searchProductNames(ProductGetNameRequest request) {
-        Sort sort = Sort.by("name").ascending();
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
+    public SliceIndex<ProductName> searchProductNames(ProductGetNameRequest request) {
+        if(request.getLastId() == null) request.setLastId(0L);
+        Pageable pageable = PageRequest.of(0, request.getSize()).withSort(Sort.by("id").ascending());
 
-        Slice<ProductName> allByNameContaining = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue(request.getName(), pageable);
- 
-        return allByNameContaining;
+        Slice<ProductName> allByNameContaining = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter(request.getName(), request.getLastId(), pageable);
+        
+        return new SliceIndex<ProductName>(allByNameContaining);
     }
 
 
