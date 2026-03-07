@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -25,8 +25,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @Builder
 public class Supplier extends TimestampAuditing{
     
-    @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
+    @Id 
     private UUID id;
 
     @Column(unique = true, nullable = false )

@@ -7,7 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated; 
-import jakarta.persistence.GeneratedValue;
+
 import jakarta.persistence.Id; 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +25,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @Data 
 public class Employee extends TimestampAuditing{
     
-    @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
+    @Id 
     private UUID id;
 
     @Column(unique = true, nullable = false, length = 55) 
