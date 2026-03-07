@@ -10,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.EmployeeCreateRequest;
 import lumi.insert.app.dto.request.EmployeeUpdateRequest;
@@ -46,6 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService{
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         Employee employee = Employee.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .username(request.getUsername())
             .fullname(request.getFullname())
             .password(encodedPassword)

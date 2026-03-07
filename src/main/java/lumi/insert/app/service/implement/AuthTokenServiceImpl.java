@@ -10,7 +10,8 @@ import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException; 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
- 
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
@@ -57,10 +58,11 @@ public class AuthTokenServiceImpl implements AuthTokenService{
         authTokenRepository.deleteByEmployeeId(employee.getId());
 
         AuthToken authToken = AuthToken.builder()
-        .employee(employee)
-        .refreshToken(UUID.randomUUID().toString())
-        .expiredAt(LocalDateTime.now().plus(7, ChronoUnit.DAYS))
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .employee(employee)
+            .refreshToken(UUID.randomUUID().toString())
+            .expiredAt(LocalDateTime.now().plus(7, ChronoUnit.DAYS))
+            .build();
 
         AuthToken savedToken = authTokenRepository.save(authToken);
         return authMapper.createDtoResponseFromEntity(accessToken, savedToken);

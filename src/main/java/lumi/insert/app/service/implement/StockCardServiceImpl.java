@@ -9,6 +9,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.PaginationRequest;
@@ -73,15 +75,17 @@ public class StockCardServiceImpl implements StockCardService{
         if(product.getStockQuantity() < 0) throw new TransactionValidationException("Product stocks with ID " + request.getProductId() + " doesn't meet buyer quantity, stock left: " + oldStock);
 
         StockCard stockCard = StockCard.builder()
-        .referenceId(request.getReferenceId())
-        .product(product)
-        .productName(product.getName())
-        .quantity(request.getQuantity())
-        .oldStock(oldStock)
-        .newStock(product.getStockQuantity())
-        .type(StockMove.valueOf(request.getType()))
-        .basePrice(product.getBasePrice())
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .referenceId(request.getReferenceId())
+            .product(product)
+            .productName(product.getName())
+            .quantity(request.getQuantity())
+            .oldStock(oldStock)
+            .newStock(product.getStockQuantity())
+            .type(StockMove.valueOf(request.getType()))
+            .oldPrice(product.getBasePrice())
+            .newPrice(product.getBasePrice())
+            .build();
 
         StockCard savedStockCard = stockCardRepository.save(stockCard);
         
