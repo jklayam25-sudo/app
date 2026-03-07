@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Slice;
 
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
@@ -19,9 +20,9 @@ public interface TransactionItemService {
 
     Slice<TransactionItemResponse> getTransactionItemsByTransactionId(UUID transactionId, PaginationRequest paginationRequest);
 
-    TransactionItemResponse getTransactionByTransactionIdAndProductId(UUID transactionId, Long ProductId);
+    Slice<TransactionItemResponse> getTransactionByTransactionIdAndProductId(UUID transactionId, Long ProductId);
 
-    TransactionItemResponse refundTransactionItem(UUID id, Long quantity);
+    TransactionItemResponse refundTransactionItem(UUID id, ItemRefundRequest request);
 
     TransactionItemResponse getTransactionItem(UUID id);
 

@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator; 
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.SupplyCreateRequest;
 import lumi.insert.app.dto.request.SupplyGetByFilter;
-import lumi.insert.app.dto.request.SupplyItemCreate;
-import lumi.insert.app.dto.request.SupplyItemRefundRequest;
+import lumi.insert.app.dto.request.SupplyItemCreate; 
 import lumi.insert.app.dto.request.SupplyUpdateRequest;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyResponse;
@@ -72,7 +72,7 @@ public class SupplyServiceImpl implements SupplyService{
         Supplier supplier = supplierRepository.findById(request.getSupplierId())
              .orElseThrow(() -> new NotFoundEntityException("Supplier with id " + request.getSupplierId() + " is not found"));
 
-        List<SupplyItemCreate> items = request.getItems();
+        List<SupplyItemCreate> items = request.getSupplyItems();
 
         List<Long> listOfProductId = items.stream().map(item -> item.getProductId()).distinct().collect(Collectors.toCollection(ArrayList::new));
         List<Product> listOfProduct = productRepository.findAllById(listOfProductId);
@@ -85,16 +85,17 @@ public class SupplyServiceImpl implements SupplyService{
         Long subTotal = items.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum();
 
         Supply supply = Supply.builder()
-        .invoiceId(request.getInvoiceId())
-        .description(request.getDescription())
-        .supplier(supplier)
-        .totalItems(Long.valueOf(items.size()))
-        .subTotal(subTotal)
-        .grandTotal(subTotal - request.getTotalDiscount() + request.getTotalFee())
-        .totalUnpaid(subTotal - request.getTotalDiscount() + request.getTotalFee())
-        .totalFee(request.getTotalFee())
-        .totalDiscount(request.getTotalDiscount())
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .invoiceId(request.getInvoiceId())
+            .description(request.getDescription())
+            .supplier(supplier)
+            .totalItems(Long.valueOf(items.size()))
+            .subTotal(subTotal)
+            .grandTotal(subTotal - request.getTotalDiscount() + request.getTotalFee())
+            .totalUnpaid(subTotal - request.getTotalDiscount() + request.getTotalFee())
+            .totalFee(request.getTotalFee())
+            .totalDiscount(request.getTotalDiscount())
+            .build();
 
         Supply savedSupply = supplyRepository.saveAndFlush(supply);
 
@@ -106,7 +107,8 @@ public class SupplyServiceImpl implements SupplyService{
 
         for (SupplyItemCreate item : items) {
             Product product = mappedProduct.get(item.getProductId());
- 
+            
+            Long oldPrice = product.getBasePrice();
             Long oldStock = product.getStockQuantity();
 
             SupplyItem supplyItem = SupplyItem.builder()
@@ -120,10 +122,11 @@ public class SupplyServiceImpl implements SupplyService{
 
             itemsToAdd.add(supplyItem);
             
-            product.setBasePrice(((product.getBasePrice() * product.getStockQuantity()) + (supplyItem.getPrice() * supplyItem.getQuantity())) / (product.getStockQuantity() + supplyItem.getQuantity()));
+            product.setBasePrice(((oldPrice * product.getStockQuantity()) + (supplyItem.getPrice() * supplyItem.getQuantity())) / (product.getStockQuantity() + supplyItem.getQuantity()));
             product.setStockQuantity(product.getStockQuantity() + supplyItem.getQuantity());
 
             StockCard stockCard = StockCard.builder() 
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .referenceId(supplyItem.getId())
                 .product(product)
                 .productName(product.getName())
@@ -131,7 +134,8 @@ public class SupplyServiceImpl implements SupplyService{
                 .oldStock(oldStock)
                 .newStock(product.getStockQuantity())
                 .type(StockMove.PURCHASE)
-                .basePrice(product.getBasePrice())
+                .oldPrice(oldPrice)
+                .newPrice(product.getBasePrice())
                 .description("Product stock supply(IN)")
                 .build();
 
@@ -184,10 +188,13 @@ public class SupplyServiceImpl implements SupplyService{
 
             Product product = item.getProduct();
             Long oldStock = product.getStockQuantity();
+            Long oldPrice = product.getBasePrice();
 
             Long alreadyRefundedProduct = listRefunded.get(product.getId());
             alreadyRefundedProduct = alreadyRefundedProduct != null ? alreadyRefundedProduct : 0L;
 
+            if(oldStock < (item.getQuantity() + alreadyRefundedProduct)) throw new TransactionValidationException("Unable to cancel supply items, product with id " + product.getId() + " doesn't have enough stock to refund, stock left: " + product.getStockQuantity());
+            
             SupplyItem reverseItem = SupplyItem.builder()
                 .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(item.getPrice())
@@ -200,11 +207,12 @@ public class SupplyServiceImpl implements SupplyService{
             reverseToAdd.add(reverseItem);
 
             if((product.getStockQuantity() - Math.abs(reverseItem.getQuantity())) != 0) {
-                product.setBasePrice(((product.getBasePrice() * product.getStockQuantity() - reverseItem.getPrice() * Math.abs(reverseItem.getQuantity())))  / (product.getStockQuantity() - Math.abs(reverseItem.getQuantity())));
+                product.setBasePrice(((oldPrice * product.getStockQuantity() - reverseItem.getPrice() * Math.abs(reverseItem.getQuantity())))  / (product.getStockQuantity() - Math.abs(reverseItem.getQuantity())));
             }
             product.setStockQuantity(product.getStockQuantity() + reverseItem.getQuantity());
 
             stockCardToAdd.add(StockCard.builder() 
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .referenceId(reverseItem.getId())
                 .product(product)
                 .productName(product.getName())
@@ -212,7 +220,8 @@ public class SupplyServiceImpl implements SupplyService{
                 .oldStock(oldStock)
                 .newStock(product.getStockQuantity())
                 .type(StockMove.SUPPLIER_OUT)
-                .basePrice(product.getBasePrice())
+                .oldPrice(oldPrice)
+                .newPrice(product.getBasePrice())
                 .description("Supply Cancelled, Product refunded. Status: CUSTOMER_OUT(OUT)")
                 .build()
             );   
@@ -256,6 +265,8 @@ public class SupplyServiceImpl implements SupplyService{
 
         allSupplyMapper.updateSupply(request, supply);
 
+        if(request.getTotalDiscount() == null) request.setTotalDiscount(0L);
+        if(request.getTotalFee() == null) request.setTotalFee(0L);
         if(request.getTotalDiscount() != 0 || request.getTotalFee() != 0){
             
             Long totalChange = request.getTotalDiscount() - request.getTotalFee();
@@ -274,6 +285,8 @@ public class SupplyServiceImpl implements SupplyService{
                 supply.setTotalUnrefunded(oldTotalUnrefunded + Math.abs(changeTotalUnpaid));
            }
 
+           if(supply.getTotalUnpaid() == 0) supply.setStatus(SupplyStatus.COMPLETE);
+
            Supplier supplier = supply.getSupplier();
            supplier.setTotalUnpaid(supplier.getTotalUnpaid() + (changeTotalUnpaid - oldTotalUnpaid));
            supplier.setTotalPaid(supplier.getTotalPaid() + (supply.getTotalPaid() - oldTotalPaid));
@@ -284,26 +297,27 @@ public class SupplyServiceImpl implements SupplyService{
     }
 
     @Override
-    public SupplyResponse refundSupplyItem(UUID id, SupplyItemRefundRequest request) { 
+    public SupplyResponse refundSupplyItem(UUID id, ItemRefundRequest request) { 
 
         List<SupplyItem> matchItems = supplyItemRepository.findBySupplyIdAndProductId(id, request.getProductId());
-        if(matchItems.size() == 0) throw new NotFoundEntityException("");
+        if(matchItems.size() == 0) throw new NotFoundEntityException("Unable to find any supply item with product id " + request.getProductId());
         long priceFromSupplier = matchItems.getLast().getPrice();
         long ttlQuantiyLeft = matchItems.stream().mapToLong(item -> item.getQuantity()).sum();
 
-        if(ttlQuantiyLeft < request.getQuantity()) throw new TransactionValidationException("");
+        if(ttlQuantiyLeft < request.getQuantity()) throw new ForbiddenRequestException("refund quantity exceeds the remaining refundedable stock with quantity: " + ttlQuantiyLeft + ", enter an exact amount to proceed");
 
         Supply supply = matchItems.getFirst().getSupply();
 
         if(supply.getStatus() == SupplyStatus.CANCELLED) throw new ForbiddenRequestException("Unable to cancel supply because Supply Status is CANCELLED");
 
         Product product = matchItems.getFirst().getProduct();
-        if(product.getStockQuantity() < request.getQuantity()) throw new TransactionValidationException("");
+        if(product.getStockQuantity() < request.getQuantity()) throw new TransactionValidationException("Unable to cancel supply items, product with id " + product.getId() + " doesn't have enough stock to refund, stock left: " + product.getStockQuantity());
 
+        Long oldPrice = product.getBasePrice();
         Long oldStock = product.getStockQuantity();
 
         if((product.getStockQuantity() - Math.abs(request.getQuantity())) != 0) {
-            product.setBasePrice(((product.getBasePrice() * product.getStockQuantity() - priceFromSupplier * Math.abs(request.getQuantity())))  / (product.getStockQuantity() - Math.abs(request.getQuantity())));
+            product.setBasePrice(((oldPrice * product.getStockQuantity() - priceFromSupplier * Math.abs(request.getQuantity())))  / (product.getStockQuantity() - Math.abs(request.getQuantity())));
         }
  
         Long oldTotalUnpaid = supply.getTotalUnpaid();
@@ -313,25 +327,27 @@ public class SupplyServiceImpl implements SupplyService{
         product.setStockQuantity(oldStock - request.getQuantity());
         
         SupplyItem supplyItem = SupplyItem.builder()
-                .id(UuidCreator.getTimeOrderedEpochFast())
-                .price(priceFromSupplier)
-                .quantity(-request.getQuantity())
-                .description("REFUNDED ")
-                .product(product)
-                .supply(supply)
-                .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .price(priceFromSupplier)
+            .quantity(-request.getQuantity())
+            .description("REFUNDED ")
+            .product(product)
+            .supply(supply)
+            .build();
 
         StockCard stockCard = StockCard.builder() 
-                .referenceId(supplyItem.getId())
-                .product(product)
-                .productName(product.getName())
-                .quantity(supplyItem.getQuantity())
-                .oldStock(oldStock)
-                .newStock(product.getStockQuantity())
-                .type(StockMove.SUPPLIER_OUT)
-                .basePrice(product.getBasePrice())
-                .description("Supply Cancelled, Product refunded. Status: SUPPLIER_OUT(OUT)")
-                .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .referenceId(supplyItem.getId())
+            .product(product)
+            .productName(product.getName())
+            .quantity(supplyItem.getQuantity())
+            .oldStock(oldStock)
+            .newStock(product.getStockQuantity())
+            .type(StockMove.SUPPLIER_OUT)
+            .oldPrice(oldPrice)
+            .newPrice(product.getBasePrice())
+            .description("Supply Cancelled, Product refunded. Status: SUPPLIER_OUT(OUT)")
+            .build();
 
         Long totalChange = priceFromSupplier * request.getQuantity();
 
@@ -343,6 +359,8 @@ public class SupplyServiceImpl implements SupplyService{
             supply.setTotalPaid(oldTotalPaid - Math.abs(changeTotalUnpaid));
             supply.setTotalUnrefunded(oldTotalUnrefunded + Math.abs(changeTotalUnpaid));
         }
+
+        if(supply.getTotalUnpaid() == 0) supply.setStatus(SupplyStatus.COMPLETE);
 
         Supplier supplier = supply.getSupplier();
         supplier.setTotalUnpaid(supplier.getTotalUnpaid() + (changeTotalUnpaid - oldTotalUnpaid));

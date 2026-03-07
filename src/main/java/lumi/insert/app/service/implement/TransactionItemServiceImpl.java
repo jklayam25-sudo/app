@@ -1,21 +1,27 @@
 package lumi.insert.app.service.implement;
  
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
 import lumi.insert.app.dto.response.TransactionItemResponse;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.StockCard;
 import lumi.insert.app.entity.Transaction;
@@ -63,12 +69,13 @@ public class TransactionItemServiceImpl implements TransactionItemService{
         if(product.getStockQuantity() < request.getQuantity()) throw new TransactionValidationException("Product stocks with ID " + request.getProductId() + " doesn't meet buyer quantity, stock left: " + product.getStockQuantity());
  
         TransactionItem transactionItem = TransactionItem.builder()
-        .price(product.getSellPrice())
-        .quantity(request.getQuantity())
-        .description(product.getName())
-        .product(product)
-        .transaction(transaction)
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .price(product.getSellPrice())
+            .quantity(request.getQuantity())
+            .description(product.getName())
+            .product(product)
+            .transaction(transaction)
+            .build();
 
         transactionItemRepository.save(transactionItem);
         
@@ -134,64 +141,79 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     }
 
     @Override
-    public TransactionItemResponse getTransactionByTransactionIdAndProductId(UUID transactionId, Long ProductId) {
-        TransactionItem searchedTransactionItem = transactionItemRepository.findByTransactionIdAndProductId(transactionId, ProductId)
-            .orElseThrow(() -> new NotFoundEntityException("Transaction Items was not found"));
+    public Slice<TransactionItemResponse> getTransactionByTransactionIdAndProductId(UUID transactionId, Long ProductId) {
+        List<TransactionItem> searchedTransactionItem = transactionItemRepository.findByTransactionIdAndProductId(transactionId, ProductId);
         
-       TransactionItemResponse result = allTransactionMapper.createTransactionItemResponseDto(searchedTransactionItem);
-        return result;
+        Slice<TransactionItem> slices = new SliceImpl<>(searchedTransactionItem);
+        return slices.map(allTransactionMapper::createTransactionItemResponseDto); 
     }
 
     @Override
-    public TransactionItemResponse refundTransactionItem(UUID id, Long quantity) {
-        TransactionItem transactionItem = transactionItemRepository.findById(id)
-            .orElseThrow(() -> new NotFoundEntityException("Transaction Items with ID " + id + " was not found"));
+    public TransactionItemResponse refundTransactionItem(UUID id, ItemRefundRequest request) { 
 
-        if(quantity > transactionItem.getQuantity()) throw new ForbiddenRequestException("Refund quantity is more than actual bought, use valid quantity");
-        if(transactionItem.getQuantity() < 0)  throw new ForbiddenRequestException("Couldn't refund a refunded item");
+        List<TransactionItem> itemsWithMatchProduct = transactionItemRepository.findByTransactionIdAndProductId(id, request.getProductId());
 
-        Transaction transaction = transactionItem.getTransaction();
+        if(itemsWithMatchProduct.size() == 0) throw new NotFoundEntityException("Unable to find any transaction item with product id " + request.getProductId()); 
 
+        long ttlRefundLeft = itemsWithMatchProduct.stream().mapToLong(item -> item.getQuantity()).sum();
+
+        if(ttlRefundLeft < request.getQuantity()) throw new ForbiddenRequestException("Refund quantity is more than actual bought, use valid quantity");
+
+        TransactionItem baseTransactionItem = itemsWithMatchProduct.getFirst();
+        Transaction transaction = baseTransactionItem.getTransaction();
+        
         if (transaction.getStatus() != TransactionStatus.PROCESS && transaction.getStatus() != TransactionStatus.COMPLETE ) throw new ForbiddenRequestException("Couldn't refund the item because Transaction Status is not PROCESS OR COMPLETE");
 
-        Product product = transactionItem.getProduct();
+        Product product = baseTransactionItem.getProduct();;
+        Customer customer = transaction.getCustomer(); 
 
         Long oldStock = product.getStockQuantity();
 
-        product.setStockQuantity(product.getStockQuantity() + quantity);
+        product.setStockQuantity(product.getStockQuantity() + request.getQuantity());
 
-        Long customerRefund = quantity * transactionItem.getPrice();
+        Long customerRefund = request.getQuantity() * baseTransactionItem.getPrice();
 
         if(transaction.getTotalUnpaid() - customerRefund < 0){
-            transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() + customerRefund - transaction.getTotalUnpaid());
+            customer.setTotalUnpaid(customer.getTotalUnpaid() - transaction.getTotalUnpaid());
+            Long balanceLeft = customerRefund - transaction.getTotalUnpaid();
+            customer.setTotalUnrefunded(customer.getTotalUnrefunded() + balanceLeft);
+            customer.setTotalPaid(customer.getTotalPaid() - balanceLeft);
+
+            transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() + balanceLeft);
             transaction.setTotalUnpaid(0L);
+            transaction.setTotalPaid(transaction.getTotalPaid() - balanceLeft);
             transaction.setStatus(TransactionStatus.PROCESS);
+
         } else {
             transaction.setTotalUnpaid(transaction.getTotalUnpaid() - customerRefund);
+            customer.setTotalUnpaid(customer.getTotalUnpaid() - customerRefund);
         }
 
         TransactionItem refundTransactionItem = TransactionItem.builder()
-            .price(transactionItem.getPrice())
-            .quantity(-quantity)
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .price(baseTransactionItem.getPrice())
+            .quantity(-request.getQuantity())
             .description("REFUND: " + product.getName())
             .product(product)
             .transaction(transaction)
             .build();
 
         StockCard stockCard = StockCard.builder()
-            .referenceId(transaction.getId())
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .referenceId(refundTransactionItem.getId())
             .product(product)
             .productName(product.getName())
-            .quantity(quantity)
+            .quantity(request.getQuantity())
             .oldStock(oldStock)
             .newStock(product.getStockQuantity())
             .type(StockMove.CUSTOMER_IN)
-            .basePrice(product.getBasePrice())
+            .oldPrice(product.getBasePrice())
+            .newPrice(product.getBasePrice())
             .description("Transaction Cancelled, Product refunded. Status: CUSTOMER_IN(IN)")
             .build();
 
-        stockCardRepository.save(stockCard);
-        
+        stockCardRepository.save(stockCard); 
+  
         TransactionItem savedRefundTransactionItem = transactionItemRepository.save(refundTransactionItem);
         TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(savedRefundTransactionItem);
         return transactionItemResponseDto;
