@@ -2,7 +2,8 @@ package lumi.insert.app.utils.mapper;
  
 
 import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper; 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
@@ -10,9 +11,11 @@ import org.mapstruct.ReportingPolicy;
 import lumi.insert.app.dto.request.SupplyUpdateRequest;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyItemResponse;
+import lumi.insert.app.dto.response.SupplyPaymentResponse;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.entity.Supply;
-import lumi.insert.app.entity.SupplyItem;  
+import lumi.insert.app.entity.SupplyItem;
+import lumi.insert.app.entity.SupplyPayment;  
 
 @Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface AllSupplyMapper {
@@ -33,7 +36,7 @@ public interface AllSupplyMapper {
     // @Mapping(target = "deleted", constant = "true")
     // TransactionItemDelete createTransactionItemDeleteResponseDto(TransactionItem transactionItem);
 
-    // @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
-    // @Mapping(target = "transactionId", source = "transaction.id")
-    // TransactionPaymentResponse createTransactionPaymentResponseDto(TransactionPayment transactionPayment);
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    @Mapping(target = "supplyId", source = "supply.id")
+    SupplyPaymentResponse createSupplyPaymentResponseDto(SupplyPayment supplyPayment);
 }
