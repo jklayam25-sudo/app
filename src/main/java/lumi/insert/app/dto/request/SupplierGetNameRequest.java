@@ -1,5 +1,7 @@
 package lumi.insert.app.dto.request;
 
+import java.util.UUID;
+
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.validation.constraints.NotBlank;
@@ -19,5 +21,7 @@ public class SupplierGetNameRequest extends PaginationRequest{
     @NotBlank(message = "Name cannot be empty")
     @Length(min = 3, message = "Request length cannot be lesser than 3")
     private String name;
+
+    private UUID lastId;
 
 }

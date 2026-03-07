@@ -7,6 +7,6 @@ import lombok.Builder;
 import lumi.insert.app.entity.nondatabase.StockMove;
 
 @Builder
-public record StockCardResponse(UUID id, UUID referenceId, Long productId, String productName, Long quantity, Long oldStock, Long newStock, Long basePrice, StockMove type, String description, LocalDateTime createdAt) {
+public record StockCardResponse(UUID id, UUID referenceId, Long productId, String productName, Long quantity, Long oldStock, Long newStock, Long oldPrice, Long newPrice, StockMove type, String description, LocalDateTime createdAt) {
     
 }

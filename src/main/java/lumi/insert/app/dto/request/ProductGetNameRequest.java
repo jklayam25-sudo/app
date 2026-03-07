@@ -17,4 +17,5 @@ public class ProductGetNameRequest extends PaginationRequest {
     @NotBlank(message = "Name cannot be empty")
     private String name;
 
+    private Long lastId;
 }
