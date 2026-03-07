@@ -9,7 +9,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
- 
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionPaymentCreateRequest;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.dto.response.TransactionPaymentResponse;
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionPayment;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
@@ -52,17 +55,21 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + transactionId + " was not found"));
 
         TransactionPayment transactionPayment = TransactionPayment.builder()
-        .transaction(transaction)
-        .paymentFrom(request.getPaymentFrom())
-        .paymentTo(request.getPaymentTo())
-        .totalPayment(request.getTotalPayment())
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .transaction(transaction)
+            .paymentFrom(request.getPaymentFrom())
+            .paymentTo(request.getPaymentTo())
+            .totalPayment(request.getTotalPayment())
+            .build();
 
         transaction.setTotalUnpaid(transaction.getTotalUnpaid() - request.getTotalPayment());
         transaction.setTotalPaid(transaction.getTotalPaid() + request.getTotalPayment());
 
         if(transaction.getTotalUnpaid() < 0) throw new TransactionValidationException("Payment exceeds the remaining transaction debts with ID " + transactionId + ", enter an exact amount to proceed");
 
+        Customer customer = transaction.getCustomer();
+        customer.setTotalUnpaid(customer.getTotalUnpaid() - request.getTotalPayment());
+        customer.setTotalPaid(customer.getTotalPaid() + request.getTotalPayment());
         // Upcoming: integrate with email notification
         if(transaction.getTotalUnpaid() == 0) transaction.setStatus(TransactionStatus.COMPLETE);
         TransactionPayment savedTransactionPayment = transactionPaymentRepository.save(transactionPayment);
@@ -115,12 +122,17 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
         if(request.getTotalPayment() > totalUnrefunded) throw new TransactionValidationException("Payment refund exceeds the remaining transaction unrefunded debt with ID " + transaction.getId() + ", enter an exact amount to proceed");
 
         TransactionPayment refundTransactionPayment = TransactionPayment.builder()
-        .transaction(transaction)
-        .paymentFrom(request.getPaymentFrom())
-        .paymentTo(request.getPaymentTo())
-        .totalPayment(request.getTotalPayment())
-        .isForRefund(true)
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .transaction(transaction)
+            .paymentFrom(request.getPaymentFrom())
+            .paymentTo(request.getPaymentTo())
+            .totalPayment(request.getTotalPayment())
+            .isForRefund(true)
+            .build();
+
+        Customer customer = transaction.getCustomer();
+        customer.setTotalRefunded(customer.getTotalRefunded() + request.getTotalPayment());
+        customer.setTotalUnrefunded(customer.getTotalUnrefunded() - request.getTotalPayment());
 
         transaction.setTotalRefunded(transaction.getTotalRefunded() + request.getTotalPayment());
         transaction.setTotalUnrefunded(transaction.getTotalUnrefunded() - request.getTotalPayment());

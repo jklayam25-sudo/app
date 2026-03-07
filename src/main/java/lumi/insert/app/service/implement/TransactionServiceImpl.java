@@ -15,7 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
- 
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
@@ -80,9 +82,10 @@ public class TransactionServiceImpl implements TransactionService{
         if(customer.getIsActive() == false) throw new TransactionValidationException("Customer with ID " + request.getCustomerId() + " is not active");
 
         Transaction transaction = Transaction.builder()
-        .invoiceId(invoiceGenerator.generate())
-        .customer(customer)
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .invoiceId(invoiceGenerator.generate())
+            .customer(customer)
+            .build();
 
         log.info("{}", transaction);
 
@@ -142,6 +145,7 @@ public class TransactionServiceImpl implements TransactionService{
             updatedProduct.setStockQuantity(updatedProduct.getStockQuantity()-item.getQuantity());
 
             StockCard stockCard = StockCard.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .referenceId(item.getId())
                 .product(updatedProduct)
                 .productName(updatedProduct.getName())
@@ -149,7 +153,8 @@ public class TransactionServiceImpl implements TransactionService{
                 .oldStock(oldStock)
                 .newStock(updatedProduct.getStockQuantity())
                 .type(StockMove.SALE)
-                .basePrice(updatedProduct.getBasePrice())
+                .oldPrice(updatedProduct.getBasePrice())
+                .newPrice(updatedProduct.getBasePrice())
                 .description("Product sale(OUT)")
                 .build();
 
@@ -166,6 +171,9 @@ public class TransactionServiceImpl implements TransactionService{
         searchedTransaction.setSubTotal(transactionItems.stream().mapToLong(item -> item.getPrice() * item.getQuantity()).sum());
         searchedTransaction.setGrandTotal(searchedTransaction.getSubTotal() - searchedTransaction.getTotalDiscount() + searchedTransaction.getTotalFee());
         searchedTransaction.setStatus(TransactionStatus.PROCESS);
+
+        Customer customer = searchedTransaction.getCustomer();
+        customer.setTotalUnpaid(customer.getTotalUnpaid() + searchedTransaction.getGrandTotal());
 
         return allTransactionMapper.createTransactionResponseDto(searchedTransaction, messages);
     }
@@ -215,30 +223,34 @@ public class TransactionServiceImpl implements TransactionService{
 
             Long cancelledQuantity;
 
+            UUID refId;
             if(transactionItem != null){
                 Long totalRefund = transactionItem.stream().mapToLong(reduce -> reduce.getQuantity()).sum();
 
                 TransactionItem reverseItem = TransactionItem.builder()
-                .price(item.getPrice())
-                .quantity(-(item.getQuantity() + totalRefund))
-                .description("CANCELLED: " + product.getName())
-                .product(product)
-                .transaction(searchedTransaction)
-                .build();
+                    .id(UuidCreator.getTimeOrderedEpochFast())
+                    .price(item.getPrice())
+                    .quantity(-(item.getQuantity() + totalRefund))
+                    .description("CANCELLED: " + product.getName())
+                    .product(product)
+                    .transaction(searchedTransaction)
+                    .build();
 
                 cancelledQuantity = item.getQuantity() + totalRefund;
-
+                refId = reverseItem.getId();
                 toRefundItems.add(reverseItem);
             } else {
                 TransactionItem reverseItem = TransactionItem.builder()
-                .price(item.getPrice())
-                .quantity(-(item.getQuantity()))
-                .description("CANCELLED: " + product.getName())
-                .product(product)
-                .transaction(searchedTransaction)
-                .build();
+                    .id(UuidCreator.getTimeOrderedEpochFast())
+                    .price(item.getPrice())
+                    .quantity(-(item.getQuantity()))
+                    .description("CANCELLED: " + product.getName())
+                    .product(product)
+                    .transaction(searchedTransaction)
+                    .build();
 
                 cancelledQuantity = item.getQuantity();
+                refId = reverseItem.getId();
                 toRefundItems.add(reverseItem);
             }
 
@@ -247,16 +259,19 @@ public class TransactionServiceImpl implements TransactionService{
             product.setStockQuantity(product.getStockQuantity() + cancelledQuantity);
 
             StockCard stockCard = StockCard.builder()
-                .referenceId(item.getId())
+                .id(UuidCreator.getTimeOrderedEpochFast())
+                .referenceId(refId)
                 .product(product)
                 .productName(product.getName())
                 .quantity(cancelledQuantity)
                 .oldStock(oldStock)
                 .newStock(product.getStockQuantity())
                 .type(StockMove.CUSTOMER_IN)
-                .basePrice(product.getBasePrice())
+                .oldPrice(product.getBasePrice())
+                .newPrice(product.getBasePrice())
                 .description("Transaction Cancelled, Product refunded. Status: CUSTOMER_IN(IN)")
                 .build();
+                
             log.info("{}", stockCard);
             stockCards.add(stockCard);
         }
@@ -264,10 +279,18 @@ public class TransactionServiceImpl implements TransactionService{
         transactionItemRepository.saveAll(toRefundItems);
         stockCardRepository.saveAll(stockCards);
 
+        Long totalPaid = searchedTransaction.getTotalPaid();
+        Long totalUnpaid = searchedTransaction.getTotalUnpaid();
+
         searchedTransaction.setTotalUnrefunded(searchedTransaction.getTotalPaid() + searchedTransaction.getTotalUnrefunded());
         searchedTransaction.setTotalUnpaid(0L);
         searchedTransaction.setTotalPaid(0L); 
         searchedTransaction.setStatus(TransactionStatus.CANCELLED);
+
+        Customer customer = searchedTransaction.getCustomer();
+        customer.setTotalUnpaid(customer.getTotalUnpaid() - totalUnpaid);
+        customer.setTotalPaid(customer.getTotalPaid() - totalPaid);
+        customer.setTotalUnrefunded(customer.getTotalUnrefunded() + totalPaid);
 
         TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction);
         return transactionResponseDto;

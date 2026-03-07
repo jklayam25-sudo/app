@@ -10,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.SupplierCreateRequest;
 import lumi.insert.app.dto.request.SupplierGetByFilter;
@@ -19,6 +21,7 @@ import lumi.insert.app.dto.response.SupplierDetailResponse;
 import lumi.insert.app.dto.response.SupplierNameResponse; 
 
 import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.SupplierRepository;
@@ -44,10 +47,11 @@ public class SupplierServiceImpl implements SupplierService{
         if(supplierRepository.existsByName(request.getName())) throw new DuplicateEntityException("Supplier with name " + request.getName() + " already exists");
 
         Supplier supplier = Supplier.builder()
-        .name(request.getName())
-        .email(request.getEmail())
-        .contact(request.getContact()) 
-        .build();
+            .id(UuidCreator.getTimeOrderedEpochFast())
+            .name(request.getName())
+            .email(request.getEmail())
+            .contact(request.getContact()) 
+            .build();
 
         Supplier savedSupplier = supplierRepository.save(supplier);
 
@@ -73,9 +77,12 @@ public class SupplierServiceImpl implements SupplierService{
     }
 
     @Override
-    public Slice<SupplierNameResponse> searchSupplierNames(SupplierGetNameRequest request) {
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(Sort.by("name").descending());
-        return supplierRepository.getByNameContainingIgnoreCase(request.getName(), pageable);
+    public SliceIndex<SupplierNameResponse> searchSupplierNames(SupplierGetNameRequest request) {
+        if(request.getLastId() == null) request.setLastId(new UUID(0, 0));
+        Pageable pageable = PageRequest.of(0, request.getSize()).withSort(Sort.by("id").ascending());
+        
+        Slice<SupplierNameResponse> suppliersName = supplierRepository.getByNameContainingIgnoreCaseAndIdAfter(request.getName(), request.getLastId(), pageable);;
+        return new SliceIndex<SupplierNameResponse>(suppliersName);
     }
 
     @Override
