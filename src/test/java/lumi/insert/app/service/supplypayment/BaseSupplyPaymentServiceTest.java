@@ -1,0 +1,71 @@
+package lumi.insert.app.service.supplypayment;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.entity.Supply;
+import lumi.insert.app.entity.SupplyItem;
+import lumi.insert.app.entity.SupplyPayment;
+import lumi.insert.app.repository.SupplyPaymentRepository;
+import lumi.insert.app.repository.SupplyRepository;
+import lumi.insert.app.service.implement.SupplyPaymentServiceImpl;
+import lumi.insert.app.utils.generator.InvoiceGenerator;
+import lumi.insert.app.utils.generator.JpaSpecGenerator;
+import lumi.insert.app.utils.mapper.AllSupplyMapper;
+import lumi.insert.app.utils.mapper.AllSupplyMapperImpl;
+
+@ExtendWith(MockitoExtension.class)
+public abstract class BaseSupplyPaymentServiceTest {
+
+    @InjectMocks
+    SupplyPaymentServiceImpl supplyPaymentServiceMock;
+
+    @Mock
+    SupplyRepository supplyRepositoryMock;
+
+    @Mock
+    SupplyPaymentRepository supplyPaymentRepositoryMock;
+
+    @Mock
+    JpaSpecGenerator jpaSpecGenerator;
+
+    @Spy
+    AllSupplyMapper allSupplyMapper = new AllSupplyMapperImpl();
+
+    @Spy
+    InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
+
+    public Supplier setupSupplier;
+
+    public Supply setupSupply;
+
+    public SupplyPayment setupSupplyPayment;
+
+    public SupplyItem setupSupplyItem;
+
+    @BeforeEach
+    void setUp() {
+        setupSupplyPayment = SupplyPayment.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
+                .build();
+
+        setupSupply = Supply.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
+                .build();
+
+        setupSupplyItem = SupplyItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
+                .build();
+
+        setupSupplier = Supplier.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
+                .build();
+    }
+}
