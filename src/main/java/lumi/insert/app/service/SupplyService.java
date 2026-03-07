@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Slice;
 
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.SupplyCreateRequest;
-import lumi.insert.app.dto.request.SupplyGetByFilter;
-import lumi.insert.app.dto.request.SupplyItemRefundRequest;
+import lumi.insert.app.dto.request.SupplyGetByFilter; 
 import lumi.insert.app.dto.request.SupplyUpdateRequest;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyResponse;
@@ -23,7 +23,7 @@ public interface SupplyService {
 
     SupplyResponse updateSupply(UUID id, SupplyUpdateRequest request);
 
-    SupplyResponse refundSupplyItem(UUID id, SupplyItemRefundRequest request);
+    SupplyResponse refundSupplyItem(UUID id, ItemRefundRequest request);
 
     byte[] getInvoicePdf(UUID id);
 

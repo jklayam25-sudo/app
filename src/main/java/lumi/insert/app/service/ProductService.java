@@ -12,6 +12,7 @@ import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 
 public interface ProductService {
 
@@ -21,7 +22,7 @@ public interface ProductService {
 
     ProductResponse updateProduct(ProductUpdateRequest request);
 
-    Slice<ProductName> searchProductNames(ProductGetNameRequest request);
+    SliceIndex<ProductName> searchProductNames(ProductGetNameRequest request);
 
     ProductResponse getProductById(Long id);
 
