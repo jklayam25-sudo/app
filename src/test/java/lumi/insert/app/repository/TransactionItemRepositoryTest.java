@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
+import java.util.List; 
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
-import jakarta.transaction.Transactional;
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import jakarta.transaction.Transactional; 
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
@@ -49,7 +51,7 @@ public class TransactionItemRepositoryTest {
 
     @BeforeEach
     void setup(){ 
-        customer = customerRepository.save(Customer.builder().name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
+        customer = customerRepository.save(Customer.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
     }
 
     @Test
@@ -58,6 +60,7 @@ public class TransactionItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
         .build();
@@ -71,6 +74,7 @@ public class TransactionItemRepositoryTest {
        Product savedProduct = productRepository.save(mockCategorizedProduct);
 
        TransactionItem transactionItem = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
        .transaction(savedTransaction)
        .product(savedProduct)
        .price(savedProduct.getBasePrice())
@@ -90,6 +94,7 @@ public class TransactionItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
         .build();
@@ -103,6 +108,7 @@ public class TransactionItemRepositoryTest {
        Product savedProduct = productRepository.save(mockCategorizedProduct);
 
        TransactionItem transactionItem = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
        .transaction(savedTransaction)
        .product(savedProduct)
        .price(savedProduct.getBasePrice())
@@ -111,16 +117,17 @@ public class TransactionItemRepositoryTest {
 
         transactionItemRepository.saveAndFlush(transactionItem);
 
-        TransactionItem searchedItem = transactionItemRepository.findByTransactionIdAndProductId(savedTransaction.getId(), savedProduct.getId()).orElseThrow();
+        List<TransactionItem> searchedItem = transactionItemRepository.findByTransactionIdAndProductId(savedTransaction.getId(), savedProduct.getId());
 
-        assertEquals(savedProduct.getId(), searchedItem.getProduct().getId());
-        assertEquals(savedTransaction.getId(), searchedItem.getTransaction().getId());
+        assertEquals(1, searchedItem.size());
+        assertEquals(savedProduct.getId(), searchedItem.getFirst().getProduct().getId());
+        assertEquals(savedTransaction.getId(), searchedItem.getFirst().getTransaction().getId());
     }
 
     @Test
     @DisplayName("Should return Optional Empty entity when transaction and product id is not valid")
     public void findByTransactionIdAndProductId_invalidId_returnOptionalEmptyEntity(){
-        Optional<TransactionItem> searchedItem = transactionItemRepository.findByTransactionIdAndProductId(UUID.randomUUID(), 15L);
+        List<TransactionItem> searchedItem = transactionItemRepository.findByTransactionIdAndProductId(UUID.randomUUID(), 15L);
 
         assertTrue(searchedItem.isEmpty());
     }
@@ -131,6 +138,7 @@ public class TransactionItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
             Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
             .build();
@@ -146,6 +154,7 @@ public class TransactionItemRepositoryTest {
             Product savedProduct = productRepository.save(mockCategorizedProduct);
 
             TransactionItem transactionItem = TransactionItem.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .transaction(savedTransaction)
             .product(savedProduct)
             .price(savedProduct.getBasePrice())

@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Employee;
 
@@ -27,6 +29,7 @@ public class EmployeeRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void saveEmployee_validEntity_shouldReturnSavedEntity(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")
@@ -42,6 +45,7 @@ public class EmployeeRepositoryTest {
     @DisplayName("Should return true when employee found")
     void existsByUsername_validEntity_shouldReturnTrue(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")
@@ -62,6 +66,7 @@ public class EmployeeRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void findEmployeeByUsername_validEntity_shouldReturnSavedEntity(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")

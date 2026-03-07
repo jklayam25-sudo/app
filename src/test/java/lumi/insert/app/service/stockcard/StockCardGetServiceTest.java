@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,7 +35,7 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
     @Test
     void getStockCard_foundEntity_returnDTO(){
         StockCard stockCard = StockCard.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .referenceId(setupTransactionItem.getId())
         .product(setupProduct)
         .productName(setupProduct.getName())
@@ -41,14 +43,15 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         when(stockCardRepository.findById(any(UUID.class))).thenReturn(Optional.of(stockCard));
 
         StockCardResponse response = stockCardService.getStockCard(stockCard.getId());
 
-        assertEquals(stockCard.getBasePrice(), response.basePrice());
+        assertEquals(stockCard.getOldPrice(), response.oldPrice());
         assertEquals(stockCard.getOldStock(), response.oldStock());
         assertEquals(stockCard.getProductName(), response.productName());
         assertEquals(stockCard.getNewStock(), response.newStock());
@@ -59,7 +62,7 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
     void getStockCard_notFoundEntity_throwNotFoundEntityException(){ 
         when(stockCardRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundEntityException.class, () -> stockCardService.getStockCard(UUID.randomUUID())); 
+        assertThrows(NotFoundEntityException.class, () -> stockCardService.getStockCard(UuidCreator.getTimeOrderedEpochFast())); 
     }
 
     @Test
@@ -88,7 +91,7 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
     @Test
     void searchStockCards_foundEntity_returnSliceDTO(){  
         StockCard stockCard = StockCard.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .referenceId(setupTransactionItem.getId())
         .product(setupProduct)
         .productName(setupProduct.getName())
@@ -96,7 +99,8 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         Page<StockCard> slices = new PageImpl<>(List.of(stockCard));

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional; 
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -115,13 +115,44 @@ public class ProductRepositoryTest {
         productRepository.save(dumpProduct2);
         productRepository.save(dumpProductInactive);
 
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("name").ascending());
-
-        Slice<ProductName> products = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("Jordan", pageable);
-        Slice<ProductName> productsNike = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("NIKE", pageable);
-        Slice<ProductName> productsSomething = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrue("Something", pageable);
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("name").ascending()); 
+        Slice<ProductName> products = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("Jordan", 0L, pageable);
+        Slice<ProductName> productsNike = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("NIKE", 0L, pageable);
+        Slice<ProductName> productsSomething = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("Something", 0L,  pageable);
 
         assertEquals(1, products.getNumberOfElements());
+        assertEquals(2, productsNike.getNumberOfElements());
+        assertFalse(productsNike.hasNext());
+        assertTrue(productsSomething.isEmpty());
+    }
+
+    @Test
+    public void testFindAllByName_lastId_foundEntity() {
+        Product dumpProduct1 = Product.builder()
+        .name("NIKE Jordan Low 3")
+        .basePrice(10000L)
+        .sellPrice(12000L)
+        .stockQuantity(50L)
+        .stockMinimum(5L)
+        .build();
+
+        Product dumpProduct2 = Product.builder()
+        .name("NIKE Kyrie 5")
+        .basePrice(11000L)
+        .sellPrice(13000L)
+        .stockQuantity(30L)
+        .stockMinimum(3L)
+        .build(); 
+
+        productRepository.save(dumpProduct1);
+        productRepository.save(dumpProduct2); 
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("name").ascending()); 
+        Slice<ProductName> products = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("Jordan", 99999L, pageable);
+        Slice<ProductName> productsNike = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("NIKE", 0L, pageable);
+        Slice<ProductName> productsSomething = productRepository.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter("Something", 0L,  pageable);
+
+        assertEquals(0, products.getNumberOfElements());
         assertEquals(2, productsNike.getNumberOfElements());
         assertFalse(productsNike.hasNext());
         assertTrue(productsSomething.isEmpty());

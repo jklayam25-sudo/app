@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.AuthToken;
 import lumi.insert.app.entity.Employee;
@@ -31,6 +33,7 @@ public class AuthTokenRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void saveAuthToken_validEntity_shouldReturnSavedEntity(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")
@@ -40,6 +43,7 @@ public class AuthTokenRepositoryTest {
         Employee savedEmployee = employeeRepository.save(employee);
         
         AuthToken authToken = AuthToken.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .refreshToken("someRefreshToken")
         .employee(savedEmployee)
         .expiredAt(LocalDateTime.now().plusDays(1))
@@ -54,6 +58,7 @@ public class AuthTokenRepositoryTest {
     @DisplayName("Should return saved entity when entity found")
     void findByRefreshToken_foundEntity_shouldReturnSavedEntity(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")
@@ -63,6 +68,7 @@ public class AuthTokenRepositoryTest {
         Employee savedEmployee = employeeRepository.save(employee);
         
         AuthToken authToken = AuthToken.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .refreshToken("someRefreshToken")
         .employee(savedEmployee)
         .expiredAt(LocalDateTime.now().plusDays(1))
@@ -86,6 +92,7 @@ public class AuthTokenRepositoryTest {
     @DisplayName("Should delete entity")
     void deleteByRefreshToken_foundEntity_shouldReturnSavedEntity(){
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")
@@ -95,6 +102,7 @@ public class AuthTokenRepositoryTest {
         Employee savedEmployee = employeeRepository.save(employee);
         
         AuthToken authToken = AuthToken.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .refreshToken("someRefreshToken")
         .employee(savedEmployee)
         .expiredAt(LocalDateTime.now().plusDays(1))

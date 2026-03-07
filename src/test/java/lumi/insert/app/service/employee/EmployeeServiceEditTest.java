@@ -82,7 +82,7 @@ public class EmployeeServiceEditTest extends BaseEmployeeServiceTest{
     @DisplayName("Should thrown duplicateEntity when request username already exists")
     void updateEmployee_duplicateEntity_throwDuplicate(){
         when(employeeRepositoryMock.findById(setupEmployee.getId())).thenReturn(Optional.of(setupEmployee)); 
-        when(employeeRepositoryMock.existsByUsername("NEW NAME")).thenThrow(new DuplicateEntityException("A"));
+        when(employeeRepositoryMock.existsByUsername("NEW NAME")).thenReturn(true);
         EmployeeUpdateRequest employeeUpdateRequest = EmployeeUpdateRequest.builder()
         .username("NEW NAME")
         .build();

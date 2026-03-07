@@ -17,10 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import lumi.insert.app.dto.request.SupplierGetByFilter;
 import lumi.insert.app.dto.request.SupplierGetNameRequest;
 import lumi.insert.app.dto.response.SupplierDetailResponse;
-import lumi.insert.app.dto.response.SupplierNameResponse; 
+import lumi.insert.app.dto.response.SupplierNameResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplierControllerGetTest extends BaseSupplierControllerTest{
@@ -135,7 +138,7 @@ public class SupplierControllerGetTest extends BaseSupplierControllerTest{
 
     @Test
     void searchSupplierNamesAPI_FilterFoundEntity_returnOKAndListDTO() throws Exception{
-        when(supplierService.searchSupplierNames(any(SupplierGetNameRequest.class))).thenReturn(sliceNames);
+        when(supplierService.searchSupplierNames(any(SupplierGetNameRequest.class))).thenReturn(new SliceIndex<>(sliceNames));
 
         mockMvc.perform(
             get("/api/suppliers/searchName?name=test ger" )
@@ -152,7 +155,7 @@ public class SupplierControllerGetTest extends BaseSupplierControllerTest{
 
     @Test
     void searchSupplierNamesAPI_filterNotFoundEntity_returnOKAndListDTO() throws Exception{
-        when(supplierService.searchSupplierNames(any(SupplierGetNameRequest.class))).thenReturn(new SliceImpl<SupplierNameResponse>(List.of()));
+        when(supplierService.searchSupplierNames(any(SupplierGetNameRequest.class))).thenReturn(new SliceIndex<>(new SliceImpl<SupplierNameResponse>(List.of())));
 
         mockMvc.perform(
             get("/api/suppliers/searchName?name=test ger" )
@@ -165,6 +168,22 @@ public class SupplierControllerGetTest extends BaseSupplierControllerTest{
         .andExpect(jsonPath("$.errors").isEmpty());
 
         verify(supplierService, times(1)).searchSupplierNames(argThat(arg -> arg.getName().equals("test ger")));
+    }
+
+    @Test
+    void searchSupplierNamesAPI_checkLastId_returnOKAndListDTO() throws Exception{
+        when(supplierService.searchSupplierNames(any(SupplierGetNameRequest.class))).thenReturn(new SliceIndex<>(new SliceImpl<SupplierNameResponse>(List.of())));
+        UUID timeOrderedEpochFast = UuidCreator.getTimeOrderedEpochFast();
+        mockMvc.perform(
+            get("/api/suppliers/searchName?name=test ger&lastId=" + timeOrderedEpochFast)
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+        )
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.content.length()").value(0))
+        .andExpect(jsonPath("$.data.empty").value(true))
+        .andExpect(jsonPath("$.errors").isEmpty()); 
+        verify(supplierService, times(1)).searchSupplierNames(argThat(arg -> arg.getLastId().equals(timeOrderedEpochFast)));
     }
 
     @Test

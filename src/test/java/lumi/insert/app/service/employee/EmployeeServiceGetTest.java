@@ -2,7 +2,9 @@ package lumi.insert.app.service.employee;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,5 +71,13 @@ public class EmployeeServiceGetTest extends BaseEmployeeServiceTest{
         assertEquals(0, employeeDTO.getNumberOfElements()); 
         assertEquals(List.of(), employeeDTO.getContent());
         verify(employeeRepositoryMock, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Should throw not found when id not found")
+    void isExistsEmployeeByUsername_exists_returnTrue(){
+        when(employeeRepositoryMock.existsByUsername("Test")).thenReturn(true);
+
+        assertTrue(employeeServiceMock.isExistsEmployeeByUsername("Test"));
     }
 }

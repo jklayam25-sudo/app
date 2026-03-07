@@ -23,6 +23,7 @@ import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 
@@ -90,7 +91,9 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
             return productNameResponse;
         });
 
-        when(productService.searchProductNames(any(ProductGetNameRequest.class))).thenReturn(map);
+        
+
+        when(productService.searchProductNames(any(ProductGetNameRequest.class))).thenReturn(new SliceIndex<>(map));
 
         mockMvc.perform(
             get("/api/products/searchName?name=pro")

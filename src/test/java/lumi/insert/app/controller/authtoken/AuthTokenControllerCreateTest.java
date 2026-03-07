@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+
 import jakarta.servlet.http.Cookie;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.exception.AuthenticationTokenException;
@@ -134,6 +136,25 @@ public class AuthTokenControllerCreateTest extends BaseAuthTokenControllerTest{
         .andDo(print())
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.errors").value("Bad credentials, wrong password!"))
+        .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("should return BadCredentialsException when password wrong")
+    public void loginAuthAPI_invalidTokenJWT_shouldReturnBadReq() throws Exception{ 
+        when(authTokenService.createAuthToken(any())).thenThrow(new JWTVerificationException(""));
+
+        mockMvc.perform(
+            post("/api/auth/login")
+            .with(csrf())
+            .accept(MediaType.APPLICATION_JSON_VALUE)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED) 
+            .param("username", setupEmployee.getUsername()) 
+            .param("password", "secret$") 
+        )
+        .andDo(print())
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.errors").value("Access token invalid, try to login again"))
         .andExpect(jsonPath("$.data").isEmpty());
     }
 

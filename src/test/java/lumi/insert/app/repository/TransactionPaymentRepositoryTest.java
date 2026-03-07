@@ -18,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
- 
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional; 
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.entity.Customer;
@@ -51,7 +53,7 @@ public class TransactionPaymentRepositoryTest {
 
     @BeforeEach
     void setup(){
-        customer = customerRepository.save(Customer.builder().name("Test").contact("test").shippingAddress("test").build());
+        customer = customerRepository.save(Customer.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("Test").contact("test").shippingAddress("test").build());
     }
  
 
@@ -61,6 +63,7 @@ public class TransactionPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
         .build();
@@ -68,6 +71,7 @@ public class TransactionPaymentRepositoryTest {
        Transaction savedTransaction = transactionRepository.save(transaction);
  
         TransactionPayment transactionPayment = TransactionPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .transaction(savedTransaction)
         .totalPayment(1000L)
         .paymentFrom("Incart Global Lte - 2432131")
@@ -87,6 +91,7 @@ public class TransactionPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
             Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
             .build();
@@ -96,6 +101,7 @@ public class TransactionPaymentRepositoryTest {
             
         for (int i = 0; i < 3; i++) {
             TransactionPayment transactionPayment = TransactionPayment.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .transaction(savedTransaction)
                 .totalPayment(1000L * i)
                 .paymentFrom("Incart Global Lte - 2432131")
@@ -126,6 +132,7 @@ public class TransactionPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
             .build();
@@ -133,6 +140,7 @@ public class TransactionPaymentRepositoryTest {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         TransactionPayment transactionPaymentSuccess = TransactionPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(1500L)
@@ -140,6 +148,7 @@ public class TransactionPaymentRepositoryTest {
         .build();
 
         TransactionPayment transactionPaymentFail = TransactionPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(2100L)
@@ -168,11 +177,13 @@ public class TransactionPaymentRepositoryTest {
         String invoiceIdA = invoiceGenerator.generate();
 
         Transaction transactionA = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceIdA)
             .customer(customer)
             .build();
 
         Transaction transactionB = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
             .build();
@@ -180,6 +191,7 @@ public class TransactionPaymentRepositoryTest {
         List<Transaction> savedTransaction = transactionRepository.saveAllAndFlush(List.of(transactionA, transactionB));
 
         TransactionPayment transactionPaymentSuccess = TransactionPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(1500L)
@@ -187,6 +199,7 @@ public class TransactionPaymentRepositoryTest {
         .build();
 
         TransactionPayment transactionPaymentFail = TransactionPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(2100L)

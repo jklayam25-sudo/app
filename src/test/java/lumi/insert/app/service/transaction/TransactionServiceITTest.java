@@ -3,6 +3,7 @@ package lumi.insert.app.service.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -62,13 +66,14 @@ public class TransactionServiceITTest {
 
     @BeforeEach
     void setup(){ 
-        customer = customerRepository.save(Customer.builder().name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
+        customer = customerRepository.save(Customer.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
     }
     
     @Test
     @DisplayName("Should return TransactionResponse DTO when set transaction.status to Process succeed")
     public void setTransactionToProcess_validRequest_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
             .build();
@@ -89,6 +94,7 @@ public class TransactionServiceITTest {
 
     
             TransactionItem transactionItem = TransactionItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(savedProduct.getSellPrice())
                 .quantity(1L + i)
                 .description(savedProduct.getName())
@@ -129,6 +135,7 @@ public class TransactionServiceITTest {
     @DisplayName("Should calculate and refresh the items, return TransactionResponse DTO when succeed")
     public void refreshTransaction_validRequest_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
             .build();
@@ -149,6 +156,7 @@ public class TransactionServiceITTest {
 
     
             TransactionItem transactionItem = TransactionItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(savedProduct.getSellPrice())
                 .quantity(1L + i)
                 .description(savedProduct.getName())
@@ -180,6 +188,7 @@ public class TransactionServiceITTest {
     @DisplayName("Should calculate and cancel the items, return TransactionResponse DTO when succeed")
     public void cancelTransaction_validRequest_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .status(TransactionStatus.PROCESS)
             .totalPaid(4000L)
@@ -202,6 +211,7 @@ public class TransactionServiceITTest {
 
     
             TransactionItem transactionItem = TransactionItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(savedProduct.getSellPrice())
                 .quantity(1L + i)
                 .description(savedProduct.getName())
@@ -224,13 +234,13 @@ public class TransactionServiceITTest {
         assertEquals(4000, setTransactionToProcess.totalUnrefunded());
         assertEquals(TransactionStatus.CANCELLED, setTransactionToProcess.status()); 
 
-        Slice<StockCard> stockcards = stockCardRepository.findAllByReferenceId(savedTransaction.getTransactionItems().getLast().getId());
-        assertEquals(1, stockcards.getNumberOfElements());
-        assertEquals(14L, stockcards.getContent().getLast().getOldStock());
-        assertEquals(5L, stockcards.getContent().getLast().getQuantity());
-        assertEquals(StockMove.CUSTOMER_IN, stockcards.getContent().getLast().getType());
-        assertEquals(19L, stockcards.getContent().getLast().getNewStock());
-        assertEquals("Product-4", stockcards.getContent().getLast().getProductName());
+        List<StockCard> stockcards = stockCardRepository.findAll(Sort.by("id").ascending());
+        assertEquals(4, stockcards.size());
+        assertEquals(14L, stockcards.getLast().getOldStock());
+        assertEquals(5L, stockcards.getLast().getQuantity());
+        assertEquals(StockMove.CUSTOMER_IN, stockcards.getLast().getType());
+        assertEquals(19L, stockcards.getLast().getNewStock());
+        assertEquals("Product-4", stockcards.getLast().getProductName());
 
         product3 = productRepository.findById(idProduct3).orElseThrow();
         assertEquals(4, product3.getStockQuantity());
@@ -240,6 +250,7 @@ public class TransactionServiceITTest {
     @DisplayName("Should calculate and cancel the items, return TransactionResponse DTO when succeed. CASE : CUSTOMER PAID, REFUND 1 ITEM (OUR DEBT) THEN CANCEL")
     public void cancelTransaction_validRequestCase_returnTransactionResponse(){
         Transaction transaction = Transaction.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .status(TransactionStatus.PROCESS)
             .totalPaid(4000L)
@@ -261,6 +272,7 @@ public class TransactionServiceITTest {
             Product savedProduct = productRepository.saveAndFlush(product);
             
             TransactionItem transactionItem = TransactionItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(savedProduct.getSellPrice())
                 .quantity(1L + i)
                 .description(savedProduct.getName())
@@ -280,6 +292,7 @@ public class TransactionServiceITTest {
         Product product3 = productRepository.findById(idProduct3).orElseThrow();
 
         TransactionItem transactionItem = TransactionItem.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .price(product3.getSellPrice())
                 .quantity(-2L)
                 .description(product3.getName())
@@ -300,13 +313,13 @@ public class TransactionServiceITTest {
         assertEquals(4100, setTransactionToProcess.totalUnrefunded());
         assertEquals(TransactionStatus.CANCELLED, setTransactionToProcess.status()); 
 
-        Slice<StockCard> stockcards = stockCardRepository.findAllByReferenceId(idItems3);
-        assertEquals(1, stockcards.getNumberOfElements());
-        assertEquals(0L, stockcards.getContent().getLast().getOldStock());
-        assertEquals(2L, stockcards.getContent().getLast().getQuantity());
-        assertEquals(StockMove.CUSTOMER_IN, stockcards.getContent().getLast().getType());
-        assertEquals(2L, stockcards.getContent().getLast().getNewStock());
-        assertEquals("Product-3", stockcards.getContent().getLast().getProductName());
+        List<StockCard> stockcards = stockCardRepository.findAll(Sort.by("id").ascending());
+        assertEquals(5, stockcards.size());
+        assertEquals(15L, stockcards.getLast().getOldStock());
+        assertEquals(6L, stockcards.getLast().getQuantity());
+        assertEquals(StockMove.CUSTOMER_IN, stockcards.getLast().getType());
+        assertEquals(21L, stockcards.getLast().getNewStock());
+        assertEquals("Product-5", stockcards.getLast().getProductName());
 
         product3 = productRepository.findById(idProduct3).orElseThrow();
         assertEquals(2, product3.getStockQuantity());

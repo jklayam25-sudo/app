@@ -1,8 +1,7 @@
 package lumi.insert.app.service.authtoken;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit; 
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock; 
 import org.mockito.junit.jupiter.MockitoExtension; 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.dto.response.EmployeeResponse;
@@ -51,7 +52,7 @@ public abstract class BaseAuthTokenServiceTest {
     @BeforeEach
     void setup(){
         setupEmployee = Employee.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("testUsername")
         .fullname("testFullname")
         .password("SECRET")
@@ -62,9 +63,9 @@ public abstract class BaseAuthTokenServiceTest {
         setupAuthToken = AuthToken.builder()
         .employee(setupEmployee)
         .expiredAt(LocalDateTime.now().plus(7, ChronoUnit.DAYS))
-        .refreshToken(UUID.randomUUID().toString())
+        .refreshToken(UuidCreator.getTimeOrderedEpochFast().toString())
         .build();
 
-        authTokenResponse = new AuthTokenResponse("someAccessToken", UUID.randomUUID().toString(), new EmployeeResponse(setupEmployee.getId(), setupEmployee.getUsername(), setupEmployee.getFullname(), setupEmployee.getRole()), LocalDateTime.now().plusDays(7), null);
+        authTokenResponse = new AuthTokenResponse("someAccessToken", UuidCreator.getTimeOrderedEpochFast().toString(), new EmployeeResponse(setupEmployee.getId(), setupEmployee.getUsername(), setupEmployee.getFullname(), setupEmployee.getRole()), LocalDateTime.now().plusDays(7), null);
     }
 }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
@@ -21,12 +22,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.CustomerGetNameRequest;
 import lumi.insert.app.dto.response.CustomerDetailResponse;
 import lumi.insert.app.dto.response.CustomerNameResponse;
 import lumi.insert.app.dto.response.CustomerResponse;
 import lumi.insert.app.entity.Customer;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CustomerServiceGetTest extends BaseCustomerServiceTest{
@@ -54,16 +58,16 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
         CustomerNameResponse name = new CustomerNameResponse(setupCustomer.getId(), setupCustomer.getName());
 
         Slice<CustomerNameResponse> slices = new SliceImpl<>(List.of(name));
-        when(customerRepository.getByNameContainingIgnoreCase(eq("tes"), any(Pageable.class))).thenReturn(slices);
+        when(customerRepository.getByNameContainingIgnoreCaseAndIdAfter(eq("tes"), any(UUID.class), any(Pageable.class))).thenReturn(slices);
 
         CustomerGetNameRequest request = CustomerGetNameRequest.builder()
         .name("tes")
         .build();
 
-        Slice<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
+        SliceIndex<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
         assertEquals(1, customer.getNumberOfElements());
         assertEquals(setupCustomer.getName(), customer.getContent().getFirst().name());
-        verify(customerRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
+        verify(customerRepository, times(1)).getByNameContainingIgnoreCaseAndIdAfter(any(), eq(new UUID(0, 0)), argThat(arg -> arg.getPageSize() == 10));
     }
 
     @Test
@@ -71,16 +75,18 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
     void searchProductNames_notFoundEntity_returnEmptyCustomerNameDTO(){ 
 
         Slice<CustomerNameResponse> slices = new SliceImpl<>(List.of());
-        when(customerRepository.getByNameContainingIgnoreCase(eq("tes"), any(Pageable.class))).thenReturn(slices);
+        when(customerRepository.getByNameContainingIgnoreCaseAndIdAfter(eq("tes"), any(UUID.class), any(Pageable.class))).thenReturn(slices);
 
         CustomerGetNameRequest request = CustomerGetNameRequest.builder()
         .name("tes")
+        .lastId(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
-        Slice<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
+        SliceIndex<CustomerNameResponse> customer = customerServiceMock.searchCustomerNames(request);
         assertEquals(0, customer.getNumberOfElements());
         assertEquals(List.of(), customer.getContent());
-        verify(customerRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
+        assertEquals(false, customer.hasPrevious());
+        verify(customerRepository, times(1)).getByNameContainingIgnoreCaseAndIdAfter(any(), eq(request.getLastId()) , argThat(arg -> arg.getPageSize() == 10));
     }
 
     @Test

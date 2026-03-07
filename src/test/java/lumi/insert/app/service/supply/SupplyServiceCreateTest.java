@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,7 +38,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
         setupProduct.setStockQuantity(0L);
 
         Supplier supplier = Supplier.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .totalUnpaid(10L)
         .build();
 
@@ -50,7 +52,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
         .invoiceId("INV-XXX-XXX")
         .totalFee(0L)
         .totalDiscount(0L)
-        .items(List.of(SupplyItemCreate.builder().productId(setupProduct.getId()).price(400L).quantity(27L).build()))
+        .supplyItems(List.of(SupplyItemCreate.builder().productId(setupProduct.getId()).price(400L).quantity(27L).build()))
         .build();
 
         SupplyResponse supply = supplyServiceMock.createSupply(request);
@@ -91,7 +93,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
         setupProduct.setStockQuantity(13L);
 
         Supplier supplier = Supplier.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .totalUnpaid(10L)
         .build();
 
@@ -105,7 +107,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
         .invoiceId("INV-XXX-XXX")
         .totalFee(0L)
         .totalDiscount(0L)
-        .items(List.of(SupplyItemCreate.builder().productId(setupProduct.getId()).price(400L).quantity(27L).build()))
+        .supplyItems(List.of(SupplyItemCreate.builder().productId(setupProduct.getId()).price(400L).quantity(27L).build()))
         .build();
 
         SupplyResponse supply = supplyServiceMock.createSupply(request);
@@ -152,7 +154,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
     @DisplayName("Should throw notFound when one or more of product request to add not found")
     public void createSupply_requestProductToAddNotFound_throwNotFound(){ 
         Supplier supplier = Supplier.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .totalUnpaid(10L)
         .build();
  
@@ -165,7 +167,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
         .invoiceId("INV-XXX-XXX")
         .totalFee(0L)
         .totalDiscount(0L)
-        .items(List.of(
+        .supplyItems(List.of(
             SupplyItemCreate.builder().productId(setupProduct.getId()).price(400L).quantity(27L).build(),
             SupplyItemCreate.builder().productId(777L).price(400L).quantity(27L).build()
         ))
@@ -178,7 +180,7 @@ public class SupplyServiceCreateTest extends BaseSupplyServiceTest{
     // @DisplayName("Should throw Tranaction validation exc when supplier is inactive")
     // public void createSupply_inactiveSupplier_throwSupplyValidationj(){ 
     //     Supplier supplier = Supplier.builder()
-    //     .id(UUID.randomUUID())
+    //     .id(UuidCreator.getTimeOrderedEpochFast())
     //     .isActive(false)
     //     .build();
 

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,7 @@ public class SupplyServiceGetTest extends BaseSupplyServiceTest{
     @Test
     @DisplayName("Should thrown NotFoundEntity Exception when finding supply result in none at DB")
     public void getSupply_invalidId_thrownNotFoundEntity(){
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
         when(supplyRepositoryMock.findByIdDetail(randomUUID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundEntityException.class, () -> supplyServiceMock.getSupply(randomUUID));

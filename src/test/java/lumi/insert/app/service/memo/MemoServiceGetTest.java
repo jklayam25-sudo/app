@@ -9,6 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +60,7 @@ public class MemoServiceGetTest extends BaseMemoServiceTest{
 
         Slice<MemoResponse> slices = new SliceImpl<>(List.of(memoResponse));
         EmployeeLogin login = EmployeeLogin.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .role(EmployeeRole.CASHIER)
         .username("Employee A")
         .build();
@@ -76,7 +78,7 @@ public class MemoServiceGetTest extends BaseMemoServiceTest{
     @Test
     void getMemos_notFoundEntity_returnSliceDTO(){  
         EmployeeLogin login = EmployeeLogin.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .role(EmployeeRole.CASHIER)
         .username("Employee A")
         .build();

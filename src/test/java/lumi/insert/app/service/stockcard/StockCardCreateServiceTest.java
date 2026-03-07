@@ -39,7 +39,7 @@ public class StockCardCreateServiceTest extends BaseStockCardServiceTest{
 
         StockCardResponse stockCardRes = stockCardService.createStockCard(request);
 
-        assertEquals(setupProduct.getBasePrice(), stockCardRes.basePrice());
+        assertEquals(setupProduct.getBasePrice(), stockCardRes.newPrice());
         assertEquals(10L, stockCardRes.oldStock());
         assertEquals(setupProduct.getName(), stockCardRes.productName());
         assertEquals(5L, stockCardRes.newStock());

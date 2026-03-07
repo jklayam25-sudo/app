@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Employee;
 import lumi.insert.app.entity.Memo;
@@ -38,6 +40,7 @@ public class MemoViewRepositoryTest {
         Memo savedMemo = memoRepository.save(cashierMemo);;
 
         Employee employee = Employee.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .username("TESTEMPLOYE")
         .fullname("TESTEMPLOYE")
         .password("TESTEMPLOYE")

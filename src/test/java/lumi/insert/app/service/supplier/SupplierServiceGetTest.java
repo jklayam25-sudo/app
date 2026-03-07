@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
@@ -21,11 +22,14 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import lumi.insert.app.dto.request.SupplierGetByFilter;
 import lumi.insert.app.dto.request.SupplierGetNameRequest;
 import lumi.insert.app.dto.response.SupplierDetailResponse;
 import lumi.insert.app.dto.response.SupplierNameResponse; 
 import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplierServiceGetTest extends BaseSupplierServiceTest{
@@ -53,16 +57,17 @@ public class SupplierServiceGetTest extends BaseSupplierServiceTest{
         SupplierNameResponse name = new SupplierNameResponse(setupSupplier.getId(), setupSupplier.getName());
 
         Slice<SupplierNameResponse> slices = new SliceImpl<>(List.of(name));
-        when(supplierRepository.getByNameContainingIgnoreCase(eq("tes"), any(Pageable.class))).thenReturn(slices);
+        when(supplierRepository.getByNameContainingIgnoreCaseAndIdAfter(eq("tes"),any(UUID.class), any(Pageable.class))).thenReturn(slices);
 
         SupplierGetNameRequest request = SupplierGetNameRequest.builder()
         .name("tes")
+        .lastId(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
-        Slice<SupplierNameResponse> Supplier = supplierServiceMock.searchSupplierNames(request);
+        SliceIndex<SupplierNameResponse> Supplier = supplierServiceMock.searchSupplierNames(request);
         assertEquals(1, Supplier.getNumberOfElements());
         assertEquals(setupSupplier.getName(), Supplier.getContent().getFirst().name());
-        verify(supplierRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
+        verify(supplierRepository, times(1)).getByNameContainingIgnoreCaseAndIdAfter(any(), eq(request.getLastId()), argThat(arg -> arg.getPageSize() == 10));
     }
 
     @Test
@@ -70,16 +75,16 @@ public class SupplierServiceGetTest extends BaseSupplierServiceTest{
     void searchProductNames_notFoundEntity_returnEmptySupplierNameDTO(){ 
 
         Slice<SupplierNameResponse> slices = new SliceImpl<>(List.of());
-        when(supplierRepository.getByNameContainingIgnoreCase(eq("tes"), any(Pageable.class))).thenReturn(slices);
+        when(supplierRepository.getByNameContainingIgnoreCaseAndIdAfter(eq("tes"),any(UUID.class), any(Pageable.class))).thenReturn(slices);
 
         SupplierGetNameRequest request = SupplierGetNameRequest.builder()
         .name("tes")
         .build();
 
-        Slice<SupplierNameResponse> Supplier = supplierServiceMock.searchSupplierNames(request);
+        SliceIndex<SupplierNameResponse> Supplier = supplierServiceMock.searchSupplierNames(request);
         assertEquals(0, Supplier.getNumberOfElements());
         assertEquals(List.of(), Supplier.getContent());
-        verify(supplierRepository, times(1)).getByNameContainingIgnoreCase(any(), argThat(arg -> arg.getPageSize() == 10));
+        verify(supplierRepository, times(1)).getByNameContainingIgnoreCaseAndIdAfter(any(), eq(new UUID(0, 0)), argThat(arg -> arg.getPageSize() == 10));
     }
 
     @Test

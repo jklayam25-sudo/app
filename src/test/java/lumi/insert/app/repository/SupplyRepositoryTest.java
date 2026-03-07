@@ -21,7 +21,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
-  
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.SupplyGetByFilter;
@@ -53,6 +55,7 @@ public class SupplyRepositoryTest {
     @BeforeEach
     public void setup(){
         Supplier supplier1 = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("Supplier 1")
         .email("TEST@mail.com")
         .contact("081234567890") 
@@ -67,6 +70,7 @@ public class SupplyRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(setupSupplier)
         .build();
@@ -83,6 +87,7 @@ public class SupplyRepositoryTest {
     @DisplayName("Should thrown jpa data error when base field < invoiceId is null")
     public void createSupply_nullableField_throwError(){
         Supply supply = Supply.builder() 
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .supplier(setupSupplier)
         .build();
         
@@ -96,6 +101,7 @@ public class SupplyRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(setupSupplier)
         .build();
@@ -125,6 +131,7 @@ public class SupplyRepositoryTest {
         for (int i = 1; i < 3; i++) {
             if(i%2 == 0) {
                 Supply supply = Supply.builder()
+                    .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .status(SupplyStatus.CANCELLED)
                     .supplier(setupSupplier)
@@ -133,6 +140,7 @@ public class SupplyRepositoryTest {
                  pendingSupplys.add(supply);
             } else {
                 Supply supply = Supply.builder()
+                    .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .supplier(setupSupplier)
                     .build();
@@ -163,6 +171,7 @@ public class SupplyRepositoryTest {
         String matchInvoiceId = invoiceGenerator.generate();
 
         Supply matchSupply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .supplier(setupSupplier)
@@ -171,6 +180,7 @@ public class SupplyRepositoryTest {
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Supply unmatchSupply2 = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .supplier(setupSupplier)
@@ -179,6 +189,7 @@ public class SupplyRepositoryTest {
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Supply unmatchSupply3 = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .status(SupplyStatus.CANCELLED)
         .totalPaid(150L)
@@ -214,6 +225,7 @@ public class SupplyRepositoryTest {
         String matchInvoiceId = invoiceGenerator.generate();
  
         Supplier supplier2 = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("Supplier 2")
         .email("TEST1@mail.com")
         .contact("0812314567890") 
@@ -222,6 +234,7 @@ public class SupplyRepositoryTest {
         Supplier savedSupplier2 = supplierRepository.saveAndFlush(supplier2);;
 
         Supply matchSupply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .supplier(setupSupplier)
@@ -230,6 +243,7 @@ public class SupplyRepositoryTest {
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Supply unmatchSupply2 = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .supplier(savedSupplier2)

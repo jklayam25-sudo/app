@@ -18,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-  
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.SupplyPaymentGetByFilter;
 import lumi.insert.app.entity.Supplier;
@@ -51,7 +53,7 @@ public class SupplyPaymentRepositoryTest {
 
     @BeforeEach
     void setup(){
-        supplier = supplierRepository.save(Supplier.builder().name("Test").contact("test").build());
+        supplier = supplierRepository.save(Supplier.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("Test").contact("test").build());
     }
  
 
@@ -61,6 +63,7 @@ public class SupplyPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
         .build();
@@ -68,6 +71,7 @@ public class SupplyPaymentRepositoryTest {
        Supply savedSupply = supplyRepository.save(supply);
  
         SupplyPayment supplyPayment = SupplyPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .supply(savedSupply)
         .totalPayment(1000L)
         .paymentFrom("Incart Global Lte - 2432131")
@@ -87,6 +91,7 @@ public class SupplyPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
             Supply supply = Supply.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
             .build();
@@ -96,6 +101,7 @@ public class SupplyPaymentRepositoryTest {
             
         for (int i = 0; i < 3; i++) {
             SupplyPayment supplyPayment = SupplyPayment.builder()
+                .id(UuidCreator.getTimeOrderedEpochFast())
                 .supply(savedSupply)
                 .totalPayment(1000L * i)
                 .paymentFrom("Incart Global Lte - 2432131")
@@ -126,6 +132,7 @@ public class SupplyPaymentRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
             .build();
@@ -133,6 +140,7 @@ public class SupplyPaymentRepositoryTest {
         Supply savedSupply = supplyRepository.save(supply);
 
         SupplyPayment supplyPaymentSuccess = SupplyPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(1500L)
@@ -140,6 +148,7 @@ public class SupplyPaymentRepositoryTest {
         .build();
 
         SupplyPayment supplyPaymentFail = SupplyPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(2100L)
@@ -168,11 +177,13 @@ public class SupplyPaymentRepositoryTest {
         String invoiceIdA = invoiceGenerator.generate();
 
         Supply supplyA = Supply.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceIdA)
             .supplier(supplier)
             .build();
 
         Supply supplyB = Supply.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .supplier(supplier)
             .build();
@@ -180,6 +191,7 @@ public class SupplyPaymentRepositoryTest {
         List<Supply> savedSupply = supplyRepository.saveAllAndFlush(List.of(supplyA, supplyB));
 
         SupplyPayment supplyPaymentSuccess = SupplyPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(1500L)
@@ -187,6 +199,7 @@ public class SupplyPaymentRepositoryTest {
         .build();
 
         SupplyPayment supplyPaymentFail = SupplyPayment.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .paymentFrom("from")
         .paymentTo("to")
         .totalPayment(2100L)

@@ -31,7 +31,7 @@ public abstract class BaseStockCardControllerTest {
     @MockitoBean
     StockCardServiceImpl stockCardService;
 
-    StockCardResponse stockCardResponse = new StockCardResponse(UUID.randomUUID(), UUID.randomUUID(), 1L, "Product", -5L, 10L, 5L, 1000L, StockMove.CUSTOMER_OUT, null, LocalDateTime.now());
+    StockCardResponse stockCardResponse = new StockCardResponse(UUID.randomUUID(), UUID.randomUUID(), 1L, "Product", -5L, 10L, 5L, 1000L, 1000L, StockMove.CUSTOMER_OUT, null, LocalDateTime.now());
 
     List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("OWNER");
 

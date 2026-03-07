@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -28,7 +30,7 @@ public class TransactionServiceGetTest extends BaseTransactionServiceTest{
     @Test
     @DisplayName("Should thrown NotFoundEntity Exception when finding transaction result in none at DB")
     public void getTransaction_invalidId_thrownNotFoundEntity(){
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
         when(transactionRepositoryMock.findById(randomUUID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.getTransaction(randomUUID));
@@ -37,7 +39,7 @@ public class TransactionServiceGetTest extends BaseTransactionServiceTest{
     @Test
     @DisplayName("Should return TransactionResponse DTO when finding transaction result in succeed")
     public void getTransaction_validId_returnTransactionResponse(){
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
         Transaction mockTransaction = Transaction.builder()
         .id(randomUUID)
         .build();
@@ -51,7 +53,7 @@ public class TransactionServiceGetTest extends BaseTransactionServiceTest{
     @Test
     @DisplayName("Should return Slice of filtered TransactionResponse DTO when finding transaction result in succeed")
     public void searchTransactionsByRequests_validFilter_returnSliceTransactionResponse(){
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
         Transaction mockTransaction = Transaction.builder()
         .id(randomUUID)
         .build();

@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import java.util.Optional;
-import java.util.UUID;
+
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ public class TransactionServiceCreateTest extends BaseTransactionServiceTest{
     @DisplayName("Should return TransactionResponse DTO when creating transaction is successful")
     public void createTransaction_validRequest_returnTransactionResponse(){
         Customer customer = Customer.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         when(transactionRepositoryMock.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
@@ -43,7 +45,7 @@ public class TransactionServiceCreateTest extends BaseTransactionServiceTest{
     @DisplayName("Should throw notFound when customer not found")
     public void createTransaction_invalidCustomer_throwNotFound(){ 
         Customer customer = Customer.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         when(customerRepositoryMock.findById(customer.getId())).thenReturn(Optional.empty());
@@ -56,7 +58,7 @@ public class TransactionServiceCreateTest extends BaseTransactionServiceTest{
     @DisplayName("Should throw Tranaction validation exc when customer is inactive")
     public void createTransaction_inactiveCustomer_throwTransactionValidationj(){ 
         Customer customer = Customer.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .isActive(false)
         .build();
 

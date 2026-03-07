@@ -121,7 +121,7 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
     @Test
     @DisplayName("should return Transaction item Response when request Trx item found")
     public void getTransactionItemByTrxIdProIdAPI_validId_shouldReturnEntity() throws Exception{
-        when(transactionItemService.getTransactionByTransactionIdAndProductId(any(UUID.class), any(Long.class))).thenReturn(transactionItemResponse);
+        when(transactionItemService.getTransactionByTransactionIdAndProductId(any(UUID.class), any(Long.class))).thenReturn(new SliceImpl<>(List.of(transactionItemResponse)));
 
         mockMvc.perform(
             get("/api/transactions/" + UUID.randomUUID().toString() + "/items/product/" + 1L)
@@ -129,9 +129,10 @@ public class TransactionItemControllerGetTest  extends BaseTransactionItemContro
         )
         .andDo(print()) 
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.id").value(transactionItemResponse.id().toString()))
-        .andExpect(jsonPath("$.data.transactionId").value(transactionItemResponse.transactionId().toString()))
-        .andExpect(jsonPath("$.data.productId").value(transactionItemResponse.productId()))
+        .andExpect(jsonPath("$.data.numberOfElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].id").value(transactionItemResponse.id().toString()))
+        .andExpect(jsonPath("$.data.content[0].transactionId").value(transactionItemResponse.transactionId().toString()))
+        .andExpect(jsonPath("$.data.content[0].productId").value(transactionItemResponse.productId()))
         .andExpect(jsonPath("$.errors").isEmpty());
     }
 

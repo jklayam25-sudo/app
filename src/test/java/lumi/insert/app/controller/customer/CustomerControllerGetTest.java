@@ -21,6 +21,7 @@ import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.CustomerGetNameRequest;
 import lumi.insert.app.dto.response.CustomerNameResponse;
 import lumi.insert.app.dto.response.CustomerResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CustomerControllerGetTest extends BaseCustomerControllerTest{
@@ -135,7 +136,7 @@ public class CustomerControllerGetTest extends BaseCustomerControllerTest{
 
     @Test
     void searchCustomerNamesAPI_FilterFoundEntity_returnOKAndListDTO() throws Exception{
-        when(customerService.searchCustomerNames(any(CustomerGetNameRequest.class))).thenReturn(sliceNames);
+        when(customerService.searchCustomerNames(any(CustomerGetNameRequest.class))).thenReturn(new SliceIndex<>(sliceNames));
 
         mockMvc.perform(
             get("/api/customers/searchName?name=test ger" )
@@ -152,7 +153,7 @@ public class CustomerControllerGetTest extends BaseCustomerControllerTest{
 
     @Test
     void searchCustomerNamesAPI_filterNotFoundEntity_returnOKAndListDTO() throws Exception{
-        when(customerService.searchCustomerNames(any(CustomerGetNameRequest.class))).thenReturn(new SliceImpl<CustomerNameResponse>(List.of()));
+        when(customerService.searchCustomerNames(any(CustomerGetNameRequest.class))).thenReturn(new SliceIndex<>(new SliceImpl<CustomerNameResponse>(List.of())));
 
         mockMvc.perform(
             get("/api/customers/searchName?name=test ger" )

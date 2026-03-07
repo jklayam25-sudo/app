@@ -23,6 +23,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     @Test
     @DisplayName("Should calcute Transaction total , return TransactionPaymentResponse DTO when creating transaction payment is successful")
     public void createTransactionPayment_validRequest_returnTransactionPaymentResponse(){
+        setupTransaction.setCustomer(setupCustomer);
         setupTransaction.setTotalUnpaid(1000000L);
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
@@ -47,6 +48,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     @Test
     @DisplayName("Should set transaction complete and calcute Transaction total , return TransactionPaymentResponse DTO when creating transaction payment is successful")
     public void createTransactionPayment_fullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setCustomer(setupCustomer);
         setupTransaction.setTotalUnpaid(1000000L);
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
@@ -91,6 +93,8 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     @Test
     @DisplayName("Should calcute Transaction refund debt , return TransactionPaymentResponse DTO when creating refund transaction payment is successful")
     public void refundTransactionPayment_nonFullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setCustomer(setupCustomer);
+
         setupTransaction.setTotalUnrefunded(1000000L);
         setupTransaction.setTotalRefunded(12000L);
         setupTransaction.setStatus(TransactionStatus.PROCESS);
@@ -117,6 +121,7 @@ public class TransactionPaymentServiceCreateTest extends BaseTransactionPaymentS
     @Test
     @DisplayName("Should set transaction complete and calcute Transaction refund debt , return TransactionPaymentResponse DTO when creating refund transaction payment is successful")
     public void refundTransactionPayment_fullPayment_returnTransactionPaymentResponse(){
+        setupTransaction.setCustomer(setupCustomer);
         setupTransaction.setTotalUnrefunded(1000000L);
         setupTransaction.setTotalRefunded(12000L);
         setupTransaction.setStatus(TransactionStatus.CANCELLED);

@@ -51,7 +51,7 @@ public class SupplyItemRepositoryTest {
 
     @BeforeEach
     void setup(){ 
-        supplier = supplierRepository.save(Supplier.builder().name("TESTES").contact("TESTE123").build());
+        supplier = supplierRepository.save(Supplier.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("TESTES").contact("TESTE123").build());
     }
 
     @Test
@@ -60,6 +60,7 @@ public class SupplyItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
         .build();
@@ -93,6 +94,7 @@ public class SupplyItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
         .build();
@@ -136,6 +138,7 @@ public class SupplyItemRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
             Supply supply = Supply.builder()
+            .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
             .build();

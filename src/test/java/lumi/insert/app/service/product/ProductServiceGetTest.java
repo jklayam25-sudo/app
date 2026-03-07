@@ -31,6 +31,7 @@ import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class ProductServiceGetTest extends BaseProductServiceTest{
@@ -70,15 +71,16 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
 
         Slice<ProductName> productSlice = new SliceImpl<>(products);
 
-        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
+        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter(eq("Pro"), eq(1L), any(Pageable.class))).thenReturn(productSlice);
 
         ProductGetNameRequest request = ProductGetNameRequest.builder()
         .name("Pro")
         .page(0)
         .size(5)
+        .lastId(1L)
         .build();
 
-        Slice<ProductName> allProductNames = productServiceMock.searchProductNames(request);
+        SliceIndex<ProductName> allProductNames = productServiceMock.searchProductNames(request);
 
         assertEquals(12, allProductNames.getNumberOfElements());
         assertEquals("Product 1", allProductNames.getContent().get(0).name());
@@ -94,7 +96,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
 
         Slice<ProductName> productSlice = new SliceImpl<>(List.of());
 
-        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrue(eq("Pro"), any(Pageable.class))).thenReturn(productSlice);
+        when(productRepositoryMock.getByNameContainingIgnoreCaseAndIsActiveTrueAndIdAfter(eq("Pro"), eq(0L) , any(Pageable.class))).thenReturn(productSlice);
 
         ProductGetNameRequest request = ProductGetNameRequest.builder()
         .name("Pro")
@@ -102,7 +104,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .size(5)
         .build();
 
-        Slice<ProductName> allProductNames = productServiceMock.searchProductNames(request);
+        SliceIndex<ProductName> allProductNames = productServiceMock.searchProductNames(request);
 
         assertEquals(0, allProductNames.getNumberOfElements());
         assertFalse(allProductNames.hasNext());

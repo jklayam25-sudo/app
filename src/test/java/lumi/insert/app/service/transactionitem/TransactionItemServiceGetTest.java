@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -31,27 +33,21 @@ public class TransactionItemServiceGetTest extends BaseTransactionItemServiceTes
         PaginationRequest request = PaginationRequest.builder() 
         .build();
         
-        Slice<TransactionItemResponse> transactionItemsByTransactionId = transactionItemServiceMock.getTransactionItemsByTransactionId(UUID.randomUUID(), request);  
+        Slice<TransactionItemResponse> transactionItemsByTransactionId = transactionItemServiceMock.getTransactionItemsByTransactionId(UuidCreator.getTimeOrderedEpochFast(), request);  
         assertEquals(1, transactionItemsByTransactionId.getNumberOfElements());
         assertEquals(setupTransactionItem.getPrice(), transactionItemsByTransactionId.getContent().getFirst().price());                                                   
-    }
-
-    @Test
-    @DisplayName("Should thrown not found error when transaction item not found")
-    public void getTransactionItemByTransactionIdAndProductId_invalidId_throwNotFoundError(){ 
-        when(transactionItemRepositoryMock.findByTransactionIdAndProductId(any(), any())).thenReturn(Optional.empty()); 
-
-        assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionByTransactionIdAndProductId(null, null));
-    }
+    } 
+ 
 
     @Test
     @DisplayName("Should return TransactionItemResponse when trxitem found")
     public void getTransactionItemByTransactionIdAndProductId_validId_throwNotFoundError(){ 
-        when(transactionItemRepositoryMock.findByTransactionIdAndProductId(any(), any())).thenReturn(Optional.of(setupTransactionItem)); 
+        when(transactionItemRepositoryMock.findByTransactionIdAndProductId(any(), any())).thenReturn(List.of(setupTransactionItem)); 
 
-         TransactionItemResponse transactionByTransactionIdAndProductId = transactionItemServiceMock.getTransactionByTransactionIdAndProductId(null, null);
+         Slice<TransactionItemResponse> transactionByTransactionIdAndProductId = transactionItemServiceMock.getTransactionByTransactionIdAndProductId(null, null);
 
-         assertEquals(setupTransactionItem.getId(), transactionByTransactionIdAndProductId.id());
+         assertEquals(1, transactionByTransactionIdAndProductId.getNumberOfElements());
+         assertEquals(setupTransactionItem.getId(), transactionByTransactionIdAndProductId.getContent().getFirst().id());
     }
 
     @Test
@@ -69,6 +65,6 @@ public class TransactionItemServiceGetTest extends BaseTransactionItemServiceTes
     public void getTransactionItem_invalidId_throwNotFoundError(){ 
         when(transactionItemRepositoryMock.findById(any())).thenReturn(Optional.empty()); 
 
-        assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionItem(UUID.randomUUID()));
+        assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionItem(UuidCreator.getTimeOrderedEpochFast()));
     }
 }

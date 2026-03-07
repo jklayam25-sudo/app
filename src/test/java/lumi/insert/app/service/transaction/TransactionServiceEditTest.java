@@ -3,6 +3,7 @@ package lumi.insert.app.service.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.eq; 
 import static org.mockito.Mockito.when;
  
@@ -12,6 +13,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
@@ -28,7 +31,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
     public void setTransactionToProcess_invalidId_throwNotFound(){
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundEntityException.class, ()-> transactionServiceMock.setTransactionToProcess(UUID.randomUUID()));
+        assertThrows(NotFoundEntityException.class, ()-> transactionServiceMock.setTransactionToProcess(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
@@ -37,7 +40,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
         setupTransaction.setStatus(TransactionStatus.COMPLETE);
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
-        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.setTransactionToProcess(UUID.randomUUID()));
+        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.setTransactionToProcess(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
@@ -45,13 +48,13 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
     public void setTransactionToComplete_invalidId_throwNotFound() {
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.setTransactionToComplete(UUID.randomUUID()));
+        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.setTransactionToComplete(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
     @DisplayName("Should throw BoilerplateException when transaction.status already Complete")
     public void setTransactionToComplete_alreadyComplete_throwBoilerPlate() {
-        UUID randomUUID = UUID.randomUUID();
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
         Transaction mockTransaction = Transaction.builder()
                 .id(randomUUID)
                 .status(TransactionStatus.COMPLETE)
@@ -65,7 +68,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
     @Test
     @DisplayName("Should throw ForbiddenRequestException when trying to complete a cancelled or pending transaction")
     public void setTransactionToComplete_invalidTransition_throwForbiddenRequest() {
-        UUID randomUUID = UUID.randomUUID(); 
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast(); 
         Transaction mockTransaction = Transaction.builder()
                 .id(randomUUID)
                 .status(TransactionStatus.PENDING)
@@ -82,7 +85,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
         setupTransaction.setStatus(TransactionStatus.CANCELLED);
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
-        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.cancelTransaction(UUID.randomUUID()));
+        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.cancelTransaction(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
@@ -90,12 +93,13 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
     public void cancelTransaction_invalidId_throwNotFound() {
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.cancelTransaction(UUID.randomUUID()));
+        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.cancelTransaction(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
     @DisplayName("Should cancel and add product stock when cancelTrx complete")
     public void cancelTransaction_validRequest_returnDtoAndReverseProduct() {
+        setupTransaction.setCustomer(setupCustomer);
         setupProduct.setStockQuantity(1L);
         setupProduct.setSellPrice(1000L);
 
@@ -109,8 +113,10 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
 
         when(productRepositoryMock.findAllById(List.of(1L))).thenReturn(List.of(setupProduct));
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
+        when(transactionItemRepositoryMock.saveAll(anyIterable())).thenAnswer(arg -> arg.getArgument(0));
+        when(stockCardRepositoryMock.saveAll(anyIterable())).thenAnswer(arg -> arg.getArgument(0));
 
-        TransactionResponse cancelTransaction = transactionServiceMock.cancelTransaction(UUID.randomUUID());
+        TransactionResponse cancelTransaction = transactionServiceMock.cancelTransaction(UuidCreator.getTimeOrderedEpochFast());
         assertEquals(TransactionStatus.CANCELLED, cancelTransaction.status());
         assertEquals(0L, cancelTransaction.totalPaid());
         assertEquals(4000L, cancelTransaction.totalUnrefunded());
@@ -134,7 +140,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
         when(productRepositoryMock.searchIdUpdatedAtMoreThan(eq(List.of(1L)), any())).thenReturn(List.of(productRefreshProjection));
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
-        TransactionResponse refreshTransaction = transactionServiceMock.refreshTransaction(UUID.randomUUID()); 
+        TransactionResponse refreshTransaction = transactionServiceMock.refreshTransaction(UuidCreator.getTimeOrderedEpochFast()); 
         assertEquals(2000L, refreshTransaction.grandTotal()); 
     }
 
@@ -156,7 +162,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
         when(productRepositoryMock.searchIdUpdatedAtMoreThan(eq(List.of(1L)), any())).thenReturn(List.of(productRefreshProjection));
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
-        TransactionResponse refreshTransaction = transactionServiceMock.refreshTransaction(UUID.randomUUID()); 
+        TransactionResponse refreshTransaction = transactionServiceMock.refreshTransaction(UuidCreator.getTimeOrderedEpochFast()); 
         assertEquals(0L, refreshTransaction.grandTotal()); 
         assertEquals("Product stock lesser than " + 2 + ", transaction quantity decreased to 0", refreshTransaction.messages().getFirst()); 
     }
@@ -167,7 +173,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
         setupTransaction.setStatus(TransactionStatus.CANCELLED);
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.of(setupTransaction));
 
-        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.refreshTransaction(UUID.randomUUID()));
+        assertThrows(ForbiddenRequestException.class, ()-> transactionServiceMock.refreshTransaction(UuidCreator.getTimeOrderedEpochFast()));
     }
 
     @Test
@@ -175,7 +181,7 @@ public class TransactionServiceEditTest extends BaseTransactionServiceTest{
     public void refreshTransaction_invalidId_throwNotFound() {
         when(transactionRepositoryMock.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.refreshTransaction(UUID.randomUUID()));
+        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.refreshTransaction(UuidCreator.getTimeOrderedEpochFast()));
     }
 
 }

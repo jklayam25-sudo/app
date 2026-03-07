@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-
+ 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired; 
@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional; 
 import lumi.insert.app.dto.request.SupplierGetByFilter;
@@ -37,6 +39,7 @@ public class SupplierRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void saveSupplier_validRequest_returnSaved(){
         Supplier supplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890") 
@@ -52,6 +55,7 @@ public class SupplierRepositoryTest {
     @DisplayName("Should return true when name already exists")
     void existsSupplierName_validRequest_returnTrue(){
         Supplier supplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890") 
@@ -65,23 +69,64 @@ public class SupplierRepositoryTest {
     @DisplayName("Should return searched name when get name found")
     void getSupplierName_validRequest_returnSliceOfName(){
         Supplier supplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890") 
         .build();
 
-        supplierRepository.saveAndFlush(supplier);
-        
-        Slice<SupplierNameResponse> names = supplierRepository.getByNameContainingIgnoreCase("test", PageRequest.of(0, 5));;
+        supplierRepository.saveAndFlush(supplier); 
+
+        Slice<SupplierNameResponse> names = supplierRepository.getByNameContainingIgnoreCaseAndIdAfter("test", new java.util.UUID(0, 0),PageRequest.of(0, 5));;
         assertEquals(1, names.getNumberOfElements()); 
         assertTrue(names.isLast()); 
         assertEquals(supplier.getName(), names.getContent().getFirst().name()); 
     }
 
     @Test
+    @DisplayName("Should return searched name when get name found")
+    void getSupplierName_notFoundAny_returnEmptySlice(){
+        Supplier supplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER")
+        .email("TEST@mail.com")
+        .contact("081234567890") 
+        .build();
+
+        supplierRepository.saveAndFlush(supplier); 
+
+        Slice<SupplierNameResponse> names = supplierRepository.getByNameContainingIgnoreCaseAndIdAfter("testoster", new java.util.UUID(0, 0),PageRequest.of(0, 5));;
+        assertEquals(0, names.getNumberOfElements());  
+    }
+
+    @Test
+    @DisplayName("Should return searched name when get name found")
+    void getSupplierName_lastIdCase_returnEmptySlice(){
+        Supplier supplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER")
+        .email("TEST@mail.com")
+        .contact("081234567890") 
+        .build();
+
+        Supplier supplier2 = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER123")
+        .email("TEST123@mail.com")
+        .contact("081234512367890") 
+        .build();
+
+        supplierRepository.saveAllAndFlush(List.of(supplier, supplier2)); 
+
+        Slice<SupplierNameResponse> names = supplierRepository.getByNameContainingIgnoreCaseAndIdAfter("test", supplier.getId(), PageRequest.of(0, 5));
+        assertEquals(1, names.getNumberOfElements());  
+    }
+
+    @Test
     @DisplayName("Should return filtered supplier when found case 1: supplier is inactive with total unpaid more than 1000 and less than 1500")
     void getSuppliers_inactiveAndTotalUnpaid_shouldReturnDTO(){
         Supplier matchSupplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TEST")
         .email("TEST@mail.com")
         .contact("081234567890") 
@@ -90,6 +135,7 @@ public class SupplierRepositoryTest {
         .build();
 
         Supplier unmatchSupplier = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TEST3")
         .email("TEST@mail.com")
         .contact("081234567890") 
@@ -98,6 +144,7 @@ public class SupplierRepositoryTest {
         .build();
 
         Supplier unmatchSupplier1 = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TEST2")
         .email("TEST@mail.com")
         .contact("081234567890") 

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.dto.request.SupplyItemRefundRequest;
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.SupplyUpdateRequest;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.entity.Supply;
@@ -279,7 +279,7 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
         setupSupplyItem.setSupply(supply);
 
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(2L) 
                 .build();
@@ -337,7 +337,7 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
         .product(setupProduct)
         .build();
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(1L) 
                 .build();
@@ -368,7 +368,7 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
             .id(UuidCreator.getTimeOrderedEpochFast())
             .build();
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(1L) 
                 .build();
@@ -394,14 +394,14 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
         .quantity(-1L) 
         .build();
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(3L) 
                 .build();
 
         when(supplyItemRepositoryMock.findBySupplyIdAndProductId(supply.getId(), request.getProductId())).thenReturn(List.of(setupSupplyItem, refundItem));
 
-        assertThrows(TransactionValidationException.class, () -> supplyServiceMock.refundSupplyItem(supply.getId(), request));
+        assertThrows(ForbiddenRequestException.class, () -> supplyServiceMock.refundSupplyItem(supply.getId(), request));
     }
 
     @Test
@@ -424,7 +424,7 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
         .product(setupProduct)
         .build();
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(1L) 
                 .build();
@@ -464,7 +464,7 @@ public class SupplyServiceEditTest extends BaseSupplyServiceTest{
         .product(setupProduct)
         .build();
 
-        SupplyItemRefundRequest request = SupplyItemRefundRequest.builder()
+        ItemRefundRequest request = ItemRefundRequest.builder()
                 .productId(setupProduct.getId())
                 .quantity(1L) 
                 .build();

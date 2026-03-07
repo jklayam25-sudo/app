@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
  
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import org.junit.jupiter.api.Test;
 
 import jakarta.validation.ConstraintViolationException;
@@ -44,7 +46,7 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
 
     @Test
     void createMemoView_validRequest_returnTrue(){
-        UUID employeeId = UUID.randomUUID();
+        UUID employeeId = UuidCreator.getTimeOrderedEpochFast();
 
         Employee employee = new Employee(); 
         employee.setId(employeeId);
@@ -68,7 +70,7 @@ public class MemoServiceCreateTest extends BaseMemoServiceTest{
 
     @Test
     void createMemoView_invalidRequest_returnFalse(){
-        UUID employeeId = UUID.randomUUID();
+        UUID employeeId = UuidCreator.getTimeOrderedEpochFast();
 
         Employee employee = new Employee(); 
         employee.setId(employeeId);

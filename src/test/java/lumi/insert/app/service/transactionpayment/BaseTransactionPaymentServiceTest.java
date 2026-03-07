@@ -1,14 +1,16 @@
 package lumi.insert.app.service.transactionpayment;
  
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension; 
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.entity.TransactionPayment;
@@ -47,18 +49,24 @@ public abstract class BaseTransactionPaymentServiceTest {
 
     public TransactionItem setupTransactionItem;
 
+    public Customer setupCustomer;
+
     @BeforeEach
     void setUp(){
         setupTransactionPayment = TransactionPayment.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         setupTransaction = Transaction.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         setupTransactionItem = TransactionItem.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .build();
+
+        setupCustomer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
     }
 }

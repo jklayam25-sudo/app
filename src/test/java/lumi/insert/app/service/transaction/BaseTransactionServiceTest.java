@@ -1,6 +1,6 @@
 package lumi.insert.app.service.transaction;
  
-import java.util.UUID;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,12 +10,17 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.entity.TransactionPayment;
 import lumi.insert.app.repository.CustomerRepository;
 import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.StockCardRepository;
+import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository; 
 import lumi.insert.app.service.implement.TransactionServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
@@ -32,6 +37,12 @@ public abstract class BaseTransactionServiceTest {
 
     @Mock
     TransactionRepository transactionRepositoryMock;
+
+    @Mock
+    TransactionItemRepository transactionItemRepositoryMock;
+
+    @Mock
+    StockCardRepository stockCardRepositoryMock;
 
     @Mock
     ProductRepository productRepositoryMock;
@@ -57,22 +68,28 @@ public abstract class BaseTransactionServiceTest {
 
     public Product setupProduct;
 
+    public Customer setupCustomer;
+
     @BeforeEach
     void setUp(){
         setupTransactionPayment = TransactionPayment.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         setupTransaction = Transaction.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         setupTransactionItem = TransactionItem.builder()
-        .id(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
 
         setupProduct = Product.builder()
         .id(1L)
+        .build();
+
+        setupCustomer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .build();
     }
 }

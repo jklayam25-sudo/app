@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
@@ -37,6 +40,7 @@ public class CustomerRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void saveCustomer_validRequest_returnSaved(){
         Customer customer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -53,6 +57,7 @@ public class CustomerRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void existsCustomerName_validRequest_returnTrue(){
         Customer customer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -67,6 +72,7 @@ public class CustomerRepositoryTest {
     @DisplayName("Should return saved entity when repository save success")
     void getCustomerName_validRequest_returnSliceOfName(){
         Customer customer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -75,16 +81,60 @@ public class CustomerRepositoryTest {
 
         customerRepository.saveAndFlush(customer);
         
-        Slice<CustomerNameResponse> names = customerRepository.getByNameContainingIgnoreCase("test", PageRequest.of(0, 5));;
+        Slice<CustomerNameResponse> names = customerRepository.getByNameContainingIgnoreCaseAndIdAfter("test", new UUID(0, 0), PageRequest.of(0, 5));;
         assertEquals(1, names.getNumberOfElements()); 
         assertTrue(names.isLast()); 
         assertEquals(customer.getName(), names.getContent().getFirst().name()); 
     }
 
     @Test
+    @DisplayName("Should return saved entity when repository save success")
+    void getCustomerName_notFoundAny_returnEmptySliceOfName(){
+        Customer customer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER")
+        .email("TEST@mail.com")
+        .contact("081234567890")
+        .shippingAddress("Jl. xxx")
+        .build();
+
+        customerRepository.saveAndFlush(customer);
+        
+        Slice<CustomerNameResponse> names = customerRepository.getByNameContainingIgnoreCaseAndIdAfter("testre", new UUID(0, 0), PageRequest.of(0, 5));;
+        assertEquals(0, names.getNumberOfElements());  
+    }
+
+    @Test
+    @DisplayName("Should return saved entity when repository save success")
+    void getCustomerName_lastIdIndex_returnEmptySliceOfName(){
+        Customer customer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER")
+        .email("TEST@mail.com")
+        .contact("081234567890")
+        .shippingAddress("Jl. xxx")
+        .build();
+
+        Customer customer2 = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("TESTCUSTOMER2")
+        .email("TEST2@mail.com")
+        .contact("081224567890")
+        .shippingAddress("Jl. xxx")
+        .build();
+
+        customerRepository.saveAllAndFlush(List.of(customer, customer2));
+        
+        Slice<CustomerNameResponse> names = customerRepository.getByNameContainingIgnoreCaseAndIdAfter("test", customer.getId(), PageRequest.of(0, 5));;
+        assertEquals(1, names.getNumberOfElements());  
+        assertEquals(customer2.getId(), names.getContent().getFirst().id());  
+    }
+
+    @Test
     @DisplayName("Should return filtered customer when found case 1: customer is inactive with total unpaid more than 1000 and less than 1500")
     void getCustomers_inactiveAndTotalUnpaid_shouldReturnDTO(){
         Customer matchCustomer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -94,6 +144,7 @@ public class CustomerRepositoryTest {
         .build();
 
         Customer unMatchCustomer = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER3")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -103,6 +154,7 @@ public class CustomerRepositoryTest {
         .build();
 
         Customer unMatchCustomer1 = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("TESTCUSTOMER2")
         .email("TEST@mail.com")
         .contact("081234567890")

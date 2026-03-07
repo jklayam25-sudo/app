@@ -21,7 +21,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
- 
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
@@ -53,6 +55,7 @@ public class TransactionRepositoryTest {
     @BeforeEach
     public void setup(){
         Customer customer1 = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("Customer 1")
         .email("TEST@mail.com")
         .contact("081234567890")
@@ -68,6 +71,7 @@ public class TransactionRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(setupCustomer)
         .build();
@@ -84,6 +88,7 @@ public class TransactionRepositoryTest {
     @DisplayName("Should thrown jpa data error when base field < invoiceId is null")
     public void createTransaction_nullableField_throwError(){
         Transaction transaction = Transaction.builder() 
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .customer(setupCustomer)
         .build();
         
@@ -97,6 +102,7 @@ public class TransactionRepositoryTest {
         String invoiceId = invoiceGenerator.generate();
 
         Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(setupCustomer)
         .build();
@@ -126,6 +132,7 @@ public class TransactionRepositoryTest {
         for (int i = 1; i < 3; i++) {
             if(i%2 == 0) {
                 Transaction transaction = Transaction.builder()
+                    .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .status(TransactionStatus.CANCELLED)
                     .customer(setupCustomer)
@@ -134,6 +141,7 @@ public class TransactionRepositoryTest {
                  pendingTransactions.add(transaction);
             } else {
                 Transaction transaction = Transaction.builder()
+                    .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .customer(setupCustomer)
                     .build();
@@ -164,6 +172,7 @@ public class TransactionRepositoryTest {
         String matchInvoiceId = invoiceGenerator.generate();
 
         Transaction matchTransaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .customer(setupCustomer)
@@ -172,6 +181,7 @@ public class TransactionRepositoryTest {
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Transaction unmatchTransaction2 = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .customer(setupCustomer)
@@ -180,6 +190,7 @@ public class TransactionRepositoryTest {
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Transaction unmatchTransaction3 = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .status(TransactionStatus.CANCELLED)
         .totalPaid(150L)
@@ -190,7 +201,7 @@ public class TransactionRepositoryTest {
 
         transactionRepository.saveAllAndFlush(List.of(matchTransaction, unmatchTransaction2, unmatchTransaction3));
 
-        TransactionGetByFilter request = TransactionGetByFilter.builder()
+        TransactionGetByFilter request = TransactionGetByFilter.builder() 
         .status(TransactionStatus.PENDING)
         .minTotalPaid(100L)
         .maxTotalPaid(200L)
@@ -215,6 +226,7 @@ public class TransactionRepositoryTest {
         String matchInvoiceId = invoiceGenerator.generate();
  
         Customer customer2 = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .name("Customer 2")
         .email("TEST1@mail.com")
         .contact("0812314567890")
@@ -224,6 +236,7 @@ public class TransactionRepositoryTest {
         Customer savedCustomer2 = customerRepository.saveAndFlush(customer2);;
 
         Transaction matchTransaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .customer(setupCustomer)
@@ -232,6 +245,7 @@ public class TransactionRepositoryTest {
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
 
         Transaction unmatchTransaction2 = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .customer(savedCustomer2)

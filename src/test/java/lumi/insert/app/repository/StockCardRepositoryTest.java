@@ -4,8 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.List; 
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
@@ -49,25 +50,29 @@ public class StockCardRepositoryTest {
     @Test
     void findByIndexPagination_foundEntity_returnSliceDTO(){
         StockCard stockCard1 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         StockCard stockCard2 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         stockCardRepository.saveAndFlush(stockCard1);
@@ -81,25 +86,28 @@ public class StockCardRepositoryTest {
     @Test
     void findByIndexPagination_foundEntityFilterLastId_returnSliceDTO(){
         StockCard stockCard1 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L).newPrice(1000L)
         .build();
 
         StockCard stockCard2 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         StockCard saveAndFlush = stockCardRepository.saveAndFlush(stockCard1);
@@ -113,25 +121,29 @@ public class StockCardRepositoryTest {
     @Test
     void findAllSpecification_foundEntityFilterLastId_returnSliceDTO(){
         StockCard stockCard1 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.PURCHASE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         StockCard stockCard2 = StockCard.builder()
-        .referenceId(UUID.randomUUID())
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .referenceId(UuidCreator.getTimeOrderedEpochFast())
         .product(product)
         .productName(product.getName())
         .quantity(-5L)
         .oldStock(10L)
         .newStock(5L)
         .type(StockMove.SALE)
-        .basePrice(1000L)
+        .oldPrice(1000L)
+        .newPrice(1000L)
         .build();
 
         List<StockCard> saveAllAndFlush = stockCardRepository.saveAllAndFlush(List.of(stockCard1, stockCard2));;
