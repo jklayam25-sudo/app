@@ -19,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid; 
 import lumi.insert.app.controller.wrapper.WebResponse;
+import lumi.insert.app.dto.request.ItemRefundRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
@@ -77,10 +78,10 @@ public class TransactionItemController {
         path = "/api/transactions/{transactionId}/items/product/{productId}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItemByProductId(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "productId") Long productId){
-        TransactionItemResponse resultFromService = transactionItemService.getTransactionByTransactionIdAndProductId(transactionId, productId);
+    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItemByProductId(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "productId") Long productId){
+        Slice<TransactionItemResponse> resultFromService = transactionItemService.getTransactionByTransactionIdAndProductId(transactionId, productId);
  
-        WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+        WebResponse<Slice<TransactionItemResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
@@ -116,8 +117,8 @@ public class TransactionItemController {
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> refundTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id, @RequestParam(name = "quantity") Long quantity){
-        TransactionItemResponse resultFromService = transactionItemService.refundTransactionItem(id, quantity);
+    ResponseEntity<WebResponse<TransactionItemResponse>> refundTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id, @Valid ItemRefundRequest request){
+        TransactionItemResponse resultFromService = transactionItemService.refundTransactionItem(id, request);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 

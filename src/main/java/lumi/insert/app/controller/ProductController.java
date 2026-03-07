@@ -26,6 +26,7 @@ import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.service.ProductService;
 
 @RestController
@@ -51,10 +52,10 @@ public class ProductController {
         path = "/api/products/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<ProductName>>> searchProductNames(@Valid @ModelAttribute ProductGetNameRequest request){
-        Slice<ProductName> resultFromService = productService.searchProductNames(request);
+    ResponseEntity<WebResponse<SliceIndex<ProductName>>> searchProductNames(@Valid @ModelAttribute ProductGetNameRequest request){
+        SliceIndex<ProductName> resultFromService = productService.searchProductNames(request);
 
-        WebResponse<Slice<ProductName>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+        WebResponse<SliceIndex<ProductName>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }

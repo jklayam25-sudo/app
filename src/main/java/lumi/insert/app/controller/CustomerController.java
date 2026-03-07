@@ -24,7 +24,8 @@ import lumi.insert.app.dto.request.CustomerGetNameRequest;
 import lumi.insert.app.dto.request.CustomerUpdateRequest; 
 import lumi.insert.app.dto.response.CustomerDetailResponse;
 import lumi.insert.app.dto.response.CustomerNameResponse;
-import lumi.insert.app.dto.response.CustomerResponse; 
+import lumi.insert.app.dto.response.CustomerResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.service.CustomerService;
 
 @RestController
@@ -81,10 +82,10 @@ public class CustomerController {
         path = "/api/customers/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<CustomerNameResponse>>> searchCustomerNamesAPI(@Valid @ModelAttribute CustomerGetNameRequest request){
-        Slice<CustomerNameResponse> resultFromService = customerService.searchCustomerNames(request);
+    ResponseEntity<WebResponse<SliceIndex<CustomerNameResponse>>> searchCustomerNamesAPI(@Valid @ModelAttribute CustomerGetNameRequest request){
+        SliceIndex<CustomerNameResponse> resultFromService = customerService.searchCustomerNames(request);
 
-        WebResponse<Slice<CustomerNameResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+        WebResponse<SliceIndex<CustomerNameResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }

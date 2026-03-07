@@ -23,7 +23,8 @@ import lumi.insert.app.dto.request.SupplierGetByFilter;
 import lumi.insert.app.dto.request.SupplierGetNameRequest;
 import lumi.insert.app.dto.request.SupplierUpdateRequest; 
 import lumi.insert.app.dto.response.SupplierDetailResponse;
-import lumi.insert.app.dto.response.SupplierNameResponse; 
+import lumi.insert.app.dto.response.SupplierNameResponse;
+import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.service.SupplierService;
 
 @RestController
@@ -80,10 +81,10 @@ public class SupplierController {
         path = "/api/suppliers/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<SupplierNameResponse>>> searchSupplierNamesAPI(@Valid @ModelAttribute SupplierGetNameRequest request){
-        Slice<SupplierNameResponse> resultFromService = supplierService.searchSupplierNames(request);
+    ResponseEntity<WebResponse<SliceIndex<SupplierNameResponse>>> searchSupplierNamesAPI(@Valid @ModelAttribute SupplierGetNameRequest request){
+        SliceIndex<SupplierNameResponse> resultFromService = supplierService.searchSupplierNames(request);
 
-        WebResponse<Slice<SupplierNameResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
+        WebResponse<SliceIndex<SupplierNameResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         return ResponseEntity.ok(wrappedResult);   
     }
