@@ -16,5 +16,5 @@ public interface SupplierRepository extends JpaRepository<Supplier, UUID>, JpaSp
     
     boolean existsByName(String name);
 
-    Slice<SupplierNameResponse> getByNameContainingIgnoreCase(String name, Pageable pageable);
+    Slice<SupplierNameResponse> getByNameContainingIgnoreCaseAndIdAfter(String name, UUID lastId, Pageable pageable);
 }

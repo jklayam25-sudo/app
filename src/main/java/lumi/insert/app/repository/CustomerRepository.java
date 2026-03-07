@@ -16,5 +16,5 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID>, JpaSp
     
     boolean existsByName(String name);
 
-    Slice<CustomerNameResponse> getByNameContainingIgnoreCase(String name, Pageable pageable);
+    Slice<CustomerNameResponse> getByNameContainingIgnoreCaseAndIdAfter(String name, UUID lastId, Pageable pageable);
 }
