@@ -1,6 +1,7 @@
 package lumi.insert.app.service.implement;
  
-
+ 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
 import lumi.insert.app.dto.response.TransactionItemResponse;
+import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.StockCard;
@@ -35,7 +37,10 @@ import lumi.insert.app.repository.ProductRepository;
 import lumi.insert.app.repository.StockCardRepository;
 import lumi.insert.app.repository.TransactionItemRepository;
 import lumi.insert.app.repository.TransactionRepository;
+import lumi.insert.app.repository.projection.ProductRefund;
+import lumi.insert.app.repository.projection.ProductSale;
 import lumi.insert.app.service.TransactionItemService;
+import lumi.insert.app.utils.generator.DateUtils;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @Service
@@ -58,6 +63,9 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     @Autowired
     AllTransactionMapper allTransactionMapper;
 
+    @Autowired
+    DateUtils datePicker;
+
     @Override
     public TransactionItemResponse createTransactionItem(UUID transactionId, TransactionItemCreateRequest request) {
         Transaction transaction = transactionRepository.findById(transactionId)
@@ -72,6 +80,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
             .id(UuidCreator.getTimeOrderedEpochFast())
             .price(product.getSellPrice())
             .quantity(request.getQuantity())
+            .productName(product.getName())
             .description(product.getName())
             .product(product)
             .transaction(transaction)
@@ -132,7 +141,7 @@ public class TransactionItemServiceImpl implements TransactionItemService{
 
     @Override
     public Slice<TransactionItemResponse> getTransactionItemsByTransactionId(UUID transactionId, PaginationRequest request) {
-        Sort sort = Sort.by("name").ascending();
+        Sort sort = Sort.by("createdAt").ascending();
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize()).withSort(sort);
 
         Slice<TransactionItem> transactionItems = transactionItemRepository.findAllByTransactionId(transactionId, pageable);
@@ -226,6 +235,14 @@ public class TransactionItemServiceImpl implements TransactionItemService{
 
         TransactionItemResponse transactionItemResponseDto = allTransactionMapper.createTransactionItemResponseDto(transactionItem);
         return transactionItemResponseDto;
+    }
+
+    @Override
+    public TransactionItemStatisticResponse getTransactionItemStats(LocalDateTime startDate, LocalDateTime endDate) { 
+        List<ProductSale> productTopSales = transactionItemRepository.getProductTopSales(startDate, endDate);
+        List<ProductRefund> productTopRefunds  = transactionItemRepository.getProductTopRefund(startDate, endDate);
+
+        return TransactionItemStatisticResponse.builder().productSales(productTopSales).productRefunds(productTopRefunds).build();
     }
     
 }

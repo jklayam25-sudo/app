@@ -24,7 +24,5 @@ public interface SupplyService {
     SupplyResponse updateSupply(UUID id, SupplyUpdateRequest request);
 
     SupplyResponse refundSupplyItem(UUID id, ItemRefundRequest request);
-
-    byte[] getInvoicePdf(UUID id);
-
+ 
 }

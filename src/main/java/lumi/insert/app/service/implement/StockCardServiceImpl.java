@@ -110,13 +110,7 @@ public class StockCardServiceImpl implements StockCardService{
 
         return slices;
     }
-
-    // @Override
-    // public Slice<StockCardResponse> getStockCardByProductId(Long id, UUID lastId, PaginationRequest request) {
-    //     // TODO Auto-generated method stub
-    //     throw new UnsupportedOperationException("Unimplemented method 'getStockCardByProductId'");
-    // }
-
+ 
     @Override
     public Slice<StockCardResponse> searchStockCards(StockCardGetByFilter request) {
         Pageable pageable = jpaSpecGenerator.pageable(request);

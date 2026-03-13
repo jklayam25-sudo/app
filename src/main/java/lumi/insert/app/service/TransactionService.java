@@ -6,6 +6,7 @@ import org.springframework.data.domain.Slice;
 
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
+import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 
 public interface TransactionService {
@@ -22,8 +23,8 @@ public interface TransactionService {
 
     TransactionResponse getTransaction(UUID id);
 
-    TransactionResponse refreshTransaction(UUID id);
+    TransactionDetailResponse getTransactionDetail(UUID id);
 
-    byte[] getInvoicePdf(UUID id);
+    TransactionResponse refreshTransaction(UUID id);
 
 }

@@ -1,5 +1,7 @@
 package lumi.insert.app.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Slice;
 
 import lumi.insert.app.dto.request.PaginationRequest;
@@ -13,6 +15,7 @@ import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
 import lumi.insert.app.entity.nondatabase.SliceIndex;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
 
 public interface ProductService {
 
@@ -33,5 +36,7 @@ public interface ProductService {
     ProductDeleteResponse deactivateProduct(Long id);
 
     ProductDeleteResponse activateProduct(Long id);
+
+    List<ProductOutOfStock> getOutOfStockProducts();
 
 }

@@ -52,6 +52,7 @@ public class EmployeeServiceImpl implements EmployeeService{
             .username(request.getUsername())
             .fullname(request.getFullname())
             .password(encodedPassword)
+            .joinDate(request.getJoinDate())
             .build();
         
         Employee savedEmployee = employeeRepository.save(employee);

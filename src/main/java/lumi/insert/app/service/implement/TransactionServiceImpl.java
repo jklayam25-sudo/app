@@ -22,6 +22,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
+import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
@@ -83,6 +84,7 @@ public class TransactionServiceImpl implements TransactionService{
 
         Transaction transaction = Transaction.builder()
             .id(UuidCreator.getTimeOrderedEpochFast())
+            .customerName(customer.getName())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
             .build();
@@ -230,6 +232,7 @@ public class TransactionServiceImpl implements TransactionService{
                 TransactionItem reverseItem = TransactionItem.builder()
                     .id(UuidCreator.getTimeOrderedEpochFast())
                     .price(item.getPrice())
+                    .productName(product.getName())
                     .quantity(-(item.getQuantity() + totalRefund))
                     .description("CANCELLED: " + product.getName())
                     .product(product)
@@ -243,6 +246,7 @@ public class TransactionServiceImpl implements TransactionService{
                 TransactionItem reverseItem = TransactionItem.builder()
                     .id(UuidCreator.getTimeOrderedEpochFast())
                     .price(item.getPrice())
+                    .productName(product.getName())
                     .quantity(-(item.getQuantity()))
                     .description("CANCELLED: " + product.getName())
                     .product(product)
@@ -305,6 +309,14 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    public TransactionDetailResponse getTransactionDetail(UUID id) {
+        Transaction searchedTransaction = transactionRepository.findByIdDetail(id)
+            .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
+
+        return allTransactionMapper.createTransactionDetailResponseDto(searchedTransaction);
+    }
+
+    @Override
     public TransactionResponse refreshTransaction(UUID id) {
         List<String> messages= new ArrayList<>();
 
@@ -338,12 +350,6 @@ public class TransactionServiceImpl implements TransactionService{
         TransactionResponse transactionResponseDto = allTransactionMapper.createTransactionResponseDto(searchedTransaction, messages);
         return transactionResponseDto;
 
-    }
-
-    @Override
-    public byte[] getInvoicePdf(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getInvoicePdf'");
     }
     
 }
