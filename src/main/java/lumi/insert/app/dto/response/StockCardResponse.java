@@ -3,10 +3,49 @@ package lumi.insert.app.dto.response;
 import java.time.LocalDateTime;
 import java.util.UUID;
  
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder; 
 import lumi.insert.app.entity.nondatabase.StockMove;
 
 @Builder
-public record StockCardResponse(UUID id, UUID referenceId, Long productId, String productName, Long quantity, Long oldStock, Long newStock, Long oldPrice, Long newPrice, StockMove type, String description, LocalDateTime createdAt) {
+@Schema(description = "Response object representing a single entry in the stock ledger (Kartu Stok)")
+public record StockCardResponse(
+    
+    @Schema(description = "Unique identifier of the stock card entry", example = "550e8400-e29b-41d4-a716-446655440000")
+    UUID id, 
+    
+    @Schema(description = "ID of the related transaction or supply record that triggered this movement", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+    UUID referenceId, 
+    
+    @Schema(description = "ID of the product being moved", example = "1001")
+    Long productId, 
+    
+    @Schema(description = "Name of the product for quick display", example = "Espresso Arabica 250g")
+    String productName, 
+    
+    @Schema(description = "The amount of stock changed in this movement", example = "10")
+    Long quantity, 
+    
+    @Schema(description = "Stock level before this movement", example = "50")
+    Long oldStock, 
+    
+    @Schema(description = "Stock level after this movement", example = "60")
+    Long newStock, 
+    
+    @Schema(description = "Cost or selling price before this movement", example = "12000")
+    Long oldPrice, 
+    
+    @Schema(description = "Cost or selling price applied to this movement", example = "12500")
+    Long newPrice, 
+    
+    @Schema(description = "The nature of the movement (e.g., IN, OUT, ADJUSTMENT)", example = "IN")
+    StockMove type, 
+    
+    @Schema(description = "Additional notes regarding this movement", example = "Received from Supplier INV-88291")
+    String description, 
+    
+    @Schema(description = "Timestamp of when the stock movement occurred")
+    LocalDateTime createdAt
+) {
     
 }

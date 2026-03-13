@@ -1,7 +1,28 @@
 package lumi.insert.app.dto.response;
 
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public record TransactionPaymentResponse(UUID id, UUID transactionId, Long totalPayment, String paymentFrom, String paymentTo, Boolean isForRefund) {
+@Schema(description = "Response object representing a transaction payment record")
+public record TransactionPaymentResponse(
+    
+    @Schema(description = "Unique identifier of the payment", example = "550e8400-e29b-41d4-a716-446655440000")
+    UUID id, 
+    
+    @Schema(description = "ID of the associated transaction", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+    UUID transactionId, 
+    
+    @Schema(description = "Total amount paid or refunded", example = "150000")
+    Long totalPayment, 
+    
+    @Schema(description = "Source of the payment (e.g., Customer Name or Bank Account)", example = "John Doe")
+    String paymentFrom, 
+    
+    @Schema(description = "Destination of the payment (e.g., Company Account or Cashier)", example = "Main Store Account")
+    String paymentTo, 
+    
+    @Schema(description = "Flag indicating if this record is a refund", example = "false")
+    Boolean isForRefund
+) {
     
 }

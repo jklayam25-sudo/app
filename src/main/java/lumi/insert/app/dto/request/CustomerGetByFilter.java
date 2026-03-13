@@ -9,46 +9,58 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Filter request for searching customers")
 public class CustomerGetByFilter extends PaginationRequest{
 
     @Pattern(regexp = "^[a-zA-Z0-9.-_ ]{5,30}$", message = "name has to be 5-30 length")
+    @Schema(description = "Filter customer by name", example = "John Wholesale")
     String name;
 
     @Email(message = "email doesn't meet the email format")
+    @Schema(description = "Filter customer by email", example = "john@example.com")
     String email;
 
+    @Schema(description = "Filter customer by phone contact", example = "081234567890")
     String contact;
 
+    @Schema(description = "Filter customers by active status", example = "true")
     Boolean isActive;
 
     @Builder.Default
     @Min(value = 0, message = "minTotalItems minimal value is 0")
+    @Schema(description = "Minimum number of customer transactions", example = "0")
     Long minTotalTransaction = 0L;
 
     @Builder.Default
     @Min(value = 0, message = "maxTotalItems minimal value is 0")
+    @Schema(description = "Maximum number of customer transactions", example = "100")
     Long maxTotalTransaction = 9999990L;
 
     @Builder.Default
     @Min(value = 0, message = "minGrandTotal minimal value is 0")
+    @Schema(description = "Minimum unpaid amount from customer", example = "0")
     Long minTotalUnpaid = 0L;
 
     @Builder.Default
     @Min(value = 0, message = "maxGrandTotal minimal value is 0")
+    @Schema(description = "Maximum unpaid amount from customer", example = "10000000")
     Long maxTotalUnpaid = 9999999999990L;
 
     @Builder.Default
     @Min(value = 0, message = "minTotalUnpaid minimal value is 0")
+    @Schema(description = "Minimum paid amount from customer", example = "0")
     Long minTotalPaid = 0L;
 
     @Builder.Default
     @Min(value = 0, message = "maxTotalUnpaid minimal value is 0")
+    @Schema(description = "Maximum paid amount from customer", example = "50000000")
     Long maxTotalPaid = 9999999999990L;
 
     @Builder.Default

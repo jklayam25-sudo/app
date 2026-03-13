@@ -5,27 +5,35 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
 @Builder
+@Schema(description = "Request to create a new product")
 public class ProductCreateRequest {
 
     @NotBlank(message = "Name cannot be empty")
+    @Schema(description = "Product name", example = "Laptop")
     private String name;
 
     @NotNull(message = "basePrice cannot be empty")
     @Min(value = 0, message = "basePrice cannot below 0")
+    @Schema(description = "Base cost price of the product", example = "500000")
     private Long basePrice;
 
     @NotNull(message = "sellPrice cannot be empty")
     @Min(value = 0, message = "sellPrice cannot below 0")
+    @Schema(description = "Selling price of the product", example = "750000")
     private Long sellPrice;
 
     @NotNull(message = "stockQuantity cannot be empty")
     @Min(value = 0, message = "stockQuantity cannot below 0")
+    @Schema(description = "Initial stock quantity", example = "100")
     private Long stockQuantity;
 
+    @Schema(description = "Minimum stock level alerts", example = "10")
     private Long stockMinimum;
 
+    @Schema(description = "Category ID to associate the product", example = "1")
     private Long categoryId;
 }
