@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDateTime;
 import java.util.List; 
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -23,13 +25,16 @@ import jakarta.transaction.Transactional;
 import lumi.insert.app.entity.Customer;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionItem; 
+import lumi.insert.app.entity.TransactionItem;
+import lumi.insert.app.repository.projection.ProductRefund;
+import lumi.insert.app.repository.projection.ProductSale;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 
 @DataJpaTest
 @Transactional
 @Import(InvoiceGenerator.class)
+@ActiveProfiles("test")
 public class TransactionItemRepositoryTest {
 
     @Autowired
@@ -46,6 +51,7 @@ public class TransactionItemRepositoryTest {
 
     @Autowired
     CustomerRepository customerRepository;
+ 
 
     Customer customer;
 
@@ -63,6 +69,7 @@ public class TransactionItemRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
+        .customerName(customer.getName())
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -77,6 +84,7 @@ public class TransactionItemRepositoryTest {
        .id(UuidCreator.getTimeOrderedEpochFast())
        .transaction(savedTransaction)
        .product(savedProduct)
+       .productName(savedProduct.getName())
        .price(savedProduct.getBasePrice())
        .quantity(savedProduct.getStockQuantity())
        .build();
@@ -97,6 +105,7 @@ public class TransactionItemRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
+        .customerName(customer.getName())
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -111,6 +120,7 @@ public class TransactionItemRepositoryTest {
        .id(UuidCreator.getTimeOrderedEpochFast())
        .transaction(savedTransaction)
        .product(savedProduct)
+       .productName(savedProduct.getName())
        .price(savedProduct.getBasePrice())
        .quantity(savedProduct.getStockQuantity())
        .build();
@@ -141,6 +151,7 @@ public class TransactionItemRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
             Transaction savedTransaction = transactionRepository.save(transaction);
@@ -157,6 +168,7 @@ public class TransactionItemRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .transaction(savedTransaction)
             .product(savedProduct)
+            .productName(savedProduct.getName())
             .price(savedProduct.getBasePrice())
             .quantity(savedProduct.getStockQuantity())
             .build();
@@ -177,6 +189,100 @@ public class TransactionItemRepositoryTest {
         Slice<TransactionItem> searchedItem = transactionItemRepository.findAllByTransactionId(UUID.randomUUID(), PageRequest.of(0, 2, Sort.by("createdAt").ascending()));
 
         assertTrue(searchedItem.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return productsales projection when transaction found")
+    public void getProductTopSales_foundData_returnListProjection(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId(invoiceId)
+        .customer(customer)
+        .customerName(customer.getName())
+        .build();
+
+       Transaction savedTransaction = transactionRepository.save(transaction);
+
+       Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+       mockCategorizedProduct.setCategory(null);
+       mockCategorizedProduct.setId(null);
+
+       Product savedProduct = productRepository.save(mockCategorizedProduct);
+
+       TransactionItem transactionItem = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .transaction(savedTransaction)
+       .product(savedProduct)
+       .productName(savedProduct.getName())
+       .price(savedProduct.getBasePrice())
+       .quantity(savedProduct.getStockQuantity())
+       .build();
+
+       TransactionItem transactionItem2 = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .transaction(savedTransaction)
+       .product(savedProduct)
+       .productName(savedProduct.getName())
+       .price(savedProduct.getBasePrice())
+       .quantity(savedProduct.getStockQuantity())
+       .build();
+
+        transactionItemRepository.saveAllAndFlush(List.of(transactionItem, transactionItem2));
+
+        List<ProductSale> productSales = transactionItemRepository.getProductTopSales(LocalDateTime.now().minusDays(1), LocalDateTime.now());
+
+        assertEquals(1, productSales.size());
+        assertEquals(savedProduct.getName(), productSales.getFirst().productName());
+        assertEquals(transactionItem.getQuantity() + transactionItem2.getQuantity(), productSales.getFirst().totalSold());
+    }
+
+    @Test
+    @DisplayName("Should return productrefund projection when transaction found")
+    public void getProductTopRefund_foundData_returnListProjection(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId(invoiceId)
+        .customer(customer)
+        .customerName(customer.getName())
+        .build();
+
+       Transaction savedTransaction = transactionRepository.save(transaction);
+
+       Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+       mockCategorizedProduct.setCategory(null);
+       mockCategorizedProduct.setId(null);
+
+       Product savedProduct = productRepository.save(mockCategorizedProduct);
+
+       TransactionItem transactionItem = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .transaction(savedTransaction)
+       .product(savedProduct)
+       .productName(savedProduct.getName())
+       .price(savedProduct.getBasePrice())
+       .quantity(-savedProduct.getStockQuantity())
+       .build();
+
+       TransactionItem transactionItem2 = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .transaction(savedTransaction)
+       .product(savedProduct)
+       .productName(savedProduct.getName())
+       .price(savedProduct.getBasePrice())
+       .quantity(-savedProduct.getStockQuantity())
+       .build();
+
+        transactionItemRepository.saveAllAndFlush(List.of(transactionItem, transactionItem2));
+
+        List<ProductRefund> productSales = transactionItemRepository.getProductTopRefund(LocalDateTime.now().minusDays(1), LocalDateTime.now());
+
+        assertEquals(1, productSales.size());
+        assertEquals(savedProduct.getName(), productSales.getFirst().productName());
+        assertEquals(transactionItem.getQuantity() + transactionItem2.getQuantity(), productSales.getFirst().totalRefunded());
     }
 
 }

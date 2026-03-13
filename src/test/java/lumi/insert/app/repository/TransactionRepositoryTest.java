@@ -21,15 +21,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.entity.Customer;
+import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Transaction;
+import lumi.insert.app.entity.TransactionItem; 
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
@@ -37,6 +43,7 @@ import lumi.insert.app.utils.generator.JpaSpecGenerator;
 @Transactional
 @Slf4j
 @Import(JpaSpecGenerator.class)
+@ActiveProfiles("test")
 public class TransactionRepositoryTest {
     
     @Autowired
@@ -47,6 +54,15 @@ public class TransactionRepositoryTest {
 
     @Autowired
     JpaSpecGenerator jpaSpecGenerator;
+
+    @Autowired
+    TransactionItemRepository transactionItemRepository;
+
+    @Autowired
+    ProductRepository productRepository;
+    
+    @Autowired
+    EntityManager entityManager;
 
     InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
 
@@ -74,6 +90,7 @@ public class TransactionRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
       Transaction savedTransaction = transactionRepository.save(transaction);
@@ -90,6 +107,7 @@ public class TransactionRepositoryTest {
         Transaction transaction = Transaction.builder() 
         .id(UuidCreator.getTimeOrderedEpochFast())
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
         
         assertNull(transaction.getInvoiceId());
@@ -105,6 +123,7 @@ public class TransactionRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
         transactionRepository.saveAndFlush(transaction);
@@ -136,6 +155,7 @@ public class TransactionRepositoryTest {
                     .invoiceId(invoiceGenerator.generate())
                     .status(TransactionStatus.CANCELLED)
                     .customer(setupCustomer)
+                    .customerName(setupCustomer.getName())
                     .build();
 
                  pendingTransactions.add(transaction);
@@ -144,6 +164,7 @@ public class TransactionRepositoryTest {
                     .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .customer(setupCustomer)
+                    .customerName(setupCustomer.getName())
                     .build();
 
                  pendingTransactions.add(transaction);
@@ -176,6 +197,7 @@ public class TransactionRepositoryTest {
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -185,6 +207,7 @@ public class TransactionRepositoryTest {
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -195,6 +218,7 @@ public class TransactionRepositoryTest {
         .status(TransactionStatus.CANCELLED)
         .totalPaid(150L)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -240,6 +264,7 @@ public class TransactionRepositoryTest {
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .customer(setupCustomer)
+        .customerName(setupCustomer.getName())
         .build();
 
         matchTransaction.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -249,6 +274,7 @@ public class TransactionRepositoryTest {
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .customer(savedCustomer2)
+        .customerName(setupCustomer.getName())
         .build();
 
         transactionRepository.saveAllAndFlush(List.of(matchTransaction, unmatchTransaction2));
@@ -264,6 +290,54 @@ public class TransactionRepositoryTest {
         Slice<Transaction> transactions = transactionRepository.findAll(specification, pageable); 
         assertEquals(1, transactions.getNumberOfElements());
         assertEquals(setupCustomer.getId(), transactions.getContent().getFirst().getCustomer().getId()); 
+    }
+
+    @Test
+    @DisplayName("Should return transaction_items detail entity (with items > product) when transaction id is valid")
+    public void findByIdDetail_validId_returnDetailEntity(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Customer customer2 = Customer.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("Customer 2")
+        .email("TEST1@mail.com")
+        .contact("0812314567890")
+        .shippingAddress("") 
+        .build();
+
+        Customer savedCustomer2 = customerRepository.saveAndFlush(customer2);
+
+        Transaction transaction = Transaction.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId(invoiceId)
+        .customer(savedCustomer2)
+        .customerName(savedCustomer2.getName())
+        .build();
+
+       Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
+
+       Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+       mockCategorizedProduct.setCategory(null);
+       mockCategorizedProduct.setId(null);
+
+       Product savedProduct = productRepository.saveAndFlush(mockCategorizedProduct);
+
+       TransactionItem transactionItem = TransactionItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .transaction(savedTransaction)
+       .product(savedProduct)
+       .productName(savedProduct.getName())
+       .price(savedProduct.getBasePrice())
+       .quantity(savedProduct.getStockQuantity())
+       .build();
+
+        transactionItemRepository.saveAndFlush(transactionItem);
+        entityManager.clear();
+        Transaction detailTransaction = transactionRepository.findByIdDetail(savedTransaction.getId()).orElseThrow(() -> new NotFoundEntityException(""));
+
+        List<TransactionItem> transactionItems = detailTransaction.getTransactionItems();
+        assertEquals(1, transactionItems.size());
+        assertEquals(savedProduct.getId(), transactionItems.getFirst().getProduct().getId()); 
     }
 
 

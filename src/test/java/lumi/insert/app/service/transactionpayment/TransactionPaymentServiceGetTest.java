@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -66,7 +67,7 @@ public class TransactionPaymentServiceGetTest extends BaseTransactionPaymentServ
         Page<TransactionPayment> slices = new PageImpl<TransactionPayment>((List.of(setupTransactionPayment)));
         when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
         when(jpaSpecGenerator.transactionPaymentSpecification(any())).thenReturn(Specification.anyOf(List.of()));
-        when(transactionPaymentRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(transactionPaymentRepositoryMock.findAll(ArgumentMatchers.<Specification<TransactionPayment>>any(), any(Pageable.class))).thenReturn(slices);
 
         Slice<TransactionPaymentResponse> result = transactionPaymentServiceMock.getTransactionPaymentsByRequests(TransactionPaymentGetByFilter.builder().build());
         assertEquals(setupTransactionPayment.getId(), result.getContent().getFirst().id());

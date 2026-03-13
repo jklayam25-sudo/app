@@ -1,14 +1,18 @@
 package lumi.insert.app.controller.supply;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any; 
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.ByteArrayInputStream; 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -25,9 +30,9 @@ import lumi.insert.app.dto.request.SupplyGetByFilter;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyItemResponse;
-import lumi.insert.app.dto.response.SupplyResponse;
+import lumi.insert.app.dto.response.SupplyResponse; 
 import lumi.insert.app.entity.nondatabase.SupplyStatus;
-import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplyControllerGetTest extends BaseSupplyControllerTest{
     
@@ -39,7 +44,7 @@ public class SupplyControllerGetTest extends BaseSupplyControllerTest{
         items.add(supplyItemResponse);
         items.add(supplyItemResponse);
 
-        SupplyDetailResponse response = new SupplyDetailResponse(supplyResponse.id(), supplyResponse.invoiceId(), null, items, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        SupplyDetailResponse response = new SupplyDetailResponse(supplyResponse.id(), supplyResponse.invoiceId(), null, null, items, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         when(supplyService.getSupply(any(UUID.class))).thenReturn(response);
         mockMvc.perform(
@@ -167,5 +172,29 @@ public class SupplyControllerGetTest extends BaseSupplyControllerTest{
         .andExpect(status().isBadRequest()) 
         .andExpect(jsonPath("$.data").isEmpty()) 
         .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and pdf content when request valid")
+    public void exportSupplyAPI_validRequest_return400StatusAndPdf() throws Exception{
+        ByteArrayInputStream bais = new ByteArrayInputStream("pdfBinary".getBytes());
+
+        UUID supplyId = UuidCreator.getTimeOrderedEpochFast();
+         
+        when(supplyService.getSupply(supplyId)).thenReturn(new SupplyDetailResponse(supplyId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        when(pdfService.exportSupplyWithItems(any(SupplyDetailResponse.class))).thenReturn(bais);
+
+        MvcResult result = mockMvc.perform(
+                get("/api/supplies/" + supplyId + "/pdf")
+                .accept(MediaType.APPLICATION_PDF)
+            )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
+        .andReturn();
+
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0);
+        
+        verify(pdfService, times(1)).exportSupplyWithItems(argThat(arg -> arg.id() == supplyId));
     }
 }

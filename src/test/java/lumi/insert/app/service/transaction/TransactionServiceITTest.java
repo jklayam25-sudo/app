@@ -3,8 +3,7 @@ package lumi.insert.app.service.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.List; 
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -36,6 +36,7 @@ import lumi.insert.app.utils.generator.InvoiceGenerator;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 public class TransactionServiceITTest {
     
     @Autowired
@@ -76,6 +77,7 @@ public class TransactionServiceITTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
@@ -100,6 +102,7 @@ public class TransactionServiceITTest {
                 .description(savedProduct.getName())
                 .transaction(savedTransaction)
                 .product(savedProduct)
+                .productName(savedProduct.getName())
                 .build();
 
             
@@ -138,6 +141,7 @@ public class TransactionServiceITTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
@@ -162,6 +166,7 @@ public class TransactionServiceITTest {
                 .description(savedProduct.getName())
                 .transaction(savedTransaction)
                 .product(savedProduct)
+                .productName(savedProduct.getName())
                 .build();
 
             TransactionItem savedTransactionItem = transactionItemRepository.saveAndFlush(transactionItem);
@@ -193,6 +198,7 @@ public class TransactionServiceITTest {
             .status(TransactionStatus.PROCESS)
             .totalPaid(4000L)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
@@ -217,6 +223,7 @@ public class TransactionServiceITTest {
                 .description(savedProduct.getName())
                 .transaction(savedTransaction)
                 .product(savedProduct)
+                .productName(savedProduct.getName())
                 .build();
 
             TransactionItem savedTransactionItem = transactionItemRepository.saveAndFlush(transactionItem);
@@ -256,11 +263,11 @@ public class TransactionServiceITTest {
             .totalPaid(4000L)
             .totalUnrefunded(100L)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction savedTransaction = transactionRepository.saveAndFlush(transaction);
-        Long idProduct3 = null;
-        UUID idItems3 = null;
+        Long idProduct3 = null; 
         for (int i = 1; i < 6; i++) {
             Product product = Product.builder()
                 .name("Product-" + i)
@@ -278,12 +285,12 @@ public class TransactionServiceITTest {
                 .description(savedProduct.getName())
                 .transaction(savedTransaction)
                 .product(savedProduct)
+                .productName(savedProduct.getName())
                 .build();
 
             TransactionItem savedTransactionItem = transactionItemRepository.saveAndFlush(transactionItem);
             if(i == 3) {
-                idProduct3 = savedProduct.getId(); 
-                idItems3 = savedTransactionItem.getId();
+                idProduct3 = savedProduct.getId();  
             }
 
             savedTransaction.getTransactionItems().add(savedTransactionItem);
@@ -298,6 +305,7 @@ public class TransactionServiceITTest {
                 .description(product3.getName())
                 .transaction(savedTransaction)
                 .product(product3)
+                .productName(product3.getName())
                 .build();
 
         TransactionItem savedTransactionItem = transactionItemRepository.saveAndFlush(transactionItem);

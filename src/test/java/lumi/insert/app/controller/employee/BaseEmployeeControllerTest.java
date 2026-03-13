@@ -1,9 +1,11 @@
 package lumi.insert.app.controller.employee;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
  
 import org.junit.jupiter.api.BeforeEach; 
-import org.springframework.boot.test.context.SpringBootTest; 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,6 +20,7 @@ import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfig
 
 @SpringBootTest
 @WithMockUser(username = "admin", roles = {"ADMIN"})
+@ActiveProfiles("test")
 public abstract class BaseEmployeeControllerTest {
      
     MockMvc mockMvc;
@@ -25,7 +28,7 @@ public abstract class BaseEmployeeControllerTest {
     @MockitoBean
     EmployeeService employeeService;
 
-    EmployeeResponse employeeResponse = new EmployeeResponse(UUID.randomUUID(), "employeeU", "employeeF", EmployeeRole.CASHIER);
+    EmployeeResponse employeeResponse = new EmployeeResponse(UUID.randomUUID(), "employeeU", "employeeF", EmployeeRole.CASHIER, LocalDateTime.now());
 
     @BeforeEach
     void setup(WebApplicationContext context) {

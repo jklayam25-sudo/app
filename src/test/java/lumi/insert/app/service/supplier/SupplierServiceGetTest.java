@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -91,7 +92,7 @@ public class SupplierServiceGetTest extends BaseSupplierServiceTest{
     @DisplayName("Should return Slice Supplier DTO when get Supplier found")
     void getSuppliers_foundEntity_returnSliceSupplierDTO(){
         Page<Supplier> slices = new PageImpl<>(List.of(setupSupplier));
-        when(supplierRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(supplierRepository.findAll(ArgumentMatchers.<Specification<Supplier>>any(), any(Pageable.class))).thenReturn(slices);
 
         SupplierGetByFilter request = SupplierGetByFilter.builder()
         .isActive(false)
@@ -107,7 +108,7 @@ public class SupplierServiceGetTest extends BaseSupplierServiceTest{
     @DisplayName("Should return Slice Supplier DTO when get Supplier found")
     void getSuppliers_notFoundEntity_returnSliceSupplierDTO(){
         Page<Supplier> slices = new PageImpl<>(List.of());
-        when(supplierRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(supplierRepository.findAll(ArgumentMatchers.<Specification<Supplier>>any(), any(Pageable.class))).thenReturn(slices);
 
         SupplierGetByFilter request = SupplierGetByFilter.builder()
         .isActive(false)

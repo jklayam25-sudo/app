@@ -13,6 +13,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -61,11 +62,20 @@ public class TransactionServiceGetTest extends BaseTransactionServiceTest{
         Page<Transaction> transactions = new PageImpl<>(List.of(mockTransaction));
         when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
         when(jpaSpecGenerator.transactionSpecification(any())).thenReturn(Specification.anyOf(List.of()));
-        when(transactionRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(transactions);
+        when(transactionRepositoryMock.findAll(ArgumentMatchers.<Specification<Transaction>>any(), any(Pageable.class))).thenReturn(transactions);
 
         Slice<TransactionResponse> result = transactionServiceMock.searchTransactionsByRequests(TransactionGetByFilter.builder().build());
         assertEquals(1, result.getNumberOfElements());
         assertEquals(randomUUID, result.getContent().getFirst().id());
+    }
+
+    @Test
+    @DisplayName("Should thrown NotFoundEntity Exception when finding transaction result in none at DB")
+    public void getTransactionDetail_invalidId_thrownNotFoundEntity(){
+        UUID randomUUID = UuidCreator.getTimeOrderedEpochFast();
+        when(transactionRepositoryMock.findByIdDetail(randomUUID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundEntityException.class, () -> transactionServiceMock.getTransactionDetail(randomUUID));
     }
 
 }

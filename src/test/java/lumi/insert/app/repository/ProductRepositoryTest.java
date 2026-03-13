@@ -20,12 +20,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
- 
+import org.springframework.test.context.ActiveProfiles;
+
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.entity.Product;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
@@ -33,6 +35,7 @@ import lumi.insert.app.utils.generator.JpaSpecGenerator;
 @Transactional
 @Slf4j
 @Import(JpaSpecGenerator.class)
+@ActiveProfiles("test")
 public class ProductRepositoryTest {
 
     @Autowired
@@ -325,4 +328,23 @@ public class ProductRepositoryTest {
        assertEquals(2, searchIdUpdatedAtMoreThan.size());
        assertEquals(2400L, searchIdUpdatedAtMoreThan.getLast().getSellPrice());
     }
+
+    @Test
+    public void getOutOfStockProducts_foundEntity_returnProjection() {
+        Product dumpProduct = Product.builder()
+        .name("NIKE Jordan Low 3")
+        .basePrice(10000L)
+        .sellPrice(12000L)
+        .stockQuantity(2L)
+        .stockMinimum(5L)
+        .build();
+
+        productRepository.save(dumpProduct);
+
+        List<ProductOutOfStock> exists = productRepository.findAllOutOfStockProduct();
+        assertEquals(1, exists.size());
+        assertEquals(dumpProduct.getStockQuantity(), exists.getFirst().stockQuantity());
+ 
+    }
+
 }

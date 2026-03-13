@@ -10,11 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.servlet.http.Cookie; 
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
+@ActiveProfiles("test") 
 public class AuthTokenControllerDeleteTest extends BaseAuthTokenControllerTest{
     
     @Test

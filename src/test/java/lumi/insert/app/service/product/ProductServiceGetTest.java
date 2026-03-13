@@ -33,6 +33,7 @@ import lumi.insert.app.entity.Category;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
 
 public class ProductServiceGetTest extends BaseProductServiceTest{
     
@@ -303,6 +304,15 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .build();
 
         assertThrows(NotFoundEntityException.class, () -> productServiceMock.getProductsByRequests(productGetByFilter));
+    }
+
+    @Test
+    @DisplayName("Should return realtime List of productOutOfStock")
+    public void getOutOfStockProducts_foundData_returnListProjection(){
+        when(productRepositoryMock.findAllOutOfStockProduct()).thenReturn(List.of(new ProductOutOfStock(1L, "Shoes", 0L , 0L)));
+
+        List<ProductOutOfStock> outOfStockProducts = productServiceMock.getOutOfStockProducts();
+        assertEquals(1, outOfStockProducts.size());
     }
 
 

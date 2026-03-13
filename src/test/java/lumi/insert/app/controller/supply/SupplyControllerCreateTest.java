@@ -10,13 +10,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map; 
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import lumi.insert.app.dto.request.SupplyCreateRequest;
+import lumi.insert.app.dto.request.SupplyItemCreate; 
 import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
@@ -25,18 +30,21 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @DisplayName("should return Supply Response when create succesfully")
     public void createSupplyAPI_validRequest_shouldReturnCreatedEntity() throws Exception{
         when(supplyService.createSupply(any(SupplyCreateRequest.class))).thenReturn(supplyResponse);
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, 10L, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(0L)
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","0") 
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100") 
-            .param("supplyItems[0].quantity","10") 
-            
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andDo(print()) 
         .andExpect(status().isCreated())
@@ -49,18 +57,21 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @Test
     @DisplayName("should return errors NotNull when request param is not valid")
     public void createSupplyAPI_nullCustomerId_shouldReturnNotNullError() throws Exception{ 
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, 10L, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(-10L)
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","-10") 
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100") 
-            .param("supplyItems[0].quantity","10") 
-            
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andDo(print()) 
         .andExpect(status().isBadRequest())
@@ -71,18 +82,21 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @Test
     @DisplayName("should return errors NotNull when request param is not valid")
     public void createSupplyAPI_emptyHeaderParam_shouldReturnNotNullError() throws Exception{ 
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, 10L, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV") 
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV")  
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100") 
-            .param("supplyItems[0].quantity","10") 
-            
-        )
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
+        ) 
         .andDo(print()) 
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").value("totalFee cannot be empty"))
@@ -93,11 +107,15 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @DisplayName("should return errors NotNull when request param is not valid")
     public void createSupplyAPI_emptyWhiteSpace_shouldReturnNotNullError() throws Exception{
         when(supplyService.createSupply(any(SupplyCreateRequest.class))).thenReturn(supplyResponse);
+
+        Map<String, String> request = new HashMap<>();
+        request.put("supplierId", " ");
+ 
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED) 
-            .param("supplierId", " ") 
+            .contentType(MediaType.APPLICATION_JSON_VALUE) 
+            .content(objectMapper.writeValueAsString(request)) 
         )
         .andDo(print()) 
         .andExpect(status().isBadRequest())
@@ -108,15 +126,20 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @Test
     @DisplayName("should return errors NotNull when request param is not valid")
     public void createSupplyAPI_nullItems_shouldReturnNotNullError() throws Exception{ 
+ 
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(0L)
+        .totalDiscount(0L) 
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","10") 
-            .param("totalDiscount","0")  
-        )
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
+        ) 
         .andDo(print()) 
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").value("items cannot be empty"))
@@ -127,18 +150,23 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @DisplayName("should return Supply Response when create succesfully")
     public void createSupplyAPI_invalidParamOfItems_shouldReturnCreatedEntity() throws Exception{
         when(supplyService.createSupply(any(SupplyCreateRequest.class))).thenReturn(supplyResponse);
+
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, null, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(0L)
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","0") 
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100")  
-            
-        )
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
+        ) 
         .andDo(print()) 
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").value("quantity cannot be empty"))
@@ -149,18 +177,22 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     @DisplayName("should return Supply Response when create succesfully")
     public void createSupplyAPI_minusProductQuantityAtItems_shouldReturnCreatedEntity() throws Exception{
         when(supplyService.createSupply(any(SupplyCreateRequest.class))).thenReturn(supplyResponse);
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, -10L, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(0L)
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","0") 
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100")  
-            .param("supplyItems[0].quantity","-100") 
-        )
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
+        ) 
         .andDo(print()) 
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors").value("quantity cannot below 0"))
@@ -172,17 +204,21 @@ public class SupplyControllerCreateTest extends BaseSupplyControllerTest{
     public void createSupplyAPI_invalidSupplierId_shouldReturnErrors() throws Exception{
         when(supplyService.createSupply(any(SupplyCreateRequest.class))).thenThrow(new NotFoundEntityException("Supplier with id is not found"));
 
+        List<SupplyItemCreate> items = List.of(new SupplyItemCreate(1L, 100L, 10L, null));
+
+        SupplyCreateRequest request = SupplyCreateRequest.builder()
+        .supplierId(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId("INV")
+        .totalFee(0L)
+        .totalDiscount(0L)
+        .supplyItems(items)
+        .build();
+
         mockMvc.perform(
             post("/api/supplies")
             .accept(MediaType.APPLICATION_JSON_VALUE)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .param("supplierId", UUID.randomUUID().toString())
-            .param("invoiceId","INV") 
-            .param("totalFee","0") 
-            .param("totalDiscount","0") 
-            .param("supplyItems[0].productId","1") 
-            .param("supplyItems[0].price","100") 
-            .param("supplyItems[0].quantity","10")   
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request))
         )
         .andDo(print()) 
         .andExpect(status().isNotFound())

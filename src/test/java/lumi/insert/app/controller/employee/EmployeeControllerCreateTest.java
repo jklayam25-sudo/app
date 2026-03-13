@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;  
@@ -22,10 +24,12 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
     @Test
     @DisplayName("should return employee entity with code created Response when create succesfully")
     public void createEmployeeAPI_validRequest_shouldReturnCreatedEntity() throws Exception{
+        LocalDateTime now = LocalDateTime.now();
         EmployeeCreateRequest request = EmployeeCreateRequest.builder()
         .username(employeeResponse.username())
         .fullname(employeeResponse.fullname())
         .password("secret$")
+        .joinDate(now)
         .build();
 
         when(employeeService.createEmployee(request)).thenReturn(employeeResponse);
@@ -38,6 +42,7 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
             .param("username", employeeResponse.username())
             .param("fullname", employeeResponse.fullname()) 
             .param("password", "secret$") 
+            .param("joinDate", now.toString())
         )
         .andDo(print()) 
         .andExpect(status().isCreated())
@@ -50,10 +55,13 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
     @Test
     @DisplayName("should return error validation with code badreq when password value doesn't meet pattern")
     public void createEmployeeAPI_illegalParam_shouldReturnError() throws Exception{
+        LocalDateTime now = LocalDateTime.now();
+
         EmployeeCreateRequest request = EmployeeCreateRequest.builder()
         .username(employeeResponse.username())
         .fullname(employeeResponse.fullname())
         .password("se$")
+        .joinDate(now)
         .build();
 
         when(employeeService.createEmployee(request)).thenReturn(employeeResponse);
@@ -66,6 +74,7 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
             .param("username", employeeResponse.username())
             .param("fullname", employeeResponse.fullname()) 
             .param("password", "stfwa  42$") 
+            .param("joinDate", now.toString())
         )
         .andDo(print()) 
         .andExpect(status().isBadRequest())
@@ -77,10 +86,13 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
     @Test
     @DisplayName("should return error DuplicateEnt when username already exists")
     public void createEmployeeAPI_duplicateUsername_shouldReturnBadRequest() throws Exception{
+        LocalDateTime now = LocalDateTime.now();
+
         EmployeeCreateRequest request = EmployeeCreateRequest.builder()
         .username(employeeResponse.username())
         .fullname(employeeResponse.fullname())
         .password("secret$")
+        .joinDate(now)
         .build();
 
         when(employeeService.createEmployee(request)).thenThrow(new DuplicateEntityException("Employee with username " + request.getUsername() + " already exists"));
@@ -93,6 +105,7 @@ public class EmployeeControllerCreateTest extends BaseEmployeeControllerTest{
             .param("username", employeeResponse.username())
             .param("fullname", employeeResponse.fullname()) 
             .param("password", "secret$") 
+            .param("joinDate", now.toString())
         )
         .andDo(print()) 
         .andExpect(status().isConflict())

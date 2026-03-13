@@ -1,30 +1,42 @@
 package lumi.insert.app.controller.product;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.ByteArrayInputStream; 
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
-
+import org.springframework.test.web.servlet.MvcResult;
+ 
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
+import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
 import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.repository.projection.ProductRefund;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 
 public class ProductControllerGetTest extends BaseProductControllerTest{
@@ -299,5 +311,45 @@ public class ProductControllerGetTest extends BaseProductControllerTest{
         .andExpect(status().isBadRequest()) 
         .andExpect(jsonPath("$.data").isEmpty())
         .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and pdf content when request valid")
+    public void getProductsStatisticsAPI_validRequest_return200StatusAndPdf() throws Exception{
+        ByteArrayInputStream bais = new ByteArrayInputStream("pdfBinary".getBytes());
+
+        TransactionItemStatisticResponse transactionItemStatisticResponse = TransactionItemStatisticResponse.builder().productRefunds(List.of(new ProductRefund("Shoes", 1L))).productSales(List.of()).build();
+
+        when(transactionItemService.getTransactionItemStats(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(transactionItemStatisticResponse);
+        when(productService.getOutOfStockProducts()).thenReturn(List.of());
+        when(pdfService.exportProductsStatistic(any(TransactionItemStatisticResponse.class), anyList(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(bais);
+
+        MvcResult result = mockMvc.perform(
+                get("/api/products/statistics/export?endDate=" + LocalDateTime.now())
+                .accept(MediaType.APPLICATION_PDF)
+            )
+        .andDo(print()) 
+        .andExpect(status().isOk()) 
+        .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
+        .andReturn();
+
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0);
+        verify(transactionItemService, times(1)).getTransactionItemStats(argThat(arg -> arg.getDayOfMonth() == 1), argThat(arg -> arg.getDayOfMonth() == LocalDateTime.now().getDayOfMonth()));
+        
+        verify(pdfService, times(1)).exportProductsStatistic(argThat(arg -> arg.getProductRefunds().getFirst().productName().equals("Shoes") && arg.getProductSales().size() == 0), argThat(arg -> arg.size() == 0), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should return 400 http status when request type incompatible")
+    public void getProductsStatisticsAPI_invalidType_return400Statu() throws Exception{
+
+        mockMvc.perform(
+                get("/api/products/statistics/export?type=docx") 
+                .accept(MediaType.APPLICATION_PDF, MediaType.APPLICATION_JSON)
+            )
+        .andDo(print()) 
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.errors").value("check documentation for export type specification"));
+ 
     }
 }

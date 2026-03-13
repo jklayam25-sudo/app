@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,8 +20,11 @@ import org.springframework.data.domain.SliceImpl;
 
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.TransactionItemResponse;
+import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
 import lumi.insert.app.entity.TransactionItem;
 import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.repository.projection.ProductRefund;
+import lumi.insert.app.repository.projection.ProductSale;
 
 public class TransactionItemServiceGetTest extends BaseTransactionItemServiceTest{
     @Test
@@ -66,5 +70,18 @@ public class TransactionItemServiceGetTest extends BaseTransactionItemServiceTes
         when(transactionItemRepositoryMock.findById(any())).thenReturn(Optional.empty()); 
 
         assertThrows(NotFoundEntityException.class, () -> transactionItemServiceMock.getTransactionItem(UuidCreator.getTimeOrderedEpochFast()));
+    }
+
+    @Test
+    @DisplayName("Should return TransactionItemStatisticResponse (List of productSale and List of productRefund) when found any")
+    public void getTransactionItemStats_foundAny_returnTransactionItemStatisticResponse(){ 
+        ProductSale productSale = new ProductSale("SomeProduct", 10L);
+        ProductRefund productRefund = new ProductRefund("SomeProduct", 10L);
+        when(transactionItemRepositoryMock.getProductTopSales(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(List.of(productSale)); 
+        when(transactionItemRepositoryMock.getProductTopRefund(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(List.of(productRefund)); 
+
+        TransactionItemStatisticResponse transactionItemStats = transactionItemServiceMock.getTransactionItemStats(LocalDateTime.now(), LocalDateTime.now());
+        assertEquals(productSale, transactionItemStats.getProductSales().getFirst());
+        assertEquals(productRefund, transactionItemStats.getProductRefunds().getFirst());
     }
 }

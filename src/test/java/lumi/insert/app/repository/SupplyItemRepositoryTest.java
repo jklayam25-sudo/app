@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -30,6 +31,7 @@ import lumi.insert.app.utils.generator.InvoiceGenerator;
 @DataJpaTest
 @Transactional
 @Import(InvoiceGenerator.class)
+@ActiveProfiles("test")
 public class SupplyItemRepositoryTest {
 
     @Autowired
@@ -63,6 +65,7 @@ public class SupplyItemRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
+        .supplierName(supplier.getName())
         .build();
 
        Supply savedSupply = supplyRepository.save(supply);
@@ -97,6 +100,7 @@ public class SupplyItemRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
+        .supplierName(supplier.getName())
         .build();
 
        Supply savedSupply = supplyRepository.save(supply);
@@ -141,6 +145,7 @@ public class SupplyItemRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .build();
 
             Supply savedSupply = supplyRepository.save(supply);

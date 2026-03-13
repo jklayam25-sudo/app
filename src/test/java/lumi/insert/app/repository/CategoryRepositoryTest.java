@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import lumi.insert.app.entity.Product;
 
 @DataJpaTest
 @Transactional
+@ActiveProfiles("test")
 @Slf4j
 public class CategoryRepositoryTest {
     

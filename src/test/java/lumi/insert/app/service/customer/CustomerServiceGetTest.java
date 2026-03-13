@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -93,7 +94,7 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
     @DisplayName("Should return Slice customer DTO when get customer found")
     void getCustomers_foundEntity_returnSliceCustomerDTO(){
         Page<Customer> slices = new PageImpl<>(List.of(setupCustomer));
-        when(customerRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(customerRepository.findAll(ArgumentMatchers.<Specification<Customer>>any(), any(Pageable.class))).thenReturn(slices);
 
         CustomerGetByFilter request = CustomerGetByFilter.builder()
         .isActive(false)
@@ -109,7 +110,7 @@ public class CustomerServiceGetTest extends BaseCustomerServiceTest{
     @DisplayName("Should return Slice customer DTO when get customer found")
     void getCustomers_notFoundEntity_returnSliceCustomerDTO(){
         Page<Customer> slices = new PageImpl<>(List.of());
-        when(customerRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(customerRepository.findAll(ArgumentMatchers.<Specification<Customer>>any(), any(Pageable.class))).thenReturn(slices);
 
         CustomerGetByFilter request = CustomerGetByFilter.builder()
         .isActive(false)

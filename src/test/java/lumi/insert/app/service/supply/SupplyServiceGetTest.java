@@ -17,6 +17,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,7 +64,7 @@ public class SupplyServiceGetTest extends BaseSupplyServiceTest{
         Page<Supply> supplies = new PageImpl<>(List.of(setupSupply));
         when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
         when(jpaSpecGenerator.supplySpecification(any())).thenReturn(Specification.anyOf(List.of()));
-        when(supplyRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(supplies);
+        when(supplyRepositoryMock.findAll(ArgumentMatchers.<Specification<Supply>>any(), any(Pageable.class))).thenReturn(supplies);
 
         Slice<SupplyResponse> result = supplyServiceMock.searchSuppliesByRequests(SupplyGetByFilter.builder().status(SupplyStatus.UNPAID).build());
         assertEquals(1, result.getNumberOfElements());
@@ -79,7 +80,7 @@ public class SupplyServiceGetTest extends BaseSupplyServiceTest{
         Page<Supply> supplies = new PageImpl<>(List.of());
         when(jpaSpecGenerator.pageable(any())).thenReturn(PageRequest.of(0, 10));
         when(jpaSpecGenerator.supplySpecification(any())).thenReturn(Specification.anyOf(List.of()));
-        when(supplyRepositoryMock.findAll(any(Specification.class), any(Pageable.class))).thenReturn(supplies);
+        when(supplyRepositoryMock.findAll(ArgumentMatchers.<Specification<Supply>>any(), any(Pageable.class))).thenReturn(supplies);
 
         Slice<SupplyResponse> result = supplyServiceMock.searchSuppliesByRequests(SupplyGetByFilter.builder().status(SupplyStatus.UNPAID).build());
         assertEquals(0, result.getNumberOfElements());

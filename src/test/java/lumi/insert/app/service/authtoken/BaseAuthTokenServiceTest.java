@@ -66,6 +66,6 @@ public abstract class BaseAuthTokenServiceTest {
         .refreshToken(UuidCreator.getTimeOrderedEpochFast().toString())
         .build();
 
-        authTokenResponse = new AuthTokenResponse("someAccessToken", UuidCreator.getTimeOrderedEpochFast().toString(), new EmployeeResponse(setupEmployee.getId(), setupEmployee.getUsername(), setupEmployee.getFullname(), setupEmployee.getRole()), LocalDateTime.now().plusDays(7), null);
+        authTokenResponse = new AuthTokenResponse("someAccessToken", UuidCreator.getTimeOrderedEpochFast().toString(), new EmployeeResponse(setupEmployee.getId(), setupEmployee.getUsername(), setupEmployee.getFullname(), setupEmployee.getRole(), LocalDateTime.now()), LocalDateTime.now().plusDays(7), null);
     }
 }

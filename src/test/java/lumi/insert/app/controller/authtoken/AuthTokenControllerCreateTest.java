@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
@@ -23,6 +24,8 @@ import lumi.insert.app.exception.NotFoundEntityException;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
+ 
+@ActiveProfiles("test")
 public class AuthTokenControllerCreateTest extends BaseAuthTokenControllerTest{
    
     @Test

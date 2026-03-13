@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -32,6 +33,7 @@ import lumi.insert.app.utils.generator.JpaSpecGenerator;
 @DataJpaTest
 @Transactional
 @Import({InvoiceGenerator.class, JpaSpecGenerator.class}) 
+@ActiveProfiles("test")
 public class TransactionPaymentRepositoryTest {
 
     @Autowired
@@ -66,6 +68,7 @@ public class TransactionPaymentRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .customer(customer)
+        .customerName(customer.getName())
         .build();
 
        Transaction savedTransaction = transactionRepository.save(transaction);
@@ -94,6 +97,7 @@ public class TransactionPaymentRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
             Transaction savedTransaction = transactionRepository.save(transaction);
@@ -135,6 +139,7 @@ public class TransactionPaymentRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -180,12 +185,14 @@ public class TransactionPaymentRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceIdA)
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         Transaction transactionB = Transaction.builder()
         .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .customer(customer)
+            .customerName(customer.getName())
             .build();
 
         List<Transaction> savedTransaction = transactionRepository.saveAllAndFlush(List.of(transactionA, transactionB));

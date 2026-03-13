@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -32,6 +33,7 @@ import lumi.insert.app.utils.generator.JpaSpecGenerator;
 @DataJpaTest
 @Transactional
 @Import({InvoiceGenerator.class, JpaSpecGenerator.class}) 
+@ActiveProfiles("test")
 public class SupplyPaymentRepositoryTest {
 
     @Autowired
@@ -66,6 +68,7 @@ public class SupplyPaymentRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(supplier)
+        .supplierName(supplier.getName())
         .build();
 
        Supply savedSupply = supplyRepository.save(supply);
@@ -94,6 +97,7 @@ public class SupplyPaymentRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .build();
 
             Supply savedSupply = supplyRepository.save(supply);
@@ -135,6 +139,7 @@ public class SupplyPaymentRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceId)
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .build();
 
         Supply savedSupply = supplyRepository.save(supply);
@@ -180,12 +185,14 @@ public class SupplyPaymentRepositoryTest {
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceIdA)
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .build();
 
         Supply supplyB = Supply.builder()
             .id(UuidCreator.getTimeOrderedEpochFast())
             .invoiceId(invoiceGenerator.generate())
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .build();
 
         List<Supply> savedSupply = supplyRepository.saveAllAndFlush(List.of(supplyA, supplyB));

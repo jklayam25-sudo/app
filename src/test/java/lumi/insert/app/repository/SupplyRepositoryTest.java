@@ -13,7 +13,7 @@ import java.util.Set;
  
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -21,15 +21,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.request.SupplyGetByFilter;
+import lumi.insert.app.entity.Product;
 import lumi.insert.app.entity.Supplier;
 import lumi.insert.app.entity.Supply;
+import lumi.insert.app.entity.SupplyItem;
 import lumi.insert.app.entity.nondatabase.SupplyStatus;
+import lumi.insert.app.exception.NotFoundEntityException;
+import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
@@ -37,6 +43,7 @@ import lumi.insert.app.utils.generator.JpaSpecGenerator;
 @Transactional
 @Slf4j
 @Import(JpaSpecGenerator.class)
+@ActiveProfiles("test")
 public class SupplyRepositoryTest {
     
     @Autowired
@@ -51,6 +58,15 @@ public class SupplyRepositoryTest {
     InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
 
     Supplier setupSupplier;
+
+    @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
+    SupplyItemRepository supplyItemRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     @BeforeEach
     public void setup(){
@@ -73,6 +89,7 @@ public class SupplyRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         Supply savedSupply = supplyRepository.save(supply);
@@ -89,6 +106,7 @@ public class SupplyRepositoryTest {
         Supply supply = Supply.builder() 
         .id(UuidCreator.getTimeOrderedEpochFast())
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
         
         assertNull(supply.getInvoiceId());
@@ -104,6 +122,7 @@ public class SupplyRepositoryTest {
         .id(UuidCreator.getTimeOrderedEpochFast())
         .invoiceId(invoiceId)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         supplyRepository.saveAndFlush(supply);
@@ -135,6 +154,7 @@ public class SupplyRepositoryTest {
                     .invoiceId(invoiceGenerator.generate())
                     .status(SupplyStatus.CANCELLED)
                     .supplier(setupSupplier)
+                    .supplierName(setupSupplier.getName())
                     .build();
 
                  pendingSupplys.add(supply);
@@ -143,6 +163,7 @@ public class SupplyRepositoryTest {
                     .id(UuidCreator.getTimeOrderedEpochFast())
                     .invoiceId(invoiceGenerator.generate())
                     .supplier(setupSupplier)
+                    .supplierName(setupSupplier.getName())
                     .build();
 
                  pendingSupplys.add(supply);
@@ -175,6 +196,7 @@ public class SupplyRepositoryTest {
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -184,6 +206,7 @@ public class SupplyRepositoryTest {
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -194,6 +217,7 @@ public class SupplyRepositoryTest {
         .status(SupplyStatus.CANCELLED)
         .totalPaid(150L)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -238,6 +262,7 @@ public class SupplyRepositoryTest {
         .invoiceId(matchInvoiceId)
         .totalPaid(150L)
         .supplier(setupSupplier)
+        .supplierName(setupSupplier.getName())
         .build();
 
         matchSupply.setCreatedAt(LocalDateTime.of(2020, 5, 10, 10, 10));
@@ -247,6 +272,7 @@ public class SupplyRepositoryTest {
         .invoiceId(invoiceGenerator.generate())
         .totalPaid(350L)
         .supplier(savedSupplier2)
+        .supplierName(savedSupplier2.getName())
         .build();
 
         supplyRepository.saveAllAndFlush(List.of(matchSupply, unmatchSupply2));
@@ -262,6 +288,52 @@ public class SupplyRepositoryTest {
         Slice<Supply> supplies = supplyRepository.findAll(specification, pageable); 
         assertEquals(1, supplies.getNumberOfElements());
         assertEquals(setupSupplier.getId(), supplies.getContent().getFirst().getSupplier().getId()); 
+    }
+
+    @Test
+    @DisplayName("Should return supply_items detail entity (with items > product) when supply id is valid")
+    public void findByIdDetail_validId_returnDetailEntity(){
+        String invoiceId = invoiceGenerator.generate();
+
+        Supplier supplier2 = Supplier.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .name("Supplier 2")
+        .email("TEST1@mail.com")
+        .contact("0812314567890") 
+        .build();
+
+        Supplier savedSupplier2 = supplierRepository.saveAndFlush(supplier2);
+
+        Supply supply = Supply.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .invoiceId(invoiceId)
+        .supplier(savedSupplier2)
+        .supplierName(savedSupplier2.getName())
+        .build();
+
+       Supply savedSupply = supplyRepository.saveAndFlush(supply);
+
+       Product mockCategorizedProduct = ProductUtils.getMockCategorizedProduct();
+       mockCategorizedProduct.setCategory(null);
+       mockCategorizedProduct.setId(null);
+
+       Product savedProduct = productRepository.saveAndFlush(mockCategorizedProduct);
+
+       SupplyItem supplyItem = SupplyItem.builder()
+       .id(UuidCreator.getTimeOrderedEpochFast())
+       .supply(savedSupply)
+       .product(savedProduct)
+       .price(savedProduct.getBasePrice())
+       .quantity(savedProduct.getStockQuantity())
+       .build();
+
+        supplyItemRepository.saveAndFlush(supplyItem);
+        entityManager.clear();
+        Supply detailSupply = supplyRepository.findByIdDetail(savedSupply.getId()).orElseThrow(() -> new NotFoundEntityException(""));
+
+        List<SupplyItem> supplyItems = detailSupply.getSupplyItems();
+        assertEquals(1, supplyItems.size());
+        assertEquals(savedProduct.getId(), supplyItems.getFirst().getProduct().getId()); 
     }
 
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -15,6 +16,7 @@ import lumi.insert.app.utils.mapper.CategoryMapper;
 
 @SpringBootTest 
 @WithMockUser(username = "admin", roles = {"ADMIN"})
+@ActiveProfiles("test")
 public abstract class BaseCategoryControllerTest {
  
     MockMvc mockMvc;

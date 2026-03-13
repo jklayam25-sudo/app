@@ -15,7 +15,8 @@ import java.util.UUID;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Test; 
+import org.mockito.ArgumentMatchers; 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -104,7 +105,7 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
         .build();
 
         Page<StockCard> slices = new PageImpl<>(List.of(stockCard));
-        when(stockCardRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(stockCardRepository.findAll(ArgumentMatchers.<Specification<StockCard>>any(), any(Pageable.class))).thenReturn(slices);
 
         StockCardGetByFilter request = StockCardGetByFilter.builder()
         .type(StockMove.SALE)
@@ -121,7 +122,7 @@ public class StockCardGetServiceTest extends BaseStockCardServiceTest{
     void searchStockCards_notFoundEntity_returnSliceDTO(){   
 
         Page<StockCard> slices = new PageImpl<>(List.of());
-        when(stockCardRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(slices);
+        when(stockCardRepository.findAll(ArgumentMatchers.<Specification<StockCard>>any(), any(Pageable.class))).thenReturn(slices);
 
         StockCardGetByFilter request = StockCardGetByFilter.builder()
         .type(StockMove.SALE)

@@ -1,0 +1,245 @@
+package lumi.insert.app.service.pdf;
+ 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lumi.insert.app.dto.response.ProductName; 
+import lumi.insert.app.dto.response.SupplyDetailResponse;
+import lumi.insert.app.dto.response.SupplyItemResponse;
+import lumi.insert.app.dto.response.TransactionDetailResponse;
+import lumi.insert.app.dto.response.TransactionItemResponse;
+import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
+import lumi.insert.app.entity.nondatabase.SupplyStatus;
+import lumi.insert.app.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
+import lumi.insert.app.repository.projection.ProductRefund;
+import lumi.insert.app.repository.projection.ProductSale;
+import lumi.insert.app.service.implement.PdfServiceImpl;
+
+@ExtendWith(MockitoExtension.class)
+public class PdfServiceTest {
+
+    @InjectMocks
+    private PdfServiceImpl pdfService;
+
+    @Test
+    void testExportSupplyWithItems_ShouldReturnValidPdfContent() throws IOException { 
+        ProductName productName = ProductName.builder()
+        .id(1L)
+        .name("Shoes")
+        .build();
+
+        SupplyItemResponse item1 = new SupplyItemResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            productName, 
+            10L, 
+            10L,
+             null
+        );
+        
+        SupplyItemResponse item2 = new SupplyItemResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            productName, 
+            10L, 
+            10L,
+             null
+        );
+
+        SupplyDetailResponse mockData = new SupplyDetailResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            "INV-999",
+            UuidCreator.getTimeOrderedEpochFast(), 
+            "Acme Supply Co.", 
+                List.of(item1, item2),
+                2L,
+                2L,    
+                20L,  
+                200L,  
+                182L,  
+                182L, 
+                0L,   
+                0L,
+                0L,
+                SupplyStatus.UNPAID,
+                null,
+                null,
+                LocalDateTime.now()
+        );
+ 
+        ByteArrayInputStream result = pdfService.exportSupplyWithItems(mockData);
+ 
+        assertNotNull(result);
+        byte[] pdfBytes = result.readAllBytes();
+        assertTrue(pdfBytes.length > 0);
+ 
+        try (PDDocument document = Loader.loadPDF(pdfBytes)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+ 
+            assertTrue(text.contains("Supply Order"));
+            assertTrue(text.contains("Invoice No: INV-999"));
+            assertTrue(text.contains("Supplier: Acme Supply Co."));
+             
+            assertTrue(text.contains("Shoes")); 
+            assertTrue(text.contains("10"));
+             
+            assertTrue(text.contains("Subtotal"));
+            assertTrue(text.contains("200"));
+            assertTrue(text.contains("Refund value"));
+            assertTrue(text.contains("0")); 
+            assertTrue(text.contains("Grandtotal"));
+            assertTrue(text.contains("182"));
+             
+            assertTrue(text.contains("Jekael"));
+            assertTrue(text.contains("Warehouse Staff"));
+        }
+    }
+
+    @Test
+    void exportTransactionWithItems_validData_ShouldReturnValidPdfContent() throws IOException {  
+
+        TransactionItemResponse item1 = new TransactionItemResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            null,
+            1L,
+            "Shoes",
+            null,
+            10L, 
+            10L,
+            null, 
+            null
+        );
+        
+        TransactionItemResponse item2 = new TransactionItemResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            null,
+            2L,
+            "Watch",
+            null,
+            100L, 
+            10L,
+            null, 
+            null
+        );
+
+        TransactionDetailResponse mockData = new TransactionDetailResponse(
+            UuidCreator.getTimeOrderedEpochFast(), 
+            "INV-999",
+            UuidCreator.getTimeOrderedEpochFast(), 
+            "Acme Supply Co.", 
+                List.of(item1, item2),
+                2L,
+                2L,    
+                20L,  
+                200L,  
+                182L,  
+                182L, 
+                0L,   
+                0L,
+                0L,
+                TransactionStatus.PROCESS,
+                null,
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+ 
+        ByteArrayInputStream result = pdfService.exportTransactionWithItems(mockData);
+ 
+        assertNotNull(result);
+        byte[] pdfBytes = result.readAllBytes();
+        assertTrue(pdfBytes.length > 0);
+ 
+        try (PDDocument document = Loader.loadPDF(pdfBytes)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+ 
+            assertTrue(text.contains("Transaction Order"));
+            assertTrue(text.contains("Invoice No: INV-999"));
+            assertTrue(text.contains("Customer: Acme Supply Co."));
+             
+            assertTrue(text.contains("Shoes")); 
+            assertTrue(text.contains("10"));
+
+            assertTrue(text.contains("Watch")); 
+             
+            assertTrue(text.contains("Subtotal"));
+            assertTrue(text.contains("200"));
+            assertTrue(text.contains("Refund value"));
+            assertTrue(text.contains("0")); 
+            assertTrue(text.contains("Grandtotal"));
+            assertTrue(text.contains("182"));
+             
+            assertTrue(text.contains("Jekael"));
+            assertTrue(text.contains("Cashier Staff"));
+        }
+    }
+
+    
+    @Test
+    void testExportProductsStatistic_Success() throws IOException { 
+        ProductSale sales = new ProductSale("Tea", 100L);
+        ProductRefund refunds = new ProductRefund("Shoes", 5L);
+        ProductOutOfStock oosProduct = new ProductOutOfStock(1L, "Mirror", 2L, 10L);
+
+        TransactionItemStatisticResponse statsResponse = TransactionItemStatisticResponse.builder()
+        .productRefunds(List.of(refunds))
+        .productSales(List.of(sales))
+        .build();
+
+        LocalDateTime now = LocalDateTime.now();
+ 
+        ByteArrayInputStream bais = pdfService.exportProductsStatistic(
+                statsResponse, 
+                List.of(oosProduct), 
+                now.minusDays(7), 
+                now
+        );
+ 
+        assertNotNull(bais);
+        assertTrue(bais.available() > 0);
+ 
+        try (PDDocument document = Loader.loadPDF(bais.readAllBytes())) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            String pdfText = stripper.getText(document);
+ 
+            assertTrue(pdfText.contains("Products statistic"));
+            assertTrue(pdfText.contains("Shoes"));
+            assertTrue(pdfText.contains("100Pcs"));
+            assertTrue(pdfText.contains("Tea"));
+             
+            assertTrue(document.getNumberOfPages() > 0);
+        }
+    }
+
+    @Test
+    void testExportProductsStatistic_EmptyList_ShouldStillGeneratePdf() throws IOException {
+        // Test skenario jika data kosong (untuk mencegah NullPointerException)
+        TransactionItemStatisticResponse statsResponse = TransactionItemStatisticResponse.builder()
+        .productRefunds(List.of())
+        .productSales(List.of())
+        .build();
+        
+        ByteArrayInputStream bais = pdfService.exportProductsStatistic(
+                statsResponse, List.of(), LocalDateTime.now(), LocalDateTime.now()
+        );
+
+        assertNotNull(bais);
+        assertTrue(bais.available() > 0);
+    }
+}

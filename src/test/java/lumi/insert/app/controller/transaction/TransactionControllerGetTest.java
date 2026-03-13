@@ -1,14 +1,18 @@
 package lumi.insert.app.controller.transaction;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,8 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
-import lumi.insert.app.dto.request.TransactionGetByFilter;
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import lumi.insert.app.dto.request.TransactionGetByFilter; 
+import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.NotFoundEntityException;
@@ -153,5 +161,29 @@ public class TransactionControllerGetTest extends BaseTransactionControllerTest{
         .andExpect(status().isBadRequest()) 
         .andExpect(jsonPath("$.data").isEmpty()) 
         .andExpect(jsonPath("$.errors").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and pdf content when request valid")
+    public void exportTransactionAPI_validRequest_return400StatusAndPdf() throws Exception{
+        ByteArrayInputStream bais = new ByteArrayInputStream("pdfBinary".getBytes());
+
+        UUID transactionId = UuidCreator.getTimeOrderedEpochFast();
+         
+        when(transactionService.getTransactionDetail(transactionId)).thenReturn(new TransactionDetailResponse(transactionId, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        when(pdfService.exportTransactionWithItems(any(TransactionDetailResponse.class))).thenReturn(bais);
+
+        MvcResult result = mockMvc.perform(
+                get("/api/transactions/" + transactionId + "/pdf")
+                .accept(MediaType.APPLICATION_PDF)
+            )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(content().contentType(MediaType.APPLICATION_PDF_VALUE))
+        .andReturn();
+
+        assertTrue(result.getResponse().getContentAsByteArray().length > 0);
+        
+        verify(pdfService, times(1)).exportTransactionWithItems(argThat(arg -> arg.id() == transactionId));
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.Slice;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -23,6 +24,7 @@ import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 @DataJpaTest
 @Transactional
+@ActiveProfiles("test")
 public class MemoRepositoryTest {
     
     @Autowired
