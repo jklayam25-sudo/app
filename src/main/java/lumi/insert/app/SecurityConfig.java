@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler; 
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -36,6 +37,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configure(http))
             .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .exceptionHandling(exc -> exc.accessDeniedHandler(customAccessDeniedHandler()));

@@ -1,7 +1,6 @@
 package lumi.insert.app.utils.security;
 
-import java.io.IOException;
-import java.time.Instant;
+import java.io.IOException; 
 import java.util.List;
 import java.util.UUID;
 
@@ -17,45 +16,55 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j; 
 import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 @Component
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter{
 
     @Autowired
     JwtUtils jwtUtils;
 
     @Autowired
-    @Qualifier("handlerExceptionResolver")
+    @Qualifier("handlerExceptionResolver") 
     private HandlerExceptionResolver resolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-
+            throws ServletException, IOException {   
         String token = parseBearer(request);
 
-        if(token == null) resolver.resolveException(request, response, token, new BadCredentialsException("Missing access token, try to request token!"));
+        if(token == null){
+            if(request.getServletPath().contains("/")) {
+                doFilter(request, response, filterChain);
+                return;
+            }
+            resolver.resolveException(request, response, null, new BadCredentialsException("Missing access token, try to request token!"));
+        } 
 
-        DecodedJWT accessToken;
+        DecodedJWT accessToken; 
 
         try {
             accessToken = jwtUtils.parseAccessToken(token);    
-        } catch (JWTVerificationException e) {
-            resolver.resolveException(request, response, token, e);
+        } catch (JWTVerificationException e) { 
+            if(e instanceof TokenExpiredException){
+                resolver.resolveException(request, response, null, new BadCredentialsException("Access token is expired, try to request token"));
+                return;
+            }
+            resolver.resolveException(request, response, null, e);
             return;
         }
         
-        if(accessToken.getExpiresAtAsInstant().isBefore(Instant.now())) {
-            resolver.resolveException(request, response, token, new BadCredentialsException("Access token is expired, try to request token"));
-        }
+        
 
         List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(accessToken.getClaim("role").asString());
  
@@ -71,7 +80,10 @@ public class JwtFilter extends OncePerRequestFilter{
     }
 
     private String parseBearer(HttpServletRequest request){
-         String token = request.getHeader("Authorization").split("Bearer ")[1];
+         String header = request.getHeader("Authorization");
+
+         if(header == null) return null;
+         String token = header.split("Bearer ")[1];;
          if(token.length() < 1) return null;
          return token;
     }
