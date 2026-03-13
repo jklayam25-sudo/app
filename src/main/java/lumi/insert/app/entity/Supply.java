@@ -73,6 +73,8 @@ public class Supply extends TimestampAuditing{
     @JoinColumn(name = "supplier_id", nullable = false) 
     private Supplier supplier;
 
+    private String supplierName;
+    
     @OneToMany(mappedBy = "supply")
     @Builder.Default
     @ToString.Exclude
