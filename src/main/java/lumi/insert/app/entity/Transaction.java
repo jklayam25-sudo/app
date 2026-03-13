@@ -72,6 +72,8 @@ public class Transaction extends TimestampAuditing{
     @JoinColumn(name = "customer_id", nullable = false) 
     private Customer customer;
 
+    private String customerName;
+
     @OneToMany(mappedBy = "transaction")
     @Builder.Default
     @ToString.Exclude
