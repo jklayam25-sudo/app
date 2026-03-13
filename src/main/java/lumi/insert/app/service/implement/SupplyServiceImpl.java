@@ -89,6 +89,7 @@ public class SupplyServiceImpl implements SupplyService{
             .invoiceId(request.getInvoiceId())
             .description(request.getDescription())
             .supplier(supplier)
+            .supplierName(supplier.getName())
             .totalItems(Long.valueOf(items.size()))
             .subTotal(subTotal)
             .grandTotal(subTotal - request.getTotalDiscount() + request.getTotalFee())
@@ -248,12 +249,6 @@ public class SupplyServiceImpl implements SupplyService{
             .orElseThrow(() -> new NotFoundEntityException("Supply with ID " + id + " is not found"));
 
         return allSupplyMapper.createDetailDTO(supply);
-    }
-
-    @Override
-    public byte[] getInvoicePdf(UUID id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getInvoicePdf'");
     }
 
     @Override
