@@ -25,19 +25,29 @@ import lumi.insert.app.dto.request.TransactionItemCreateRequest;
 import lumi.insert.app.dto.response.TransactionItemDelete;
 import lumi.insert.app.dto.response.TransactionItemResponse; 
 import lumi.insert.app.service.TransactionItemService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Transaction Items", description = "Endpoints for managing items within sales transactions")
 public class TransactionItemController {
     
     @Autowired
     TransactionItemService transactionItemService;
 
+    @Operation(summary = "Create transaction item", description = "Adds a new item to an existing transaction")
+    @ApiResponse(responseCode = "201", description = "Transaction item created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @PostMapping(
         path = "/api/transactions/{id}/items",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> createTransactionItem(@PathVariable(name = "id") UUID id, @Valid TransactionItemCreateRequest request){
+    ResponseEntity<WebResponse<TransactionItemResponse>> createTransactionItem(@Parameter(description = "Transaction ID") @PathVariable(name = "id") UUID id, @Valid @RequestBody TransactionItemCreateRequest request){
         TransactionItemResponse resultFromService = transactionItemService.createTransactionItem(id, request);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -50,11 +60,14 @@ public class TransactionItemController {
         return ResponseEntity.created(location).body(wrappedResult);   
     }
 
+    @Operation(summary = "Get transaction items", description = "Retrieve paginated list of all items in a transaction")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved transaction items")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/items",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItems(@PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute PaginationRequest request){
+    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItems(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute PaginationRequest request){
         Slice<TransactionItemResponse> resultFromService = transactionItemService.getTransactionItemsByTransactionId(transactionId, request);
  
         WebResponse<Slice<TransactionItemResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -62,11 +75,14 @@ public class TransactionItemController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Get transaction item by ID", description = "Retrieve detailed information about a specific transaction item")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved transaction item")
+    @ApiResponse(responseCode = "404", description = "Transaction item not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/items/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<TransactionItemResponse>> getTransactionItem(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Item ID") @PathVariable(name = "id") UUID id){
         TransactionItemResponse resultFromService = transactionItemService.getTransactionItem(id);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -74,11 +90,14 @@ public class TransactionItemController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Get transaction items by product", description = "Retrieve all items in a transaction for a specific product")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved transaction items")
+    @ApiResponse(responseCode = "404", description = "Transaction or product not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/items/product/{productId}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItemByProductId(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "productId") Long productId){
+    ResponseEntity<WebResponse<Slice<TransactionItemResponse>>> getTransactionItemByProductId(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Product ID") @PathVariable(name = "productId") Long productId){
         Slice<TransactionItemResponse> resultFromService = transactionItemService.getTransactionByTransactionIdAndProductId(transactionId, productId);
  
         WebResponse<Slice<TransactionItemResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -86,11 +105,14 @@ public class TransactionItemController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Delete transaction item", description = "Removes an item from a transaction (410 Gone response)")
+    @ApiResponse(responseCode = "410", description = "Transaction item deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Transaction item not found")
     @DeleteMapping(
         path = "/api/transactions/{transactionId}/items/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemDelete>> DeleteTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<TransactionItemDelete>> DeleteTransactionItem(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Item ID") @PathVariable(name = "id") UUID id){
         TransactionItemDelete resultFromService = transactionItemService.deleteTransactionItem(id);
  
         WebResponse<TransactionItemDelete> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -98,12 +120,16 @@ public class TransactionItemController {
         return ResponseEntity.status(HttpStatusCode.valueOf(410)).body(wrappedResult);   
     }
 
+    @Operation(summary = "Update transaction item quantity", description = "Updates the quantity of a specific item in a transaction")
+    @ApiResponse(responseCode = "200", description = "Transaction item quantity updated successfully")
+    @ApiResponse(responseCode = "404", description = "Transaction item not found")
+    @ApiResponse(responseCode = "400", description = "Invalid quantity")
     @PostMapping(
         path = "/api/transactions/{transactionId}/items/{id}/quantity",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> UpdateTransactionItemQuantity(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id, @RequestParam(name = "quantity") Long quantity){
+    ResponseEntity<WebResponse<TransactionItemResponse>> UpdateTransactionItemQuantity(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Item ID") @PathVariable(name = "id") UUID id, @Parameter(description = "New quantity") @RequestBody @RequestParam(name = "quantity") Long quantity){
         TransactionItemResponse resultFromService = transactionItemService.updateTransactionItemQuantity(id, quantity);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -112,12 +138,16 @@ public class TransactionItemController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Refund transaction item", description = "Records a refund for a specific item in the transaction")
+    @ApiResponse(responseCode = "200", description = "Transaction item refunded successfully")
+    @ApiResponse(responseCode = "404", description = "Transaction item not found")
+    @ApiResponse(responseCode = "400", description = "Invalid refund request")
     @PostMapping(
         path = "/api/transactions/{transactionId}/items/{id}/refund",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionItemResponse>> refundTransactionItem(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id, @Valid ItemRefundRequest request){
+    ResponseEntity<WebResponse<TransactionItemResponse>> refundTransactionItem(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Item ID") @PathVariable(name = "id") UUID id, @Valid @RequestBody ItemRefundRequest request){
         TransactionItemResponse resultFromService = transactionItemService.refundTransactionItem(id, request);
  
         WebResponse<TransactionItemResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);

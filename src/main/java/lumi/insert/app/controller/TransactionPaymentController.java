@@ -23,21 +23,31 @@ import lumi.insert.app.dto.request.TransactionPaymentCreateRequest;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.dto.response.TransactionPaymentResponse; 
 import lumi.insert.app.service.TransactionPaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Transactional
 @Slf4j
+@Tag(name = "Transaction Payments", description = "Endpoints for managing transaction payments and collections")
 public class TransactionPaymentController {
     
     @Autowired
     TransactionPaymentService transactionPaymentService;
 
+    @Operation(summary = "Create transaction payment", description = "Records a new payment received for a transaction")
+    @ApiResponse(responseCode = "201", description = "Transaction payment created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @PostMapping(
         path = "/api/transactions/{transactionId}/payments",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionPaymentResponse>> createTransactionPaymentAPI(@PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid TransactionPaymentCreateRequest request){
+    ResponseEntity<WebResponse<TransactionPaymentResponse>> createTransactionPaymentAPI(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid @RequestBody TransactionPaymentCreateRequest request){
         TransactionPaymentResponse resultFromService = transactionPaymentService.createTransactionPayment(transactionId, request);
         WebResponse<TransactionPaymentResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
@@ -49,12 +59,16 @@ public class TransactionPaymentController {
         return ResponseEntity.created(location).body(wrappedResult);
     }
 
+    @Operation(summary = "Refund transaction payment", description = "Records a refund for a payment in a transaction")
+    @ApiResponse(responseCode = "201", description = "Transaction payment refund created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @PostMapping(
         path = "/api/transactions/{transactionId}/payments/refund",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<TransactionPaymentResponse>> refundTransactionPaymentAPI(@PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid TransactionPaymentCreateRequest request){
+    ResponseEntity<WebResponse<TransactionPaymentResponse>> refundTransactionPaymentAPI(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid @RequestBody TransactionPaymentCreateRequest request){
         TransactionPaymentResponse resultFromService = transactionPaymentService.refundTransactionPayment(transactionId, request);
         WebResponse<TransactionPaymentResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
@@ -66,11 +80,14 @@ public class TransactionPaymentController {
         return ResponseEntity.created(location).body(wrappedResult);
     }
 
+    @Operation(summary = "Get transaction payment by ID", description = "Retrieve detailed information about a specific transaction payment")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved transaction payment")
+    @ApiResponse(responseCode = "404", description = "Transaction payment not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/payments/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<TransactionPaymentResponse>> getTransactionPaymentAPI(@PathVariable(name = "transactionId") UUID transactionId, @PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<TransactionPaymentResponse>> getTransactionPaymentAPI(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @Parameter(description = "Payment ID") @PathVariable(name = "id") UUID id){
         TransactionPaymentResponse resultFromService = transactionPaymentService.getTransactionPayment(id);
 
         WebResponse<TransactionPaymentResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -78,11 +95,14 @@ public class TransactionPaymentController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Get transaction payments", description = "Retrieve paginated list of all payments for a transaction")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved transaction payments")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/payments",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<TransactionPaymentResponse>>> getTransactionPaymentsAPI(@PathVariable(name = "transactionId") UUID transactionId,@ModelAttribute @Valid PaginationRequest request){
+    ResponseEntity<WebResponse<Slice<TransactionPaymentResponse>>> getTransactionPaymentsAPI(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId,@ModelAttribute @Valid PaginationRequest request){
         Slice<TransactionPaymentResponse> resultFromService = transactionPaymentService.getTransactionPaymentsByTransactionId(transactionId, request);
 
         WebResponse<Slice<TransactionPaymentResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -90,11 +110,14 @@ public class TransactionPaymentController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Search transaction payments", description = "Search transaction payments with filtering options")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered transaction payments")
+    @ApiResponse(responseCode = "404", description = "Transaction not found")
     @GetMapping(
         path = "/api/transactions/{transactionId}/payments/filter",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<TransactionPaymentResponse>>> searchTransactionPaymentsFilter(@PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid TransactionPaymentGetByFilter request){
+    ResponseEntity<WebResponse<Slice<TransactionPaymentResponse>>> searchTransactionPaymentsFilter(@Parameter(description = "Transaction ID") @PathVariable(name = "transactionId") UUID transactionId, @ModelAttribute @Valid TransactionPaymentGetByFilter request){
         log.info("{}", request);
         Slice<TransactionPaymentResponse> resultFromService = transactionPaymentService.getTransactionPaymentsByRequests(request);
 

@@ -26,20 +26,29 @@ import lumi.insert.app.dto.response.SupplierDetailResponse;
 import lumi.insert.app.dto.response.SupplierNameResponse;
 import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.service.SupplierService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Slf4j
+@Tag(name = "Suppliers", description = "Endpoints for managing suppliers and vendor information")
 public class SupplierController {
     
     @Autowired
     SupplierService supplierService;
 
+    @Operation(summary = "Create new supplier", description = "Creates a new supplier with contact and location details")
+    @ApiResponse(responseCode = "201", description = "Supplier created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PostMapping(
         path = "/api/suppliers",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<SupplierDetailResponse>> createSupplierAPI(@Valid SupplierCreateRequest request){
+    ResponseEntity<WebResponse<SupplierDetailResponse>> createSupplierAPI(@Valid @RequestBody SupplierCreateRequest request){
         
         SupplierDetailResponse resultFromService = supplierService.createSupplier(request);
 
@@ -53,11 +62,14 @@ public class SupplierController {
         return ResponseEntity.created(location).body(wrappedResult);
     }
 
+    @Operation(summary = "Get supplier by ID", description = "Retrieve detailed information about a specific supplier")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved supplier")
+    @ApiResponse(responseCode = "404", description = "Supplier not found")
     @GetMapping(
         path = "/api/suppliers/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplierDetailResponse>> getSupplierAPI(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<SupplierDetailResponse>> getSupplierAPI(@Parameter(description = "Supplier ID") @PathVariable(name = "id") UUID id){
         SupplierDetailResponse resultFromService = supplierService.getSupplier(id);
 
         WebResponse<SupplierDetailResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -65,6 +77,8 @@ public class SupplierController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Get all suppliers", description = "Retrieve paginated list of suppliers with optional filtering")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved suppliers")
     @GetMapping(
         path = "/api/suppliers",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -77,6 +91,8 @@ public class SupplierController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Search supplier names", description = "Search for suppliers by name with pagination support")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved matching suppliers")
     @GetMapping(
         path = "/api/suppliers/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -89,12 +105,16 @@ public class SupplierController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Update supplier", description = "Updates information for an existing supplier")
+    @ApiResponse(responseCode = "200", description = "Supplier updated successfully")
+    @ApiResponse(responseCode = "404", description = "Supplier not found")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PatchMapping(
         path = "/api/suppliers/{id}",
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplierDetailResponse>> updateSupplierAPI(@PathVariable(name = "id") UUID id, @Valid SupplierUpdateRequest request){ 
+    ResponseEntity<WebResponse<SupplierDetailResponse>> updateSupplierAPI(@Parameter(description = "Supplier ID") @PathVariable(name = "id") UUID id, @Valid @RequestBody SupplierUpdateRequest request){ 
         SupplierDetailResponse resultFromService = supplierService.updateSupplier(id, request);
 
         WebResponse<SupplierDetailResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);

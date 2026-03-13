@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,22 +24,27 @@ import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.service.AuthTokenService;
 
 @RestController
+@Tag(name = "Authentication", description = "Endpoints for managing user sessions and JWT tokens")
 public class AuthTokenController {
     
     @Autowired
     AuthTokenService authTokenService;
 
+    @Operation(summary = "Login to the system", description = "Authenticates user and returns access token in body and refresh token in HttpOnly cookie")
+    @ApiResponse(responseCode = "200", description = "Login successful")
     @PostMapping(
         path = "/api/auth/login",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<AuthTokenResponse>> loginAuthAPI(@Valid AuthTokenCreateRequest request){
+    public ResponseEntity<WebResponse<AuthTokenResponse>> loginAuthAPI(@Valid @RequestBody AuthTokenCreateRequest request){
         AuthTokenResponse resultFromService = authTokenService.createAuthToken(request);
 
         WebResponse<AuthTokenResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", resultFromService.refreshToken())
+        .httpOnly(true)
+        .secure(false)
         .maxAge(604800)
         .path("/")
         .build();
@@ -43,28 +52,27 @@ public class AuthTokenController {
         return ResponseEntity.ok().header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString()).body(wrappedResult);
     }
 
+    @Operation(summary = "Refresh access token", description = "Uses the refresh token from cookie to generate a new short-lived access token")
+    @ApiResponse(responseCode = "200", description = "Token refreshed successfully")
     @PostMapping(
         path = "/api/auth/refresh",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<AuthTokenResponse>> refreshAuthAPI(@CookieValue(name = "refreshToken", required = true) String refreshToken){
+    public ResponseEntity<WebResponse<AuthTokenResponse>> refreshAuthAPI(@CookieValue(name = "refreshToken", required = true) String refreshToken){
         AuthTokenResponse resultFromService = authTokenService.refreshAuthToken(refreshToken);
 
         WebResponse<AuthTokenResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null); 
-
-        // ResponseCookie cookie = ResponseCookie.from("refreshToken", resultFromService.refreshToken())
-        // .maxAge(604800)
-        // .path("/")
-        // .build();
         
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Logout", description = "Invalidates the refresh token and clears the authentication cookie")
+    @ApiResponse(responseCode = "204", description = "Logout successful")
     @DeleteMapping(
         path = "/api/auth/logout"
     )
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    void deleteAuthAPI(@CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response){
+    public void deleteAuthAPI(@CookieValue(name = "refreshToken", required = true) String refreshToken, HttpServletResponse response){
         authTokenService.deleteRefreshToken(refreshToken);
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setPath("/");

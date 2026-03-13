@@ -22,19 +22,28 @@ import lumi.insert.app.dto.request.StockCardCreateRequest;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
 import lumi.insert.app.dto.response.StockCardResponse; 
 import lumi.insert.app.service.StockCardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Stock Cards", description = "Endpoints for managing stock card records and inventory tracking")
 public class StockCardController {
 
     @Autowired
     StockCardService stockCardService;
     
+    @Operation(summary = "Create new stock card", description = "Creates a new stock card record for inventory tracking")
+    @ApiResponse(responseCode = "201", description = "Stock card created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PostMapping(
         path = "/api/stockcards",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<StockCardResponse>> createStockCardAPI(@Valid StockCardCreateRequest request){
+    ResponseEntity<WebResponse<StockCardResponse>> createStockCardAPI(@Valid @RequestBody StockCardCreateRequest request){
         StockCardResponse resultFromService = stockCardService.createStockCard(request);
 
         WebResponse<StockCardResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -47,11 +56,14 @@ public class StockCardController {
         return ResponseEntity.created(location).body(wrappedResult);
     }
 
+    @Operation(summary = "Get stock card by ID", description = "Retrieve detailed information about a specific stock card")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved stock card")
+    @ApiResponse(responseCode = "404", description = "Stock card not found")
     @GetMapping(
         path = "/api/stockcards/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<StockCardResponse>> getStockCardAPI(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<StockCardResponse>> getStockCardAPI(@Parameter(description = "Stock card ID") @PathVariable(name = "id") UUID id){
         StockCardResponse resultFromService = stockCardService.getStockCard(id);
 
         WebResponse<StockCardResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -59,11 +71,13 @@ public class StockCardController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Get all stock cards", description = "Retrieve paginated list of all stock cards with optional cursor-based pagination")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved stock cards")
     @GetMapping(
         path = "/api/stockcards",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<StockCardResponse>>> getStockCardsAPI(@RequestParam(name = "lastId", required = false) UUID lastId, @ModelAttribute PaginationRequest request){
+    ResponseEntity<WebResponse<Slice<StockCardResponse>>> getStockCardsAPI(@Parameter(description = "Last stock card ID for cursor-based pagination (optional)") @RequestParam(name = "lastId", required = false) UUID lastId, @ModelAttribute PaginationRequest request){
         Slice<StockCardResponse> resultFromService = stockCardService.getStockCards(lastId, request);
 
         WebResponse<Slice<StockCardResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -71,6 +85,8 @@ public class StockCardController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Search stock cards", description = "Search stock cards with filtering options")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered stock cards")
     @GetMapping(
         path = "/api/stockcards/search",
         produces = MediaType.APPLICATION_JSON_VALUE

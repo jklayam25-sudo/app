@@ -3,6 +3,7 @@ package lumi.insert.app.controller;
 import java.net.URI;
 import java.util.UUID;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
@@ -17,6 +18,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.dto.request.CustomerCreateRequest;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
@@ -30,17 +36,21 @@ import lumi.insert.app.service.CustomerService;
 
 @RestController
 @Slf4j
+@Tag(name = "Customers", description = "Endpoints for managing customer information and details")
 public class CustomerController {
     
     @Autowired
     CustomerService customerService;
 
+    @Operation(summary = "Create new customer", description = "Creates a new customer with the specified details including location")
+    @ApiResponse(responseCode = "201", description = "Customer created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PostMapping(
         path = "/api/customers",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<CustomerDetailResponse>> createCustomerAPI(@Valid CustomerCreateRequest request){
+    ResponseEntity<WebResponse<CustomerDetailResponse>> createCustomerAPI(@Valid @RequestBody CustomerCreateRequest request){
         
         CustomerDetailResponse resultFromService = customerService.createCustomer(request);
 
@@ -54,11 +64,14 @@ public class CustomerController {
         return ResponseEntity.created(location).body(wrappedResult);
     }
 
+    @Operation(summary = "Get customer by ID", description = "Retrieve detailed information about a specific customer")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved customer")
+    @ApiResponse(responseCode = "404", description = "Customer not found")
     @GetMapping(
         path = "/api/customers/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<CustomerDetailResponse>> getCustomerAPI(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<CustomerDetailResponse>> getCustomerAPI(@Parameter(description = "Customer ID") @PathVariable(name = "id") UUID id){
         CustomerDetailResponse resultFromService = customerService.getCustomer(id);
 
         WebResponse<CustomerDetailResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -66,6 +79,8 @@ public class CustomerController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Get all customers", description = "Retrieve paginated list of customers with optional filtering")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved customers")
     @GetMapping(
         path = "/api/customers",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -78,6 +93,8 @@ public class CustomerController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Search customer names", description = "Search for customers by name with pagination support")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved matching customers")
     @GetMapping(
         path = "/api/customers/searchName",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -90,12 +107,16 @@ public class CustomerController {
         return ResponseEntity.ok(wrappedResult);   
     }
 
+    @Operation(summary = "Update customer", description = "Updates information for an existing customer")
+    @ApiResponse(responseCode = "200", description = "Customer updated successfully")
+    @ApiResponse(responseCode = "404", description = "Customer not found")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PatchMapping(
         path = "/api/customers/{id}",
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<CustomerDetailResponse>> updateCustomerAPI(@PathVariable(name = "id") UUID id, @Valid CustomerUpdateRequest request){ 
+    ResponseEntity<WebResponse<CustomerDetailResponse>> updateCustomerAPI(@Parameter(description = "Customer ID") @PathVariable(name = "id") UUID id, @Valid @RequestBody CustomerUpdateRequest request){ 
         CustomerDetailResponse resultFromService = customerService.updateCustomer(id, request);
 
         WebResponse<CustomerDetailResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);

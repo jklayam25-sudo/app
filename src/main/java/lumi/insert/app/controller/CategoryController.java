@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter; 
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.request.CategoryUpdateRequest;
@@ -23,17 +28,21 @@ import lumi.insert.app.dto.response.CategoryResponse;
 import lumi.insert.app.service.CategoryService;
 
 @RestController
+@Tag(name = "Categories", description = "Endpoints for managing product categories")
 public class CategoryController {
     
     @Autowired
     CategoryService categoryService;
 
+    @Operation(summary = "Create new category", description = "Creates a new product category with the specified name")
+    @ApiResponse(responseCode = "201", description = "Category created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PostMapping(
         path = "/api/categories",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<CategoryResponse>> createCategory(@Valid CategoryCreateRequest request){
+    ResponseEntity<WebResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryCreateRequest request){
         CategoryResponse resultFromService = categoryService.createCategory(request);
 
         WebResponse<CategoryResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);;
@@ -47,6 +56,8 @@ public class CategoryController {
     }
 
 
+    @Operation(summary = "Get all categories", description = "Retrieve paginated list of all categories with filtering options")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved categories")
     @GetMapping(
         path = "/api/categories",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -60,11 +71,14 @@ public class CategoryController {
     }
 
 
+    @Operation(summary = "Get category by ID", description = "Retrieve detailed information about a specific category")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved category")
+    @ApiResponse(responseCode = "404", description = "Category not found")
     @GetMapping(
         path = "/api/categories/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<CategoryResponse>> getCategoryById(@PathVariable(value = "id") Long id){
+    ResponseEntity<WebResponse<CategoryResponse>> getCategoryById(@Parameter(description = "Category ID") @PathVariable(value = "id") Long id){
         CategoryResponse resultFromService = categoryService.getCategoryById(id);
 
         WebResponse<CategoryResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);;
@@ -73,12 +87,16 @@ public class CategoryController {
     }
 
 
+    @Operation(summary = "Update category name", description = "Updates the name of an existing category")
+    @ApiResponse(responseCode = "200", description = "Category updated successfully")
+    @ApiResponse(responseCode = "404", description = "Category not found")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PutMapping(
         path = "/api/categories/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE,
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    ResponseEntity<WebResponse<CategoryResponse>> editCategory(@PathVariable(value = "id", required = true) Long id, CategoryUpdateRequest request){
+    ResponseEntity<WebResponse<CategoryResponse>> editCategory(@Parameter(description = "Category ID") @PathVariable(value = "id", required = true) Long id, @Valid @RequestBody CategoryUpdateRequest request){
         request.setId(id);
         CategoryResponse resultFromService = categoryService.updateCategoryName(request);
 
@@ -88,11 +106,14 @@ public class CategoryController {
     }
 
 
+    @Operation(summary = "Activate category", description = "Activates a category to make it visible for new products")
+    @ApiResponse(responseCode = "200", description = "Category activated successfully")
+    @ApiResponse(responseCode = "404", description = "Category not found")
     @PostMapping(
         path = "/api/categories/{id}/activate",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<CategoryResponse>> activateProduct(@PathVariable(value = "id", required = true) Long id ){ 
+    ResponseEntity<WebResponse<CategoryResponse>> activateProduct(@Parameter(description = "Category ID") @PathVariable(value = "id", required = true) Long id ){ 
         CategoryResponse resultFromService = categoryService.activateCategory(id);
 
         WebResponse<CategoryResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);;
@@ -101,11 +122,14 @@ public class CategoryController {
     }
 
 
+    @Operation(summary = "Deactivate category", description = "Deactivates a category to prevent using it for new products")
+    @ApiResponse(responseCode = "200", description = "Category deactivated successfully")
+    @ApiResponse(responseCode = "404", description = "Category not found")
     @PostMapping(
         path = "/api/categories/{id}/deactivate",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<CategoryResponse>> deactivateProduct(@PathVariable(value = "id", required = true) Long id ){ 
+    ResponseEntity<WebResponse<CategoryResponse>> deactivateProduct(@Parameter(description = "Category ID") @PathVariable(value = "id", required = true) Long id ){ 
         CategoryResponse resultFromService = categoryService.deactivateCategory(id);
 
         WebResponse<CategoryResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);;
