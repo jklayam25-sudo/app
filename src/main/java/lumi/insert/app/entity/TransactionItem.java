@@ -37,6 +37,8 @@ public class TransactionItem extends TimestampAuditing{
     @JoinColumn(name = "product_id", nullable = false, unique = true) 
     private Product product;
 
+    private String productName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id", nullable = false) 
     private Transaction transaction;
