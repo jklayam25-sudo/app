@@ -1,0 +1,2 @@
+ALTER TABLE supplies
+    ADD COLUMN supplier_name VARCHAR(255) NOT NULL DEFAULT '';
