@@ -1,9 +1,12 @@
 package lumi.insert.app.controller;
  
+import java.io.ByteArrayInputStream;
 import java.net.URI;
+import org.springframework.http.HttpHeaders;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +27,34 @@ import lumi.insert.app.dto.request.SupplyGetByFilter;
 import lumi.insert.app.dto.request.SupplyUpdateRequest; 
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyResponse;
+import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.SupplyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Slf4j
+@Tag(name = "Supplies", description = "Endpoints for managing purchase supplies and inventory receiving")
 public class SupplyController {
     
     @Autowired
     SupplyService supplyService;
 
+    @Autowired
+    PdfService pdfService;
+
+    @Operation(summary = "Create new supply order", description = "Creates a new purchase supply order with specified items")
+    @ApiResponse(responseCode = "201", description = "Supply order created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PostMapping(
         path = "/api/supplies",
         produces = MediaType.APPLICATION_JSON_VALUE,
-        consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+        consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplyResponse>> createSupply(@Valid SupplyCreateRequest request){
+    ResponseEntity<WebResponse<SupplyResponse>> createSupply(@Valid @RequestBody @org.springframework.web.bind.annotation.RequestBody SupplyCreateRequest request){
         SupplyResponse resultFromService = supplyService.createSupply(request);
  
         WebResponse<SupplyResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -51,11 +67,14 @@ public class SupplyController {
         return ResponseEntity.created(location).body(wrappedResult);   
     }
 
+    @Operation(summary = "Get supply order by ID", description = "Retrieve detailed information about a specific supply order")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved supply order")
+    @ApiResponse(responseCode = "404", description = "Supply order not found")
     @GetMapping(
         path = "/api/supplies/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplyDetailResponse>> getSupply(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<SupplyDetailResponse>> getSupply(@Parameter(description = "Supply order ID") @PathVariable(name = "id") UUID id){
         SupplyDetailResponse resultFromService = supplyService.getSupply(id);
         
         WebResponse<SupplyDetailResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -63,6 +82,28 @@ public class SupplyController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Export supply order to PDF", description = "Generates a PDF document of the supply order with all items")
+    @ApiResponse(responseCode = "200", description = "Successfully exported supply order to PDF")
+    @ApiResponse(responseCode = "404", description = "Supply order not found")
+    @GetMapping(
+        path = "/api/supplies/{id}/pdf",
+        produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    ResponseEntity<InputStreamResource> exportSupply(@Parameter(description = "Supply order ID") @PathVariable(name = "id") UUID id){
+        SupplyDetailResponse resultFromService = supplyService.getSupply(id);
+        ByteArrayInputStream pdf = pdfService.exportSupplyWithItems(resultFromService);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename="+ resultFromService.invoiceId() + ".pdf");
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(new InputStreamResource(pdf));
+    }
+
+    @Operation(summary = "Search supply orders", description = "Retrieve paginated list of supply orders with optional filtering")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved supply orders")
     @GetMapping(
         path = "/api/supplies/search",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -75,11 +116,14 @@ public class SupplyController {
         return ResponseEntity.ok(wrappedResult);
     } 
 
+    @Operation(summary = "Cancel supply order", description = "Cancels an existing supply order")
+    @ApiResponse(responseCode = "200", description = "Supply order cancelled successfully")
+    @ApiResponse(responseCode = "404", description = "Supply order not found")
     @PostMapping(
         path = "/api/supplies/{id}/cancel",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplyResponse>> cancelSupply(@PathVariable(name = "id") UUID id){
+    ResponseEntity<WebResponse<SupplyResponse>> cancelSupply(@Parameter(description = "Supply order ID") @PathVariable(name = "id") UUID id){
         SupplyResponse resultFromService = supplyService.cancelSupply(id);
  
         WebResponse<SupplyResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -87,12 +131,16 @@ public class SupplyController {
         return ResponseEntity.ok(wrappedResult);   
     } 
 
+    @Operation(summary = "Update supply order", description = "Updates information for an existing supply order")
+    @ApiResponse(responseCode = "200", description = "Supply order updated successfully")
+    @ApiResponse(responseCode = "404", description = "Supply order not found")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
     @PatchMapping(
         path = "/api/supplies/{id}",
         consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplyResponse>> updateSupplierAPI(@PathVariable(name = "id") UUID id, @Valid SupplyUpdateRequest request){ 
+    ResponseEntity<WebResponse<SupplyResponse>> updateSupplierAPI(@Parameter(description = "Supply order ID") @PathVariable(name = "id") UUID id, @Valid @RequestBody SupplyUpdateRequest request){ 
         SupplyResponse resultFromService = supplyService.updateSupply(id, request);
 
         WebResponse<SupplyResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -100,11 +148,15 @@ public class SupplyController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Refund supply item", description = "Records a refund for a specific item in the supply order")
+    @ApiResponse(responseCode = "200", description = "Supply item refunded successfully")
+    @ApiResponse(responseCode = "404", description = "Supply order not found")
+    @ApiResponse(responseCode = "400", description = "Invalid refund request")
     @PostMapping(
         path = "/api/supplies/{id}/refund",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<SupplyResponse>> refundSupplyItem(@PathVariable(name = "id") UUID id, @Valid ItemRefundRequest request){
+    ResponseEntity<WebResponse<SupplyResponse>> refundSupplyItem(@Parameter(description = "Supply order ID") @PathVariable(name = "id") UUID id, @Valid ItemRefundRequest request){
         SupplyResponse resultFromService = supplyService.refundSupplyItem(id, request);
  
         WebResponse<SupplyResponse> wrappedResult = WebResponse.getWrapper(resultFromService, null);
