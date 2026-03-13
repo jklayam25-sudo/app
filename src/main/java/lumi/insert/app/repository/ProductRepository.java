@@ -14,7 +14,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import lumi.insert.app.dto.response.ProductName;
-import lumi.insert.app.entity.Product; 
+import lumi.insert.app.entity.Product;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
 import lumi.insert.app.repository.projection.ProductRefreshProjection;
 
 @Repository
@@ -35,6 +36,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<ProductRefreshProjection> searchIdUpdatedAtMoreThan(@Param("ids") List<Long> ids,@Param("updatedAt") LocalDateTime updatedAt); 
 
     @Query(value = "SELECT p FROM products p WHERE p.id IN :ids AND p.updatedAt >= :updatedAt")
-    List<Product> searchProductUpdatedAtMoreThan(@Param("ids") List<Long> ids,@Param("updatedAt") LocalDateTime updatedAt); 
+    List<Product> searchProductUpdatedAtMoreThan(@Param("ids") List<Long> ids,@Param("updatedAt") LocalDateTime updatedAt);
+    
+    @Query(value = "SELECT new lumi.insert.app.repository.projection.ProductOutOfStock(p.id, p.name, p.stockQuantity, p.stockMinimum) " + 
+        "FROM products p WHERE p.stockQuantity <= p.stockMinimum")
+    List<ProductOutOfStock> findAllOutOfStockProduct();
 
 }
