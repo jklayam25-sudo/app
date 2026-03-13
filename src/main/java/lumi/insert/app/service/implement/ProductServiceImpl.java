@@ -1,5 +1,7 @@
 package lumi.insert.app.service.implement;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +27,8 @@ import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.repository.CategoryRepository;
-import lumi.insert.app.repository.ProductRepository; 
+import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.repository.projection.ProductOutOfStock;
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.ProductMapper;
@@ -156,7 +159,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Slice<ProductResponse> getProductsByRequests(ProductGetByFilter request) {
-        if(!(request.getCategoryId() != null & categoryRepository.existsById(request.getCategoryId()))){
+        if(request.getCategoryId() != null && !(categoryRepository.existsById(request.getCategoryId()))){
             throw new NotFoundEntityException("Category with ID " + request.getCategoryId() + " was not found");
         }
 
@@ -206,6 +209,12 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDeleteResponse deleteDtoResponseFromProduct = productMapper.createDeleteDtoResponseFromProduct(savedProduct);
         return deleteDtoResponseFromProduct;
+    }
+
+
+    @Override
+    public List<ProductOutOfStock> getOutOfStockProducts() {
+        return productRepository.findAllOutOfStockProduct();
     }
 
 }
