@@ -1,6 +1,7 @@
 package lumi.insert.app.controller;
  
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import org.springframework.http.HttpHeaders;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.controller.wrapper.WebResponse;
@@ -26,9 +28,10 @@ import lumi.insert.app.dto.request.SupplyCreateRequest;
 import lumi.insert.app.dto.request.SupplyGetByFilter; 
 import lumi.insert.app.dto.request.SupplyUpdateRequest; 
 import lumi.insert.app.dto.response.SupplyDetailResponse;
-import lumi.insert.app.dto.response.SupplyResponse;
+import lumi.insert.app.dto.response.SupplyResponse; 
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.SupplyService;
+import lumi.insert.app.service.XlsxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -45,6 +48,9 @@ public class SupplyController {
 
     @Autowired
     PdfService pdfService;
+
+    @Autowired
+    XlsxService xlsxService;
 
     @Operation(summary = "Create new supply order", description = "Creates a new purchase supply order with specified items")
     @ApiResponse(responseCode = "201", description = "Supply order created successfully")
@@ -108,7 +114,7 @@ public class SupplyController {
         path = "/api/supplies/search",
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<WebResponse<Slice<SupplyResponse>>> getSupplys(@ModelAttribute @Valid SupplyGetByFilter request){
+    ResponseEntity<WebResponse<Slice<SupplyResponse>>> getSupplies(@ModelAttribute @Valid SupplyGetByFilter request){
         Slice<SupplyResponse> resultFromService = supplyService.searchSuppliesByRequests(request);
         
         WebResponse<Slice<SupplyResponse>> wrappedResult = WebResponse.getWrapper(resultFromService, null);
@@ -116,6 +122,21 @@ public class SupplyController {
         return ResponseEntity.ok(wrappedResult);
     } 
 
+    @Operation(summary = "Export supplies using filters to XLSX", description = "Export specific supplies with filtering options")
+    @ApiResponse(responseCode = "200", description = "Successfully exported supply list to XLSX")
+    @GetMapping(
+        path = "/api/supplies/history/export",
+        produces = MediaType.APPLICATION_XML_VALUE
+    )
+    void exportSupplies(@ModelAttribute @Valid SupplyGetByFilter request, HttpServletResponse response) throws IOException{
+        request.setSize(99999000);
+        Slice<SupplyResponse> resultFromService = supplyService.searchSuppliesByRequests(request);
+        
+        response.setContentType("application/xml");
+        response.addHeader("Content-Disposition", "attachment; filename=supplyHistory" + ".xlsx");
+        xlsxService.exportSupplies(resultFromService.getContent(), response.getOutputStream());
+    } 
+ 
     @Operation(summary = "Cancel supply order", description = "Cancels an existing supply order")
     @ApiResponse(responseCode = "200", description = "Supply order cancelled successfully")
     @ApiResponse(responseCode = "404", description = "Supply order not found")
