@@ -10,12 +10,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook; 
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.service.XlsxService;
 
+@Slf4j
 public class XlsxServiceImpl implements XlsxService{
 
     @Override
@@ -78,7 +80,7 @@ public class XlsxServiceImpl implements XlsxService{
             sheet.createFreezePane(0, 1);
             workbook.write(outputStream);
         } catch (Exception e) {
-            // TODO: handle exception
+           log.warn("Exception triggered during exporting stream to client, with message: {}", e.getLocalizedMessage());
         }
     }
 
@@ -140,7 +142,7 @@ public class XlsxServiceImpl implements XlsxService{
             sheet.createFreezePane(0, 1);
             workbook.write(outputStream);
         } catch (Exception e) {
-            // TODO: handle exception
+            log.warn("Exception triggered during exporting stream to client, with message: {}", e.getLocalizedMessage());
         }
     }
     
