@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.SupplyService;
+import lumi.insert.app.service.XlsxService;
 import lumi.insert.app.utils.mapper.AllSupplyMapper;
 
 @SpringBootTest 
@@ -38,6 +39,9 @@ public abstract class BaseSupplyControllerTest {
 
     @MockitoBean
     PdfService pdfService;
+
+    @MockitoBean
+    XlsxService xlsxService;
   
     @BeforeEach
     void setup(WebApplicationContext context) {

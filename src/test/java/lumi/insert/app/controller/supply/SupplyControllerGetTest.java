@@ -12,7 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.ByteArrayInputStream; 
+import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -196,5 +197,55 @@ public class SupplyControllerGetTest extends BaseSupplyControllerTest{
         assertTrue(result.getResponse().getContentAsByteArray().length > 0);
         
         verify(pdfService, times(1)).exportSupplyWithItems(argThat(arg -> arg.id() == supplyId));
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and xlsx content when request valid")
+    public void exportSuppliesHistoryAPI_validRequest_return200StatusAndXlsx() throws Exception{ 
+  
+        SupplyResponse supplyResponse = new SupplyResponse(UuidCreator.getTimeOrderedEpochFast(), 
+            "INV-012", 
+            null ,
+            "TEST LTE.", 
+            2L, 
+            3L, 
+            4L, 
+            5L, 
+            6L, 
+            7L, 
+            8L,
+             9L,
+             10L, 
+             SupplyStatus.COMPLETE, 
+             null, 
+             null, 
+             LocalDateTime.now()
+            );
+
+        when(supplyService.searchSuppliesByRequests(any())).thenReturn(new SliceImpl<>(List.of(supplyResponse)));
+
+         mockMvc.perform(
+                get("/api/supplies/history/export?status=COMPLETE")
+                .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(content().contentType(MediaType.APPLICATION_XML_VALUE));
+        
+        verify(supplyService, times(1)).searchSuppliesByRequests(argThat(arg -> arg.getStatus() == SupplyStatus.COMPLETE && arg.getSize() == 99999000));
+        verify(xlsxService, times(1)).exportSupplies(argThat(arg -> arg.getFirst().invoiceId() == supplyResponse.invoiceId()), any());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and xlsx content when request valid")
+    public void exportSuppliesHistoryAPI_invalidType_return400Status() throws Exception{ 
+         mockMvc.perform(
+                get("/api/supplies/history/export?status=TRUE")
+                .accept(MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE)
+            )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty()) 
+        .andExpect(jsonPath("$.errors").isNotEmpty()); 
     }
 }
