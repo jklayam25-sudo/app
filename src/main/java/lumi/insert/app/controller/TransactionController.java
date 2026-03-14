@@ -1,7 +1,8 @@
 package lumi.insert.app.controller;
  
 import java.io.ByteArrayInputStream;
-import java.net.URI;
+import java.io.IOException;
+import java.net.URI; 
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.controller.wrapper.WebResponse; 
@@ -27,6 +29,7 @@ import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.TransactionService;
+import lumi.insert.app.service.XlsxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -43,6 +46,9 @@ public class TransactionController {
 
     @Autowired
     PdfService pdfService;
+
+    @Autowired
+    XlsxService xlsxService;
 
     @Operation(summary = "Create new transaction", description = "Creates a new sales transaction with specified items and customer")
     @ApiResponse(responseCode = "201", description = "Transaction created successfully")
@@ -94,6 +100,21 @@ public class TransactionController {
         return ResponseEntity.ok(wrappedResult);
     }
 
+    @Operation(summary = "Export transactions using filters to XLSX", description = "Export specific transactions with filtering options")
+    @ApiResponse(responseCode = "200", description = "Successfully exported transactions list to XLSX")
+    @GetMapping(
+        path = "/api/transactions/history/export",
+        produces = MediaType.APPLICATION_XML_VALUE
+    )
+    void exportTransactionsHistory(@ModelAttribute @Valid TransactionGetByFilter request, HttpServletResponse response) throws IOException{
+        request.setSize(99999000);
+        Slice<TransactionResponse> resultFromService = transactionService.searchTransactionsByRequests(request);
+
+        response.setContentType("application/xml");
+        response.addHeader("Content-Disposition", "attachment; filename=transactionHistory" + ".xlsx");
+        xlsxService.exportTransactions(resultFromService.getContent(), response.getOutputStream());
+    }
+
     @Operation(summary = "Export transaction order to PDF", description = "Generates a PDF document of the transaction order with all items")
     @ApiResponse(responseCode = "200", description = "Successfully exported transaction order to PDF")
     @ApiResponse(responseCode = "404", description = "Supply order not found")
@@ -101,7 +122,7 @@ public class TransactionController {
         path = "/api/transactions/{id}/pdf",
         produces = MediaType.APPLICATION_PDF_VALUE
     )
-    ResponseEntity<InputStreamResource> exportSupply(@Parameter(description = "Transaction ID") @PathVariable(name = "id") UUID id){
+    ResponseEntity<InputStreamResource> exportTransaction(@Parameter(description = "Transaction ID") @PathVariable(name = "id") UUID id){
         TransactionDetailResponse resultFromService = transactionService.getTransactionDetail(id);
         ByteArrayInputStream pdf = pdfService.exportTransactionWithItems(resultFromService);
         
