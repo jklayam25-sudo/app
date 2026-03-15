@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.TransactionService;
+import lumi.insert.app.service.XlsxService;
 import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @SpringBootTest 
@@ -33,6 +34,9 @@ public abstract class BaseTransactionControllerTest {
 
     @MockitoBean
     PdfService pdfService;
+
+    @MockitoBean
+    XlsxService xlsxService;
 
     @BeforeEach
     void setup(WebApplicationContext context) {

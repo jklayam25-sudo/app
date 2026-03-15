@@ -165,7 +165,7 @@ public class TransactionControllerGetTest extends BaseTransactionControllerTest{
 
     @Test
     @DisplayName("Should return 200 http status and pdf content when request valid")
-    public void exportTransactionAPI_validRequest_return400StatusAndPdf() throws Exception{
+    public void exportTransactionAPI_validRequest_return200StatusAndPdf() throws Exception{
         ByteArrayInputStream bais = new ByteArrayInputStream("pdfBinary".getBytes());
 
         UUID transactionId = UuidCreator.getTimeOrderedEpochFast();
@@ -185,5 +185,38 @@ public class TransactionControllerGetTest extends BaseTransactionControllerTest{
         assertTrue(result.getResponse().getContentAsByteArray().length > 0);
         
         verify(pdfService, times(1)).exportTransactionWithItems(argThat(arg -> arg.id() == transactionId));
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and xlsx content when request valid")
+    public void exportTransactionsHistoryAPI_validRequest_return200StatusAndXlsx() throws Exception{ 
+
+        UUID transactionId = UuidCreator.getTimeOrderedEpochFast();
+         
+        when(transactionService.searchTransactionsByRequests(any())).thenReturn(new SliceImpl<>(List.of(new TransactionResponse(transactionId, null, transactionId, null, null, null, null, null, null, null, null, null, null, null, transactionId, null, null, null))));
+
+         mockMvc.perform(
+                get("/api/transactions/history/export?status=COMPLETE")
+                .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+        .andDo(print())
+        .andExpect(status().isOk()) 
+        .andExpect(content().contentType(MediaType.APPLICATION_XML_VALUE));
+        
+        verify(transactionService, times(1)).searchTransactionsByRequests(argThat(arg -> arg.getStatus() == TransactionStatus.COMPLETE && arg.getSize() == 99999000));
+        verify(xlsxService, times(1)).exportTransactions(argThat(arg -> arg.getFirst().id() == transactionId), any());
+    }
+
+    @Test
+    @DisplayName("Should return 200 http status and xlsx content when request valid")
+    public void exportTransactionsHistoryAPI_invalidType_return400Status() throws Exception{ 
+         mockMvc.perform(
+                get("/api/transactions/history/export?status=TRUE")
+                .accept(MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE)
+            )
+        .andDo(print())
+        .andExpect(status().isBadRequest()) 
+        .andExpect(jsonPath("$.data").isEmpty()) 
+        .andExpect(jsonPath("$.errors").isNotEmpty()); 
     }
 }
