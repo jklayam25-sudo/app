@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "products")
 @Data
@@ -21,7 +21,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Product extends TimestampAuditing {
+public class Product extends BaseAuditing {
     
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)

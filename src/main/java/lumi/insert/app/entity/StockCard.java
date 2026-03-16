@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lumi.insert.app.entity.nondatabase.StockMove;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "stock_cards")
 @Data
@@ -25,7 +25,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockCard extends TimestampAuditing{
+public class StockCard extends BaseAuditing{
     
     @Id 
     UUID id;

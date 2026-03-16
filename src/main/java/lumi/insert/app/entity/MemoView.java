@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "memo_views")
 @Table(
@@ -25,7 +25,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MemoView extends TimestampAuditing{
+public class MemoView extends BaseAuditing{
 
     @Id
     @Column(nullable = false)

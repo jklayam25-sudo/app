@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor; 
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "supply_items")
 @Data
@@ -20,7 +20,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder 
-public class SupplyItem extends TimestampAuditing{
+public class SupplyItem extends BaseAuditing{
 
     @Id 
     private UUID id;

@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing; 
 
 @Entity(name = "auth_tokens")
 @Builder
@@ -21,7 +21,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class AuthToken extends TimestampAuditing{
+public class AuthToken extends BaseAuditing{
 
     @Id 
     private UUID id;

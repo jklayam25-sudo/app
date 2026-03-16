@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor; 
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "memos")
 @Data
@@ -23,7 +23,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Memo extends TimestampAuditing{
+public class Memo extends BaseAuditing{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

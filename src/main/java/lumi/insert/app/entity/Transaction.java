@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
 @Entity(name = "transactions")
@@ -29,7 +29,7 @@ import lumi.insert.app.entity.nondatabase.TransactionStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Transaction extends TimestampAuditing{
+public class Transaction extends BaseAuditing{
 
     @Id 
     private UUID id;

@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor; 
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "employees")
 @Builder
@@ -23,7 +23,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data 
-public class Employee extends TimestampAuditing{
+public class Employee extends BaseAuditing{
     
     @Id 
     private UUID id;

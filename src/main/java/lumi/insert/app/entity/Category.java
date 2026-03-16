@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lumi.insert.app.entity.nondatabase.TimestampAuditing;
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "categories")
 @Data
@@ -21,7 +21,7 @@ import lumi.insert.app.entity.nondatabase.TimestampAuditing;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category extends TimestampAuditing {
+public class Category extends BaseAuditing {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
