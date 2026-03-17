@@ -3,6 +3,9 @@ package lumi.insert.app.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
@@ -21,15 +24,18 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data
+@Audited
 public class AuthToken extends BaseAuditing{
 
     @Id 
+    @NotAudited
     private UUID id;
 
     @Column(nullable = false, unique = true)
     private String refreshToken;
 
     @OneToOne 
+    @NotAudited
     private Employee employee;
 
     @Column(nullable = false)

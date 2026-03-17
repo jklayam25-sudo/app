@@ -2,6 +2,8 @@ package lumi.insert.app.entity;
 
 import java.util.List;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +15,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor; 
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lombok.NoArgsConstructor;
 import lumi.insert.app.entity.nondatabase.BaseAuditing;
+import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 @Entity(name = "memos")
 @Data
@@ -23,6 +25,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Memo extends BaseAuditing{
 
     @Id

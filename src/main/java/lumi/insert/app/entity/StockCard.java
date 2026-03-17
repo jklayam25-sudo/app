@@ -1,6 +1,7 @@
 package lumi.insert.app.entity;
 
 import java.util.UUID;
+ 
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,15 +17,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.entity.nondatabase.BaseAuditing;
+import lumi.insert.app.entity.nondatabase.StockMove;
 
 @Entity(name = "stock_cards")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder 
 public class StockCard extends BaseAuditing{
     
     @Id 

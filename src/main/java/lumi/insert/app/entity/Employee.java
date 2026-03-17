@@ -3,6 +3,9 @@ package lumi.insert.app.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +16,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor; 
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lombok.NoArgsConstructor;
 import lumi.insert.app.entity.nondatabase.BaseAuditing;
+import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 @Entity(name = "employees")
 @Builder
@@ -23,6 +26,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Data 
+@Audited
 public class Employee extends BaseAuditing{
     
     @Id 
@@ -35,9 +39,11 @@ public class Employee extends BaseAuditing{
     private String fullname;
 
     @Column(nullable = false)
+    @NotAudited
     private String password;
 
     @Column(nullable = false)
+    @NotAudited
     private LocalDateTime joinDate;
 
     @Column(nullable = true)

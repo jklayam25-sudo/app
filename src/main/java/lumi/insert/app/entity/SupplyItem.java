@@ -2,6 +2,9 @@ package lumi.insert.app.entity;
 
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType; 
 import jakarta.persistence.Id;
@@ -11,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor; 
+import lombok.NoArgsConstructor;
 import lumi.insert.app.entity.nondatabase.BaseAuditing;
 
 @Entity(name = "supply_items")
@@ -20,6 +23,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder 
+@Audited
 public class SupplyItem extends BaseAuditing{
 
     @Id 
@@ -35,10 +39,12 @@ public class SupplyItem extends BaseAuditing{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, unique = true) 
+    @NotAudited
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supply_id", nullable = false) 
+    @NotAudited
     private Supply supply;
     
 }

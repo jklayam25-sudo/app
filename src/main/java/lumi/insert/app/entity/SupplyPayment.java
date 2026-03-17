@@ -1,6 +1,9 @@
 package lumi.insert.app.entity;
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType; 
@@ -20,6 +23,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class SupplyPayment extends BaseAuditing{
   
     @Id 
@@ -27,6 +31,7 @@ public class SupplyPayment extends BaseAuditing{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supply_id", nullable = false)
+    @NotAudited
     private Supply supply;
 
     @Column(nullable = false)

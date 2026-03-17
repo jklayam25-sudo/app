@@ -2,6 +2,9 @@ package lumi.insert.app.entity;
 
 import java.util.List;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,10 +24,11 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Audited
 public class Category extends BaseAuditing {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY) 
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -32,6 +36,7 @@ public class Category extends BaseAuditing {
 
     @OneToMany(mappedBy = "category")
     @ToString.Exclude
+    @NotAudited
     private List<Product> product;
 
     @Builder.Default

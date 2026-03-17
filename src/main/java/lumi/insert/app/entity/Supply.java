@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,8 +22,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
-import lumi.insert.app.entity.nondatabase.BaseAuditing; 
+import lumi.insert.app.entity.nondatabase.BaseAuditing;
+import lumi.insert.app.entity.nondatabase.SupplyStatus; 
 
 @Entity(name = "supplies")
 @Data
@@ -28,6 +31,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Supply extends BaseAuditing{
 
     @Id 
@@ -37,30 +41,39 @@ public class Supply extends BaseAuditing{
     private String invoiceId;
 
     @Builder.Default 
+    @NotAudited
     private Long totalItems = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalFee = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalDiscount = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long subTotal = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long grandTotal = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalUnpaid = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalPaid = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalUnrefunded = 0L;
 
     @Builder.Default
+    @NotAudited
     private Long totalRefunded = 0L;
 
     @Enumerated(EnumType.STRING)
@@ -71,18 +84,22 @@ public class Supply extends BaseAuditing{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false) 
+    @NotAudited
     private Supplier supplier;
 
+    @NotAudited
     private String supplierName;
     
     @OneToMany(mappedBy = "supply")
     @Builder.Default
     @ToString.Exclude
+    @NotAudited
     private List<SupplyItem> supplyItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "supply")
     @Builder.Default
     @ToString.Exclude
+    @NotAudited
     private List<SupplyPayment> supplyPayments = new ArrayList<>();
     
 }

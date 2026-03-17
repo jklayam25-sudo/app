@@ -1,6 +1,9 @@
 package lumi.insert.app.entity;
  
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column; 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,6 +28,7 @@ import lumi.insert.app.entity.nondatabase.BaseAuditing;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class MemoView extends BaseAuditing{
 
     @Id
@@ -37,6 +41,7 @@ public class MemoView extends BaseAuditing{
 
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "employee_id", nullable = false) 
+    @NotAudited
     private Employee employee;
 
     public MemoView (Memo memo, Employee employee){
