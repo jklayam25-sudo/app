@@ -15,8 +15,10 @@ import org.springframework.test.context.ActiveProfiles;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import lumi.insert.app.entity.Category;
-import lumi.insert.app.entity.Product;
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.repository.CategoryRepository;
+import lumi.insert.app.core.repository.ProductRepository;
 
 @DataJpaTest
 @Transactional

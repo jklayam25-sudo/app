@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
+
 public class ProductTest {
     
     @Test

@@ -17,13 +17,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import org.junit.jupiter.api.Test;
 
 import jakarta.validation.ConstraintViolationException;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.MemoView;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.dto.request.MemoCreateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.MemoView;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
 public class MemoServiceCreateTest extends BaseMemoServiceTest{
     

@@ -10,9 +10,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;

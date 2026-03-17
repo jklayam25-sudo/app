@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lumi.insert.app.entity.nondatabase.SupplyStatus; 
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus; 
 
 @Schema(description = "Response object containing detailed summary of a supply/procurement transaction")
 public record SupplyResponse(

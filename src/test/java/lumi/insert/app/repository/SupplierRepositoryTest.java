@@ -19,10 +19,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import jakarta.transaction.Transactional; 
+import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.repository.SupplierRepository;
 import lumi.insert.app.dto.request.SupplierGetByFilter;
-import lumi.insert.app.dto.response.SupplierNameResponse; 
-import lumi.insert.app.entity.Supplier;
+import lumi.insert.app.dto.response.SupplierNameResponse;
 import lumi.insert.app.utils.generator.JpaSpecGenerator; 
 
 @DataJpaTest

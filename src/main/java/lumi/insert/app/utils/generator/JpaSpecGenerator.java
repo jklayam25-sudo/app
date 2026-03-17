@@ -10,6 +10,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.entity.Supply;
+import lumi.insert.app.core.entity.SupplyPayment;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionPayment;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
@@ -19,14 +27,6 @@ import lumi.insert.app.dto.request.SupplyGetByFilter;
 import lumi.insert.app.dto.request.SupplyPaymentGetByFilter;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.StockCard;
-import lumi.insert.app.entity.Supplier;
-import lumi.insert.app.entity.Supply;
-import lumi.insert.app.entity.SupplyPayment;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionPayment;
 
 @Component
 public class JpaSpecGenerator {

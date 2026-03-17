@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Supplier; 
-import lumi.insert.app.repository.SupplierRepository;
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.repository.SupplierRepository;
 import lumi.insert.app.service.implement.SupplierServiceImpl;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 import lumi.insert.app.utils.mapper.SupplierMapperImpl; 

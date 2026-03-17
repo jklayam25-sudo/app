@@ -16,8 +16,10 @@ import org.springframework.test.context.ActiveProfiles;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.entity.AuthToken;
-import lumi.insert.app.entity.Employee;
+import lumi.insert.app.core.entity.AuthToken;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.repository.AuthTokenRepository;
+import lumi.insert.app.core.repository.EmployeeRepository;
 
 @DataJpaTest
 @Transactional

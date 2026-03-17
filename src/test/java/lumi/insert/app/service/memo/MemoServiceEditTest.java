@@ -11,10 +11,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.dto.request.MemoUpdateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class MemoServiceEditTest extends BaseMemoServiceTest{

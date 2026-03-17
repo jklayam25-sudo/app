@@ -4,8 +4,8 @@ import java.util.List;
 
 import lombok.Builder;
 import lombok.Data;
-import lumi.insert.app.repository.projection.ProductRefund;
-import lumi.insert.app.repository.projection.ProductSale;
+import lumi.insert.app.core.repository.projection.ProductRefund;
+import lumi.insert.app.core.repository.projection.ProductSale;
 
 @Data
 @Builder

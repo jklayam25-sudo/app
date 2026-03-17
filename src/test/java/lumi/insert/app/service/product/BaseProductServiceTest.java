@@ -11,12 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.repository.CategoryRepository;
-import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.core.repository.CategoryRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.mapper.ProductMapper;
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.service.implement.ProductServiceImpl; 
 import lumi.insert.app.utils.mapper.CategoryMapperImpl;
-import lumi.insert.app.utils.mapper.ProductMapper;
 import lumi.insert.app.utils.mapper.ProductMapperImpl;
 
 @SpringBootTest

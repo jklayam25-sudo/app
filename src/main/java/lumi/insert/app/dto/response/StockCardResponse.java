@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
  
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder; 
-import lumi.insert.app.entity.nondatabase.StockMove;
+import lombok.Builder;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
 
 @Builder
 @Schema(description = "Response object representing a single entry in the stock ledger (Kartu Stok)")

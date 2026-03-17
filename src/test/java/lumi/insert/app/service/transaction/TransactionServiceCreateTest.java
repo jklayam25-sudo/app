@@ -14,11 +14,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.nondatabase.TransactionStatus; 
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 

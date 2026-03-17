@@ -19,9 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.core.entity.Employee;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.EmployeeResponse;
-import lumi.insert.app.entity.Employee;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 @Slf4j

@@ -11,6 +11,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
  
 import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
+import lumi.insert.app.core.repository.CategoryRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductUpdateRequest;
@@ -20,18 +26,12 @@ import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
-import lumi.insert.app.entity.Category;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.CategoryRepository;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
+import lumi.insert.app.mapper.ProductMapper;
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.ProductMapper;
 
 @Service
 @Transactional

@@ -27,12 +27,12 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.dto.request.SupplyGetByFilter;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyItemResponse;
-import lumi.insert.app.dto.response.SupplyResponse; 
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
+import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplyControllerGetTest extends BaseSupplyControllerTest{

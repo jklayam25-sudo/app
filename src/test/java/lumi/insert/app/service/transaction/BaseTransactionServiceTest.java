@@ -12,20 +12,20 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionItem;
-import lumi.insert.app.entity.TransactionPayment;
-import lumi.insert.app.repository.CustomerRepository;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.StockCardRepository;
-import lumi.insert.app.repository.TransactionItemRepository;
-import lumi.insert.app.repository.TransactionRepository; 
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.TransactionPayment;
+import lumi.insert.app.core.repository.CustomerRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.StockCardRepository;
+import lumi.insert.app.core.repository.TransactionItemRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
+import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.implement.TransactionServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapper;
 import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
 
 @ExtendWith(MockitoExtension.class)

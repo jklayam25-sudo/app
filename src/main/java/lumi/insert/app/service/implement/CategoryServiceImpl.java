@@ -9,17 +9,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.repository.CategoryRepository;
 import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.CategoryRepository;
+import lumi.insert.app.mapper.CategoryMapper;
 import lumi.insert.app.service.CategoryService;
-import lumi.insert.app.utils.mapper.CategoryMapper;
 
 @Service
 @Transactional

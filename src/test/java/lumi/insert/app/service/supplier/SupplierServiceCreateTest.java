@@ -13,9 +13,9 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Supplier;
 import lumi.insert.app.dto.request.SupplierCreateRequest;
 import lumi.insert.app.dto.response.SupplierDetailResponse;
-import lumi.insert.app.entity.Supplier;
 import lumi.insert.app.exception.DuplicateEntityException; 
 
 public class SupplierServiceCreateTest extends BaseSupplierServiceTest{

@@ -4,10 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.TransactionDetailResponse;
-import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
-import lumi.insert.app.repository.projection.ProductOutOfStock; 
+import lumi.insert.app.dto.response.TransactionItemStatisticResponse; 
 
 public interface PdfService {
     

@@ -21,14 +21,14 @@ import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter; 
 import org.springframework.stereotype.Service;
 
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
+import lumi.insert.app.core.repository.projection.ProductRefund;
+import lumi.insert.app.core.repository.projection.ProductSale;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyItemResponse;
 import lumi.insert.app.dto.response.TransactionDetailResponse; 
 import lumi.insert.app.dto.response.TransactionItemResponse;
 import lumi.insert.app.dto.response.TransactionItemStatisticResponse;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
-import lumi.insert.app.repository.projection.ProductRefund;
-import lumi.insert.app.repository.projection.ProductSale;
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.utils.generator.PdfCellBuilder;
 import lumi.insert.app.utils.generator.PdfPageTemplate;

@@ -7,20 +7,20 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.MemoView;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.repository.EmployeeRepository;
+import lumi.insert.app.core.repository.MemoRepository;
+import lumi.insert.app.core.repository.MemoViewRepository;
 import lumi.insert.app.dto.request.MemoCreateRequest;
 import lumi.insert.app.dto.request.MemoUpdateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.MemoView;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.EmployeeRepository;
-import lumi.insert.app.repository.MemoRepository;
-import lumi.insert.app.repository.MemoViewRepository;
+import lumi.insert.app.mapper.MemoMapper;
 import lumi.insert.app.service.MemoService;
-import lumi.insert.app.utils.mapper.MemoMapper;
 
 @Service
 @Slf4j

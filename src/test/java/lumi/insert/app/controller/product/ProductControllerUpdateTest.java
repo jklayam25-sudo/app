@@ -12,10 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.dto.request.ProductUpdateRequest;
 import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductResponse;
-import lumi.insert.app.entity.Product;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 

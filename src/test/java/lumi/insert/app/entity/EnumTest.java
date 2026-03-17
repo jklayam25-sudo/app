@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test; 
 
 import lumi.insert.app.LumiInsertJavaEditionApplication;
-import lumi.insert.app.entity.nondatabase.ProductSortOrder;
-import lumi.insert.app.entity.nondatabase.TransactionSortOrder;
+import lumi.insert.app.core.entity.nondatabase.ProductSortOrder;
+import lumi.insert.app.core.entity.nondatabase.TransactionSortOrder;
 
 public class EnumTest {
      

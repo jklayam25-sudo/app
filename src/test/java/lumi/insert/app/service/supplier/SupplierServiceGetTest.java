@@ -25,12 +25,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
 import lumi.insert.app.dto.request.SupplierGetByFilter;
 import lumi.insert.app.dto.request.SupplierGetNameRequest;
 import lumi.insert.app.dto.response.SupplierDetailResponse;
-import lumi.insert.app.dto.response.SupplierNameResponse; 
-import lumi.insert.app.entity.Supplier;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
+import lumi.insert.app.dto.response.SupplierNameResponse;
 import lumi.insert.app.exception.NotFoundEntityException; 
 
 public class SupplierServiceGetTest extends BaseSupplierServiceTest{

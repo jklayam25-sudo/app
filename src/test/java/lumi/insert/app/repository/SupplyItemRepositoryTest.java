@@ -21,10 +21,14 @@ import org.springframework.test.context.ActiveProfiles;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.entity.Supplier;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.Supply;
-import lumi.insert.app.entity.SupplyItem; 
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.entity.Supply;
+import lumi.insert.app.core.entity.SupplyItem;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.SupplierRepository;
+import lumi.insert.app.core.repository.SupplyItemRepository;
+import lumi.insert.app.core.repository.SupplyRepository;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 

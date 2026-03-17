@@ -16,11 +16,14 @@ import org.springframework.test.context.ActiveProfiles;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.dto.response.MemoResponse; 
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.MemoView;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.MemoView;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.repository.EmployeeRepository;
+import lumi.insert.app.core.repository.MemoRepository;
+import lumi.insert.app.core.repository.MemoViewRepository;
+import lumi.insert.app.dto.response.MemoResponse;
 
 @DataJpaTest
 @Transactional

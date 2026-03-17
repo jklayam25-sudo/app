@@ -4,7 +4,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 
 @Builder
 @Schema(description = "Response object representing an internal memo or announcement for employees")

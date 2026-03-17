@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Slice;
 
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductCreateRequest;
 import lumi.insert.app.dto.request.ProductUpdateRequest;
@@ -14,8 +16,6 @@ import lumi.insert.app.dto.response.ProductDeleteResponse;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
 
 public interface ProductService {
 

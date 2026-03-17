@@ -24,11 +24,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 
+import lumi.insert.app.core.entity.Supply;
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.dto.request.SupplyGetByFilter;
 import lumi.insert.app.dto.response.SupplyDetailResponse;
 import lumi.insert.app.dto.response.SupplyResponse;
-import lumi.insert.app.entity.Supply;
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class SupplyServiceGetTest extends BaseSupplyServiceTest{

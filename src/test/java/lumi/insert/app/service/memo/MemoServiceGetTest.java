@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class MemoServiceGetTest extends BaseMemoServiceTest{

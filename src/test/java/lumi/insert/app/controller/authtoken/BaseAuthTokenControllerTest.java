@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import lumi.insert.app.core.entity.Employee;
 import lumi.insert.app.dto.response.AuthTokenResponse;
-import lumi.insert.app.entity.Employee;
 import lumi.insert.app.service.AuthTokenService; 
 
 @SpringBootTest

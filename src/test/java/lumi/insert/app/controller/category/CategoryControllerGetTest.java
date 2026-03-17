@@ -15,9 +15,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 
+import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.utils.forTesting.CategoryUtils;
 

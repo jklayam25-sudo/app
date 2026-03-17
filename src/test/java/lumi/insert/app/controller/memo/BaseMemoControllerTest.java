@@ -16,9 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.service.MemoService;
 
 @SpringBootTest

@@ -22,11 +22,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import jakarta.transaction.Transactional; 
+import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionPayment;
+import lumi.insert.app.core.repository.CustomerRepository;
+import lumi.insert.app.core.repository.TransactionPaymentRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Transaction; 
-import lumi.insert.app.entity.TransactionPayment; 
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 

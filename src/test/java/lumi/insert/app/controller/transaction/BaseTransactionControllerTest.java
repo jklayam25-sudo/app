@@ -14,10 +14,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import lumi.insert.app.dto.response.TransactionResponse;
+import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.PdfService;
 import lumi.insert.app.service.TransactionService;
 import lumi.insert.app.service.XlsxService;
-import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @SpringBootTest 
 @WithMockUser(username = "admin", roles = {"ADMIN"})

@@ -11,8 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import lumi.insert.app.mapper.CategoryMapper;
 import lumi.insert.app.service.CategoryService;
-import lumi.insert.app.utils.mapper.CategoryMapper;
 
 @SpringBootTest 
 @WithMockUser(username = "admin", roles = {"ADMIN"})

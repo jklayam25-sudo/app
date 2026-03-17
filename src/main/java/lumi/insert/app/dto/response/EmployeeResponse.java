@@ -3,7 +3,7 @@ package lumi.insert.app.dto.response;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 
 @Schema(description = "Response containing basic employee profile and system authorization role")
 public record EmployeeResponse(

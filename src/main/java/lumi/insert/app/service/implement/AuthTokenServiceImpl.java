@@ -14,15 +14,15 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.AuthToken;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.repository.AuthTokenRepository;
+import lumi.insert.app.core.repository.EmployeeRepository;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.dto.response.AuthTokenResponse;
-import lumi.insert.app.entity.AuthToken;
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.exception.AuthenticationTokenException;  
-import lumi.insert.app.repository.AuthTokenRepository;
-import lumi.insert.app.repository.EmployeeRepository;
+import lumi.insert.app.exception.AuthenticationTokenException;
+import lumi.insert.app.mapper.AuthMapper;
 import lumi.insert.app.service.AuthTokenService;
-import lumi.insert.app.utils.mapper.AuthMapper;
 import lumi.insert.app.utils.security.JwtUtils;
 
 @Service

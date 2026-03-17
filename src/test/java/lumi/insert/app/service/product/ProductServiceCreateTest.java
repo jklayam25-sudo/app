@@ -11,9 +11,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.dto.request.ProductCreateRequest; 
 import lumi.insert.app.dto.response.ProductResponse;
-import lumi.insert.app.entity.Product;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 

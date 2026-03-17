@@ -11,10 +11,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
- 
+
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.dto.request.SupplyPaymentCreateRequest; 
 import lumi.insert.app.dto.response.SupplyPaymentResponse;
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException; 

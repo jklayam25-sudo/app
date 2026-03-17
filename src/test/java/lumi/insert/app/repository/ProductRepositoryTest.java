@@ -24,11 +24,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
+import lumi.insert.app.core.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.response.ProductName;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
-import lumi.insert.app.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
 @DataJpaTest

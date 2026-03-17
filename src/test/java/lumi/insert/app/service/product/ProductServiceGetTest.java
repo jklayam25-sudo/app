@@ -23,17 +23,17 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
-import lumi.insert.app.entity.Category;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
 
 public class ProductServiceGetTest extends BaseProductServiceTest{
     

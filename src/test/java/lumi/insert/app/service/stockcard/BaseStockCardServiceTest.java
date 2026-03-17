@@ -9,14 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.TransactionItem;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.StockCardRepository;
-import lumi.insert.app.repository.TransactionItemRepository;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.StockCardRepository;
+import lumi.insert.app.core.repository.TransactionItemRepository;
+import lumi.insert.app.mapper.StockCardMapper;
 import lumi.insert.app.service.implement.StockCardServiceImpl;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.StockCardMapper;
 import lumi.insert.app.utils.mapper.StockCardMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
