@@ -14,4 +14,7 @@ public class EmployeeLogin {
     private String username;
 
     private EmployeeRole role;
+
+    private String ipAddress;
+    
 }

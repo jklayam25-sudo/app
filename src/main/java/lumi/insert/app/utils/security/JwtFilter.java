@@ -23,7 +23,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j; 
+import lombok.extern.slf4j.Slf4j;
 import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.entity.nondatabase.EmployeeRole;
 
@@ -72,6 +72,7 @@ public class JwtFilter extends OncePerRequestFilter{
         .id(UUID.fromString(accessToken.getClaim("id").asString()))
         .username(accessToken.getClaim("username").asString())
         .role(EmployeeRole.valueOf(accessToken.getClaim("role").asString()))
+        .ipAddress(request.getRemoteAddr())
         .build();
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, authorities);
