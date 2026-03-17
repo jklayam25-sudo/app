@@ -2,6 +2,7 @@ package lumi.insert.app.entity.nondatabase;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.envers.NotAudited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -21,18 +22,23 @@ import lombok.Setter;
 public abstract class BaseAuditing {
 
     @CreatedBy
+    @NotAudited
     private String createdBy;
 
     @LastModifiedBy
+    @NotAudited
     private String updatedBy;
 
     @CreatedDate
+    @NotAudited
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @NotAudited
     private LocalDateTime updatedAt;
 
     @Version
+    @NotAudited
     private Long version = 0L;
 
 }
