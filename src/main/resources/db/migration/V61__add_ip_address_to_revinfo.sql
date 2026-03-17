@@ -1,0 +1,2 @@
+ALTER TABLE revinfo
+    ADD COLUMN ip_address VARCHAR(55) NOT NULL;
