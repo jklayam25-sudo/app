@@ -61,6 +61,12 @@ public record SupplyResponse(
     
     @Schema(description = "Timestamp when the supply was recorded")
     LocalDateTime createdAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

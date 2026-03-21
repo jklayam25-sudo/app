@@ -12,6 +12,12 @@ public record ProductStockResponse (
     
     @Schema(description = "The current number of units available in the warehouse/store", example = "42")
     Long stockQuantity
-) {
+    
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
 
 }

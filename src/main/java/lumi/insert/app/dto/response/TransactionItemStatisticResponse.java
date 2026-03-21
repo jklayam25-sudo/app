@@ -9,9 +9,14 @@ import lumi.insert.app.core.repository.projection.ProductSale;
 
 @Data
 @Builder
-public class TransactionItemStatisticResponse {
+public class TransactionItemStatisticResponse implements Identifiable{
     
     private List<ProductSale> productSales;
 
     private List<ProductRefund> productRefunds;
+
+    @Override
+    public String getId() {
+        return "EXPORT";
+    }
 }

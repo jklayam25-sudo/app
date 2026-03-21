@@ -32,6 +32,11 @@ public record CustomerDetailResponse(
     
     @Schema(description = "Status indicating if the customer account is active", example = "true")
     Boolean isActive
-) {
-    
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

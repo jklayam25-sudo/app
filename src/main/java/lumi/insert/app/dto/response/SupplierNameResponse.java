@@ -11,6 +11,12 @@ public record SupplierNameResponse(
     
     @Schema(description = "Legal or trade name of the supplier company", example = "PT. Maju Jaya Perkasa")
     String name
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

@@ -27,6 +27,12 @@ public record MemoResponse(
     
     @Schema(description = "Status indicating if the current logged-in user has read this memo", example = "false")
     Boolean isRead
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

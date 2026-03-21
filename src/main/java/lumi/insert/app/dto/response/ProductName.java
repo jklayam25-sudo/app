@@ -12,6 +12,12 @@ public record ProductName (
     
     @Schema(description = "Full display name of the product", example = "Oli Yamalube Super Sport 1L")
     String name
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

@@ -21,6 +21,12 @@ public record TransactionItemDelete(
     
     @Schema(description = "Timestamp when the deletion status was last updated")
     LocalDateTime updatedAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

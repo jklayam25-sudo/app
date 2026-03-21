@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 @Schema(description = "Confirmation response after successfully creating a new product in the system")
-public class ProductCreateResponse {
+public class ProductCreateResponse implements Identifiable {
 
     @Schema(description = "The auto-generated ID for the newly created product", example = "1005")
     private Long id;
@@ -36,5 +36,10 @@ public class ProductCreateResponse {
 
     @Schema(description = "Server-generated timestamp of the last update")
     private LocalDateTime updatedAt; 
+
+    @Override
+    public String getId(){
+        return String.valueOf(this.id);
+    }
 
 }

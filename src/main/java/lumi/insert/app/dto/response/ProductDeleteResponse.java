@@ -22,5 +22,12 @@ public record ProductDeleteResponse (
     
     @Schema(description = "Timestamp when the deletion/deactivation occurred")
     LocalDateTime updatedAt
-) {
+    
+) implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

@@ -20,6 +20,11 @@ public record AuthTokenResponse(
     
     @Schema(description = "Timestamp when the tokens were issued")
     LocalDateTime createdAt
-) {
-    
+) implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.employee.getId());
+    }
+
 }

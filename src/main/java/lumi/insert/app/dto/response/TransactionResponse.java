@@ -64,6 +64,12 @@ public record TransactionResponse(
     
     @Schema(description = "Timestamp when the transaction was last updated")
     LocalDateTime updatedAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

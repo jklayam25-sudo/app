@@ -46,6 +46,12 @@ public record StockCardResponse(
     
     @Schema(description = "Timestamp of when the stock movement occurred")
     LocalDateTime createdAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

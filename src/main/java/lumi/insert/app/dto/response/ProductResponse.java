@@ -34,6 +34,12 @@ public record ProductResponse (
     
     @Schema(description = "Timestamp of the last update to product details or stock")
     LocalDateTime updatedAt
-) {
+    
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
 
 }

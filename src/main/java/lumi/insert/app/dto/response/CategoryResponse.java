@@ -23,6 +23,11 @@ public record CategoryResponse(
     
     @Schema(description = "Timestamp of the last update to category name or status")
     LocalDateTime updatedAt
-) {
+) implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
 
 }
