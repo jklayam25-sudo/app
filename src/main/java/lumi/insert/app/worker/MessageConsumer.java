@@ -16,8 +16,7 @@ public class MessageConsumer {
     ActivityLogRepository activityLogRepository;
     
     @RabbitListener(queues = "activity-logs")
-    void activityLogsHandler(ActivityLog activityLog){
-        log.info("3");
+    void activityLogsHandler(ActivityLog activityLog){ 
         activityLogRepository.save(activityLog);
     }
 }

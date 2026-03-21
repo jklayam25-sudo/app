@@ -17,14 +17,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import jakarta.validation.Valid; 
 import lumi.insert.app.controller.wrapper.WebResponse;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.service.AuthTokenService;
 
 @RestController
-@Tag(name = "Authentication", description = "Endpoints for managing user sessions and JWT tokens")
+@Tag(name = "Authentication", description = "Endpoints for managing user sessions and JWT tokens") 
 public class AuthTokenController {
     
     @Autowired
@@ -47,8 +47,7 @@ public class AuthTokenController {
         .secure(false)
         .maxAge(604800)
         .path("/")
-        .build();
-
+        .build(); 
         return ResponseEntity.ok().header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString()).body(wrappedResult);
     }
 
