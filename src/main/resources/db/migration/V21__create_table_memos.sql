@@ -10,11 +10,9 @@ CREATE TABLE memos (
     is_active BOOLEAN DEFAULT TRUE,
 
     role employee_role DEFAULT NULL,
-
-    created_by UUID DEFAULT NULL,
-    
+  
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL
+    version BIGINT DEFAULT 0 NOT NULL
 );
  

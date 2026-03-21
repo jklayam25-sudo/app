@@ -18,6 +18,8 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
 import lumi.insert.app.service.XlsxService;
@@ -30,6 +32,11 @@ public class XlsxServiceImpl implements XlsxService{
 
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.EXPORT_DATA,
+        actionMessage = "Transaction history exported as XLSX"
+    )
     public void exportTransactions(List<TransactionResponse> datas, OutputStream outputStream) {
         try (SXSSFWorkbook workbook = new SXSSFWorkbook()) { 
             SXSSFSheet sheet = workbook.createSheet("Transactions");
@@ -127,6 +134,11 @@ public class XlsxServiceImpl implements XlsxService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.EXPORT_DATA,
+        actionMessage = "Supply history exported as XLSX"
+    )
     public void exportSupplies(List<SupplyResponse> datas, OutputStream outputStream) {
          try (SXSSFWorkbook workbook = new SXSSFWorkbook()) { 
             SXSSFSheet sheet = workbook.createSheet("Supplies");

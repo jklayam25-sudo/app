@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lumi.insert.app.entity.nondatabase.SupplyStatus; 
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus; 
 
 @Schema(description = "Full detail response for a supply transaction, including itemized product list")
 public record SupplyDetailResponse(
@@ -64,6 +64,12 @@ public record SupplyDetailResponse(
     
     @Schema(description = "Timestamp when the supply record was first created")
     LocalDateTime createdAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

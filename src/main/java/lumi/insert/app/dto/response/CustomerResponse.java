@@ -17,6 +17,12 @@ public record CustomerResponse(
     
     @Schema(description = "Primary contact or WhatsApp number", example = "081234567890")
     String contact
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.dto.request.CategoryCreateRequest; 
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.utils.forTesting.CategoryUtils;
 

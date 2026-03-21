@@ -24,11 +24,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 
+import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
 import lumi.insert.app.dto.response.StockCardResponse;
-import lumi.insert.app.entity.StockCard;
-import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class StockCardGetServiceTest extends BaseStockCardServiceTest{

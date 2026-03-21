@@ -19,10 +19,10 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.projection.ProductRefreshProjection;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.core.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
 
 public class TransactionServiceEditTest extends BaseTransactionServiceTest{
 

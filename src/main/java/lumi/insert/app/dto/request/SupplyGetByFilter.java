@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data

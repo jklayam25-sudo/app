@@ -23,6 +23,12 @@ public record TransactionPaymentResponse(
     
     @Schema(description = "Flag indicating if this record is a refund", example = "false")
     Boolean isForRefund
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

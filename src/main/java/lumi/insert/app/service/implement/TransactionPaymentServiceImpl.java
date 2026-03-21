@@ -15,22 +15,24 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionPayment;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.core.repository.TransactionPaymentRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionPaymentCreateRequest;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter;
 import lumi.insert.app.dto.response.TransactionPaymentResponse;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionPayment;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
-import lumi.insert.app.repository.TransactionPaymentRepository;
-import lumi.insert.app.repository.TransactionRepository;
+import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.TransactionPaymentService;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @Service
 @Transactional
@@ -50,6 +52,11 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_payments",
+        action = ActivityAction.TRANSACTION_PAYMENT_RECEIVED,
+        actionMessage = "Transaction payment received from customer"
+    )
     public TransactionPaymentResponse createTransactionPayment(UUID transactionId, TransactionPaymentCreateRequest request) {
         Transaction transaction = transactionRepository.findById(transactionId)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + transactionId + " was not found"));
@@ -111,6 +118,11 @@ public class TransactionPaymentServiceImpl implements TransactionPaymentService 
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_payments",
+        action = ActivityAction.TRANSACTION_REFUND_SETTLED,
+        actionMessage = "Transaction refund settled to customer"
+    )
     public TransactionPaymentResponse refundTransactionPayment(UUID transactionId, TransactionPaymentCreateRequest request) {
         Transaction transaction = transactionRepository.findById(transactionId)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + transactionId + " was not found"));

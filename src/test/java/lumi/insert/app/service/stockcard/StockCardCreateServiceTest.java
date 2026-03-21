@@ -12,10 +12,10 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.dto.request.StockCardCreateRequest;
 import lumi.insert.app.dto.response.StockCardResponse;
-import lumi.insert.app.entity.StockCard;
-import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
 

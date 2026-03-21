@@ -9,17 +9,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
+import lumi.insert.app.core.repository.CategoryRepository;
 import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.request.CategoryUpdateRequest;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.CategoryRepository;
+import lumi.insert.app.mapper.CategoryMapper;
 import lumi.insert.app.service.CategoryService;
-import lumi.insert.app.utils.mapper.CategoryMapper;
 
 @Service
 @Transactional
@@ -32,6 +34,11 @@ public class CategoryServiceImpl implements CategoryService {
     CategoryMapper categoryMapper;
 
     @Override
+    @ActivityLogger(
+        entityName = "categories",
+        action = ActivityAction.CATEGORY_CREATED,
+        actionMessage = "Category created"
+    )
     public CategoryResponse createCategory(CategoryCreateRequest request) {
 
         if(categoryRepository.existsByName(request.getName())){
@@ -49,7 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    @Override
+    @Override 
+    @ActivityLogger(
+        entityName = "categories",
+        action = ActivityAction.CATEGORY_UPDATED,
+        actionMessage = "Category name updated"
+    )
     public CategoryResponse updateCategoryName(CategoryUpdateRequest request) {
         if(categoryRepository.existsByName(request.getName())){
             throw  new DuplicateEntityException("Category with name " + request.getName() + " already exists");
@@ -65,6 +77,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "categories",
+        action = ActivityAction.CATEGORY_UPDATED,
+        actionMessage = "Category status set to active"
+    )
     public CategoryResponse activateCategory(Long id) {
         Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
         if(searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category with ID " + id + " already active");
@@ -77,6 +94,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "categories",
+        action = ActivityAction.CATEGORY_UPDATED,
+        actionMessage = "Category status set to inactive"
+    )
     public CategoryResponse deactivateCategory(Long id) {
         Category searchedCategory = categoryRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
         if(!searchedCategory.getIsActive()) throw new BoilerplateRequestException("Category with ID " + id + " already inactive");

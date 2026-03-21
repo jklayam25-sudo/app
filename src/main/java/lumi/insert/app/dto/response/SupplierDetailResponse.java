@@ -29,6 +29,12 @@ public record SupplierDetailResponse(
     
     @Schema(description = "Status indicating if the supplier is currently enabled for new orders", example = "true")
     Boolean isActive
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

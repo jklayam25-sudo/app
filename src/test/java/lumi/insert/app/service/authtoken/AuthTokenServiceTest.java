@@ -19,11 +19,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AccountExpiredException;
-import org.springframework.security.authentication.BadCredentialsException; 
+import org.springframework.security.authentication.BadCredentialsException;
 
+import lumi.insert.app.core.entity.AuthToken;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
 import lumi.insert.app.dto.response.AuthTokenResponse;
-import lumi.insert.app.entity.AuthToken;
 import lumi.insert.app.exception.AuthenticationTokenException; 
 
 public class AuthTokenServiceTest extends BaseAuthTokenServiceTest{

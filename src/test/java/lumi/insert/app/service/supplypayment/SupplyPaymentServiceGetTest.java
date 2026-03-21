@@ -21,10 +21,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 
+import lumi.insert.app.core.entity.SupplyPayment;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.SupplyPaymentGetByFilter; 
-import lumi.insert.app.dto.response.SupplyPaymentResponse; 
-import lumi.insert.app.entity.SupplyPayment;
+import lumi.insert.app.dto.response.SupplyPaymentResponse;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class SupplyPaymentServiceGetTest extends BaseSupplyPaymentServiceTest{

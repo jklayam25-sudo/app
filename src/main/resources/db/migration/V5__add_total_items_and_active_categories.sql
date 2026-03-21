@@ -1,5 +1,5 @@
 ALTER TABLE categories 
-    ADD COLUMN total_items INTEGER DEFAULT 0 NOT NULL;
+    ADD COLUMN total_items BIGINT DEFAULT 0 NOT NULL;
     
 ALTER TABLE categories
     ADD COLUMN is_active BOOLEAN DEFAULT TRUE NOT NULL;

@@ -9,11 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Customer; 
-import lumi.insert.app.repository.CustomerRepository;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.service.implement.CustomerServiceImpl;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.CustomerMapperImpl; 
+import lumi.insert.app.mapper.CustomerMapperImpl; 
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseCustomerServiceTest {

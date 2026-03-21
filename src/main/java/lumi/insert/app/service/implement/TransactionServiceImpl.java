@@ -20,31 +20,33 @@ import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.core.repository.CustomerRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.StockCardRepository;
+import lumi.insert.app.core.repository.TransactionItemRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
+import lumi.insert.app.core.repository.projection.ProductRefreshProjection;
 import lumi.insert.app.dto.request.TransactionCreateRequest;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.StockCard;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionItem;
-import lumi.insert.app.entity.nondatabase.StockMove;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.BoilerplateRequestException;
 import lumi.insert.app.exception.ForbiddenRequestException;
 import lumi.insert.app.exception.NotFoundEntityException;
 import lumi.insert.app.exception.TransactionValidationException;
-import lumi.insert.app.repository.CustomerRepository;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.StockCardRepository;
-import lumi.insert.app.repository.TransactionItemRepository;
-import lumi.insert.app.repository.TransactionRepository;
-import lumi.insert.app.repository.projection.ProductRefreshProjection;
+import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.TransactionService;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapper;
 
 @Service
 @Slf4j
@@ -76,6 +78,11 @@ public class TransactionServiceImpl implements TransactionService{
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_CART_CREATED,
+        actionMessage = "New transaction cart created"
+    )
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
             .orElseThrow(() -> new NotFoundEntityException("Customer with ID " + request.getCustomerId() + " is not found"));
@@ -109,6 +116,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_PLACED,
+        actionMessage = "Transaction order placed"
+    )
     public TransactionResponse setTransactionToProcess(UUID id) {
         List<String> messages = new ArrayList<>();
 
@@ -181,6 +193,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_COMPLETED,
+        actionMessage = "Transaction order completed"
+    )
     public TransactionResponse setTransactionToComplete(UUID id) {
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
@@ -194,6 +211,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_CANCELLED,
+        actionMessage = "Transaction order cancelled"
+    )
     public TransactionResponse cancelTransaction(UUID id) {
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));

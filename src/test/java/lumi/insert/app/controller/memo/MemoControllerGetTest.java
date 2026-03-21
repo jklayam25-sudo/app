@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class MemoControllerGetTest extends BaseMemoControllerTest{

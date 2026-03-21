@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.eq; 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,17 +23,17 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
+import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.ProductGetByFilter;
 import lumi.insert.app.dto.request.ProductGetNameRequest;
 import lumi.insert.app.dto.response.ProductName;
 import lumi.insert.app.dto.response.ProductResponse;
 import lumi.insert.app.dto.response.ProductStockResponse;
-import lumi.insert.app.entity.Category;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.projection.ProductOutOfStock;
 
 public class ProductServiceGetTest extends BaseProductServiceTest{
     
@@ -242,9 +242,11 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
             productRepository.save(dumpProduct);
         }
 
-        Category category = Category.builder()
-        .id(99999L)
+        Category category = Category.builder() 
+        .name("Shoes")
         .build();
+
+        Category saveAndFlush = categoryRepository.saveAndFlush(category);;
 
          Product dumpProduct = Product.builder()
             .name("Prodoteus XIJ ")
@@ -252,7 +254,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
             .sellPrice(5999L)
             .stockQuantity(10L)
             .stockMinimum(0L)
-            .category(category)
+            .category(saveAndFlush)
             .build();
 
         productRepository.save(dumpProduct);
@@ -276,7 +278,7 @@ public class ProductServiceGetTest extends BaseProductServiceTest{
         .size(5)
         .sortBy("sellPrice")
         .sortDirection("ASC")
-        .categoryId(99999L)
+        .categoryId(saveAndFlush.getId())
         .build();
 
         Slice<ProductResponse> productsByRequests = productService.getProductsByRequests(productGetByFilter);

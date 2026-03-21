@@ -8,16 +8,22 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+
 import jakarta.transaction.Transactional;
-import lumi.insert.app.repository.CategoryRepository;
-import lumi.insert.app.repository.ProductRepository;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.repository.CategoryRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.mapper.ProductMapper;
 import lumi.insert.app.service.ProductService;
 import lumi.insert.app.service.implement.ProductServiceImpl; 
-import lumi.insert.app.utils.mapper.CategoryMapperImpl;
-import lumi.insert.app.utils.mapper.ProductMapper;
-import lumi.insert.app.utils.mapper.ProductMapperImpl;
+import lumi.insert.app.mapper.CategoryMapperImpl;
+import lumi.insert.app.mapper.ProductMapperImpl;
 
 @SpringBootTest
 @Transactional
@@ -47,6 +53,16 @@ public abstract class BaseProductServiceTest {
 
     @BeforeEach
     void setUp() {
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         ReflectionTestUtils.setField(productMapper, "categoryMapper", new CategoryMapperImpl());
     }
 

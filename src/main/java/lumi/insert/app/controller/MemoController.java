@@ -19,10 +19,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
 import lumi.insert.app.controller.wrapper.WebResponse;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.dto.request.MemoCreateRequest;
 import lumi.insert.app.dto.request.MemoUpdateRequest;
 import lumi.insert.app.dto.response.MemoResponse;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.service.MemoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

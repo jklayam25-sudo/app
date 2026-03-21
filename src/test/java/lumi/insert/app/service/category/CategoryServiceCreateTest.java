@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.dto.request.CategoryCreateRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.DuplicateEntityException;
 
 public class CategoryServiceCreateTest extends BaseCategoryServiceTest{

@@ -1,6 +1,6 @@
 package lumi.insert.app.utils.forTesting;
  
-import lumi.insert.app.entity.Category;
+import lumi.insert.app.core.entity.Category;
 
 public class CategoryUtils {
     

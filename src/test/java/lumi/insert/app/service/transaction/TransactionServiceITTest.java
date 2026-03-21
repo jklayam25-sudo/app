@@ -12,25 +12,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.core.repository.CustomerRepository;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.StockCardRepository;
+import lumi.insert.app.core.repository.TransactionItemRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.StockCard;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionItem;
-import lumi.insert.app.entity.nondatabase.StockMove;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
-import lumi.insert.app.repository.CustomerRepository;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.StockCardRepository;
-import lumi.insert.app.repository.TransactionItemRepository;
-import lumi.insert.app.repository.TransactionRepository;
 import lumi.insert.app.service.TransactionService;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 
@@ -67,6 +71,16 @@ public class TransactionServiceITTest {
 
     @BeforeEach
     void setup(){ 
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         customer = customerRepository.save(Customer.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
     }
     

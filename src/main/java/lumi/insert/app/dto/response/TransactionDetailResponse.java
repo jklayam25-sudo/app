@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema; 
-import lumi.insert.app.entity.nondatabase.TransactionStatus; 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus; 
 
 @Schema(description = "Full detail response for a transaction, including itemized product list")
 public record TransactionDetailResponse(
@@ -67,6 +67,12 @@ public record TransactionDetailResponse(
     
     @Schema(description = "Timestamp when the transaction was last updated")
     LocalDateTime updatedAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

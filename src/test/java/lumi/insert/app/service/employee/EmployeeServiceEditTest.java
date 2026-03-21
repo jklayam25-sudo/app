@@ -11,12 +11,12 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test; 
+import org.junit.jupiter.api.Test;
 
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.dto.request.EmployeeUpdateRequest;
 import lumi.insert.app.dto.response.EmployeeResponse;
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
 

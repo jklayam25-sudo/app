@@ -25,10 +25,10 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.dto.request.TransactionGetByFilter; 
 import lumi.insert.app.dto.response.TransactionDetailResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionControllerGetTest extends BaseTransactionControllerTest{

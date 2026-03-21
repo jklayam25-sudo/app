@@ -1,11 +1,11 @@
 CREATE TABLE products (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
-    base_price INTEGER NOT NULL,
-    sell_price INTEGER NOT NULL,
-    stock_quantity INTEGER NOT NULL,
-    stock_minimum INTEGER NOT NULL DEFAULT 0,
-    category_id INTEGER,
+    base_price BIGINT NOT NULL,
+    sell_price BIGINT NOT NULL,
+    stock_quantity BIGINT NOT NULL,
+    stock_minimum BIGINT NOT NULL DEFAULT 0,
+    category_id BIGINT,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
 

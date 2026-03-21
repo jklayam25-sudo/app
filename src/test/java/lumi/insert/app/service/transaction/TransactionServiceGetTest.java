@@ -21,9 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
 
+import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.dto.request.TransactionGetByFilter;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.Transaction;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionServiceGetTest extends BaseTransactionServiceTest{

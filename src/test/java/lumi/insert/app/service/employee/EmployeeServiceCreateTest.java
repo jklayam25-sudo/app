@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
- 
+
+import lumi.insert.app.core.entity.Employee;
 import lumi.insert.app.dto.request.EmployeeCreateRequest;
 import lumi.insert.app.dto.response.EmployeeResponse;
-import lumi.insert.app.entity.Employee;
 import lumi.insert.app.exception.DuplicateEntityException; 
  
 public class EmployeeServiceCreateTest extends BaseEmployeeServiceTest{

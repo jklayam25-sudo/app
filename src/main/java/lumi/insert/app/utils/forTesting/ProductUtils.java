@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
- 
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.Category;
+
+import lumi.insert.app.core.entity.Category;
+import lumi.insert.app.core.entity.Product;
 
 public class ProductUtils {
 

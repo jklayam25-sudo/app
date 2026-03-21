@@ -10,23 +10,23 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.github.f4b6a3.uuid.UuidCreator; 
+import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Supplier;
-import lumi.insert.app.entity.Product;
-import lumi.insert.app.entity.Supply;
-import lumi.insert.app.entity.SupplyItem; 
-import lumi.insert.app.repository.SupplierRepository;
-import lumi.insert.app.repository.SupplyItemRepository;
-import lumi.insert.app.repository.ProductRepository;
-import lumi.insert.app.repository.StockCardRepository;
-import lumi.insert.app.repository.SupplyRepository; 
+import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.entity.Supply;
+import lumi.insert.app.core.entity.SupplyItem;
+import lumi.insert.app.core.repository.ProductRepository;
+import lumi.insert.app.core.repository.StockCardRepository;
+import lumi.insert.app.core.repository.SupplierRepository;
+import lumi.insert.app.core.repository.SupplyItemRepository;
+import lumi.insert.app.core.repository.SupplyRepository;
+import lumi.insert.app.mapper.AllSupplyMapper;
 import lumi.insert.app.service.implement.SupplyServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllSupplyMapper;
-import lumi.insert.app.utils.mapper.AllSupplyMapperImpl; 
-import lumi.insert.app.utils.mapper.ProductMapperImpl;
+import lumi.insert.app.mapper.AllSupplyMapperImpl; 
+import lumi.insert.app.mapper.ProductMapperImpl;
 
 @ExtendWith(MockitoExtension.class) 
 public abstract class BaseSupplyServiceTest {

@@ -5,7 +5,7 @@ CREATE TABLE memo_views (
  
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL,
+    version BIGINT DEFAULT 0 NOT NULL,
 
     CONSTRAINT uk_memo_employee UNIQUE (memo_id, employee_id),
  

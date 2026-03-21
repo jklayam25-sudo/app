@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 
 @Schema(description = "Main transaction response containing financial summaries and status")
 public record TransactionResponse(
@@ -64,6 +64,12 @@ public record TransactionResponse(
     
     @Schema(description = "Timestamp when the transaction was last updated")
     LocalDateTime updatedAt
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

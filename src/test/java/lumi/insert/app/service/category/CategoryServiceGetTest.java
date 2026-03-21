@@ -15,9 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.response.CategoryResponse;
-import lumi.insert.app.entity.Category;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class CategoryServiceGetTest extends BaseCategoryServiceTest{

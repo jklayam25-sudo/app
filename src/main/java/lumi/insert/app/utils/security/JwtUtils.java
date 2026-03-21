@@ -10,7 +10,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import lumi.insert.app.entity.Employee;
+import lumi.insert.app.core.entity.Employee;
 
 @Component
 public class JwtUtils {

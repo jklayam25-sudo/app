@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
+import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.dto.request.CustomerCreateRequest;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.CustomerGetNameRequest;
@@ -20,14 +25,11 @@ import lumi.insert.app.dto.request.CustomerUpdateRequest;
 import lumi.insert.app.dto.response.CustomerDetailResponse;
 import lumi.insert.app.dto.response.CustomerNameResponse;
 import lumi.insert.app.dto.response.CustomerResponse;
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.exception.DuplicateEntityException;
 import lumi.insert.app.exception.NotFoundEntityException;
-import lumi.insert.app.repository.CustomerRepository;
+import lumi.insert.app.mapper.CustomerMapper;
 import lumi.insert.app.service.CustomerService;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.CustomerMapper;
 
 @Service
 @Transactional
@@ -43,6 +45,11 @@ public class CustomerServiceImpl implements CustomerService{
     JpaSpecGenerator jpaSpec;
 
     @Override
+    @ActivityLogger(
+        entityName = "customers",
+        action = ActivityAction.CUSTOMER_REGISTERED,
+        actionMessage = "New customer registered"
+    )
     public CustomerDetailResponse createCustomer(CustomerCreateRequest request) {
         if(customerRepository.existsByName(request.getName())) throw new DuplicateEntityException("Customer with name " + request.getName() + " already exists");
 
@@ -87,6 +94,11 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "customers",
+        action = ActivityAction.CUSTOMER_UPDATED,
+        actionMessage = "Customer updated"
+    )
     public CustomerDetailResponse updateCustomer(UUID id, CustomerUpdateRequest request) {
         if(request.getName() != null && customerRepository.existsByName(request.getName())) throw new DuplicateEntityException("Customer with name " + request.getName() + " already exists");
 

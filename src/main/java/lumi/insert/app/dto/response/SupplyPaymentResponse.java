@@ -23,6 +23,12 @@ public record SupplyPaymentResponse(
     
     @Schema(description = "Flag indicating if this payment is a refund from the supplier (e.g., for returned goods)", example = "false")
     Boolean isForRefund
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

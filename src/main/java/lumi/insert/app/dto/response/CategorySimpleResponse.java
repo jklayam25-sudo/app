@@ -10,6 +10,11 @@ public record CategorySimpleResponse(
     
     @Schema(description = "Display name of the category", example = "Onderdil Motor")
     String name
-) {
-    
+) implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

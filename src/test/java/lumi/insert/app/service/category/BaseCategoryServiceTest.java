@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.repository.CategoryRepository;
+import lumi.insert.app.core.repository.CategoryRepository;
+import lumi.insert.app.mapper.CategoryMapper;
 import lumi.insert.app.service.CategoryService;
 import lumi.insert.app.service.implement.CategoryServiceImpl;
-import lumi.insert.app.utils.mapper.CategoryMapper;
 
 @SpringBootTest
 @Transactional

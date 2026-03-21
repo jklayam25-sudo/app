@@ -20,10 +20,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 
+import lumi.insert.app.core.entity.TransactionPayment;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.TransactionPaymentGetByFilter; 
-import lumi.insert.app.dto.response.TransactionPaymentResponse; 
-import lumi.insert.app.entity.TransactionPayment;
+import lumi.insert.app.dto.response.TransactionPaymentResponse;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 public class TransactionPaymentServiceGetTest extends BaseTransactionPaymentServiceTest{

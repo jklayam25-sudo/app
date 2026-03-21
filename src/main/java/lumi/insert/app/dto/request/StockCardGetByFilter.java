@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import lumi.insert.app.entity.nondatabase.StockMove;
+import lumi.insert.app.core.entity.nondatabase.StockMove;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data

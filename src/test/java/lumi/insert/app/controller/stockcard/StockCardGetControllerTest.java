@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 
+import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.dto.request.PaginationRequest;
 import lumi.insert.app.dto.request.StockCardGetByFilter;
-import lumi.insert.app.entity.nondatabase.StockMove;
 import lumi.insert.app.exception.NotFoundEntityException;
 
 import static org.mockito.ArgumentMatchers.any;

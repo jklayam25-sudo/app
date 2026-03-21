@@ -17,10 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
+import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.dto.response.SupplyResponse;
 import lumi.insert.app.dto.response.TransactionResponse;
-import lumi.insert.app.entity.nondatabase.SupplyStatus;
-import lumi.insert.app.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.service.implement.XlsxServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +57,7 @@ public class XlsxServiceTest {
 
         XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new ByteArrayInputStream(out.toByteArray()));
 
-        XSSFSheet sheet = xssfWorkbook.getSheet("Transaction");
+        XSSFSheet sheet = xssfWorkbook.getSheet("Transactions");
         assertEquals(transactionResponse.invoiceId(), sheet.getRow(2).getCell(1).getStringCellValue()); 
         assertEquals(transactionResponse.status().toString(), sheet.getRow(2).getCell(12).getStringCellValue()); 
         assertEquals(transactionResponse.status().toString(), sheet.getRow(3).getCell(12).getStringCellValue());

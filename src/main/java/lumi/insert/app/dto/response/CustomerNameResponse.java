@@ -11,6 +11,12 @@ public record CustomerNameResponse(
     
     @Schema(description = "Full name of the customer for display purposes", example = "Budi Santoso")
     String name
-) {
     
+) implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

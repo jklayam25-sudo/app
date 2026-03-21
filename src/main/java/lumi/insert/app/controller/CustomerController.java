@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lumi.insert.app.controller.wrapper.WebResponse;
+import lumi.insert.app.core.entity.nondatabase.SliceIndex;
 import lumi.insert.app.dto.request.CustomerCreateRequest;
 import lumi.insert.app.dto.request.CustomerGetByFilter;
 import lumi.insert.app.dto.request.CustomerGetNameRequest;
@@ -31,7 +32,6 @@ import lumi.insert.app.dto.request.CustomerUpdateRequest;
 import lumi.insert.app.dto.response.CustomerDetailResponse;
 import lumi.insert.app.dto.response.CustomerNameResponse;
 import lumi.insert.app.dto.response.CustomerResponse;
-import lumi.insert.app.entity.nondatabase.SliceIndex;
 import lumi.insert.app.service.CustomerService;
 
 @RestController

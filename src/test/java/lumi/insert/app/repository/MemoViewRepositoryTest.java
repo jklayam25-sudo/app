@@ -4,22 +4,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
-import lumi.insert.app.entity.Employee;
-import lumi.insert.app.entity.Memo;
-import lumi.insert.app.entity.MemoView;
-import lumi.insert.app.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.config.security.AuditorAwareImpl;
+import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.Memo;
+import lumi.insert.app.core.entity.MemoView;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.core.repository.EmployeeRepository;
+import lumi.insert.app.core.repository.MemoRepository;
+import lumi.insert.app.core.repository.MemoViewRepository;
 
-@DataJpaTest
+@DataJpaTest 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional 
 @ActiveProfiles("test")
+@Import({AuditorAwareImpl.class})
 public class MemoViewRepositoryTest {
     
     @Autowired
@@ -31,6 +43,19 @@ public class MemoViewRepositoryTest {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    @BeforeEach
+    void setup(){
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+    
     @Test
     void getMemo_roleALL_returnALL(){
         Memo cashierMemo = Memo.builder() 

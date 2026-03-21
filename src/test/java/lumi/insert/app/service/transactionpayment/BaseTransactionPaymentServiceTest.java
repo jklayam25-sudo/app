@@ -10,17 +10,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
-import lumi.insert.app.entity.Customer;
-import lumi.insert.app.entity.Transaction;
-import lumi.insert.app.entity.TransactionItem;
-import lumi.insert.app.entity.TransactionPayment;
-import lumi.insert.app.repository.TransactionPaymentRepository;
-import lumi.insert.app.repository.TransactionRepository;
+import lumi.insert.app.core.entity.Customer;
+import lumi.insert.app.core.entity.Transaction;
+import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.TransactionPayment;
+import lumi.insert.app.core.repository.TransactionPaymentRepository;
+import lumi.insert.app.core.repository.TransactionRepository;
+import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.implement.TransactionPaymentServiceImpl; 
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapper;
-import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
+import lumi.insert.app.mapper.AllTransactionMapperImpl;
  
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseTransactionPaymentServiceTest {

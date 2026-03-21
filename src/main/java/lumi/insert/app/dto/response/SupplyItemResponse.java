@@ -20,6 +20,12 @@ public record SupplyItemResponse(
     
     @Schema(description = "Additional notes or specifications for this batch (e.g., Expiry Date, Batch No)", example = "Batch #A2024 - Exp: 2026-12")
     String description
-) {
     
+)  implements Identifiable {
+
+    @Override
+    public String getId() {
+        return String.valueOf(this.id);
+    }
+
 }

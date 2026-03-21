@@ -16,9 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import lumi.insert.app.dto.request.MemoCreateRequest;
-import lumi.insert.app.entity.nondatabase.EmployeeLogin;
-import lumi.insert.app.entity.nondatabase.EmployeeRole; 
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
+import lumi.insert.app.dto.request.MemoCreateRequest; 
 
 public class MemoControllerCreateTest extends BaseMemoControllerTest{
     
