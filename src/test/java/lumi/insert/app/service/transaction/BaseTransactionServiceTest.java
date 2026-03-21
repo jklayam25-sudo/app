@@ -8,7 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
@@ -17,6 +20,8 @@ import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.core.entity.TransactionItem;
 import lumi.insert.app.core.entity.TransactionPayment;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.core.repository.ProductRepository;
 import lumi.insert.app.core.repository.StockCardRepository;
@@ -26,10 +31,10 @@ import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.implement.TransactionServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
+import lumi.insert.app.mapper.AllTransactionMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
-@DataJpaTest
+@SpringBootTest @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class BaseTransactionServiceTest {
     
     @InjectMocks
@@ -72,6 +77,16 @@ public abstract class BaseTransactionServiceTest {
 
     @BeforeEach
     void setUp(){
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         setupTransactionPayment = TransactionPayment.builder()
         .id(UuidCreator.getTimeOrderedEpochFast())
         .build();

@@ -11,7 +11,7 @@ import lumi.insert.app.core.repository.MemoRepository;
 import lumi.insert.app.core.repository.MemoViewRepository;
 import lumi.insert.app.mapper.MemoMapper;
 import lumi.insert.app.service.implement.MemoServiceImpl;
-import lumi.insert.app.utils.mapper.MemoMapperImpl;
+import lumi.insert.app.mapper.MemoMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseMemoServiceTest {

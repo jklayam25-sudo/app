@@ -13,7 +13,7 @@ import lumi.insert.app.core.entity.Customer;
 import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.service.implement.CustomerServiceImpl;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.CustomerMapperImpl; 
+import lumi.insert.app.mapper.CustomerMapperImpl; 
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseCustomerServiceTest {

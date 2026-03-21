@@ -10,18 +10,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import; 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.config.security.AuditorAwareImpl;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.core.repository.ProductRepository;
 import lumi.insert.app.core.repository.StockCardRepository;
@@ -29,10 +35,12 @@ import lumi.insert.app.dto.request.StockCardGetByFilter;
 import lumi.insert.app.dto.response.StockCardResponse;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
-@DataJpaTest
+@DataJpaTest 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-@Import(JpaSpecGenerator.class)
+@Import({JpaSpecGenerator.class, AuditorAwareImpl.class})
 @ActiveProfiles("test")
+
 public class StockCardRepositoryTest {
     
     @Autowired
@@ -48,6 +56,18 @@ public class StockCardRepositoryTest {
 
     @BeforeEach
     void setup(){
+        productRepository.deleteAll();
+        
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         product = productRepository.saveAndFlush(Product.builder().name("Shoes").basePrice(1000L).sellPrice(1100L).stockQuantity(10L).build());
     }
 

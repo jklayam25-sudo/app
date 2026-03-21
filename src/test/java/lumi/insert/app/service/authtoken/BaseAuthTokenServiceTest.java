@@ -19,7 +19,7 @@ import lumi.insert.app.core.repository.EmployeeRepository;
 import lumi.insert.app.dto.response.AuthTokenResponse;
 import lumi.insert.app.dto.response.EmployeeResponse;
 import lumi.insert.app.service.implement.AuthTokenServiceImpl;
-import lumi.insert.app.utils.mapper.AuthMapperImpl;
+import lumi.insert.app.mapper.AuthMapperImpl;
 import lumi.insert.app.utils.security.JwtUtils;
 
 @ExtendWith(MockitoExtension.class)

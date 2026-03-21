@@ -16,11 +16,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;  
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice; 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -28,10 +31,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.config.security.AuditorAwareImpl;
 import lumi.insert.app.core.entity.Customer;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.core.repository.ProductRepository;
@@ -43,10 +49,11 @@ import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
-@DataJpaTest
+@DataJpaTest 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 @Slf4j
-@Import(JpaSpecGenerator.class)
+@Import({JpaSpecGenerator.class, AuditorAwareImpl.class})
 @ActiveProfiles("test")
 public class TransactionRepositoryTest {
     
@@ -74,6 +81,16 @@ public class TransactionRepositoryTest {
 
     @BeforeEach
     public void setup(){
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         Customer customer1 = Customer.builder()
         .id(UuidCreator.getTimeOrderedEpochFast())
         .name("Customer 1")

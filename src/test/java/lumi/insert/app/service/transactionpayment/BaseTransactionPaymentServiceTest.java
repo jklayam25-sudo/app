@@ -20,7 +20,7 @@ import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.implement.TransactionPaymentServiceImpl; 
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
+import lumi.insert.app.mapper.AllTransactionMapperImpl;
  
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseTransactionPaymentServiceTest {

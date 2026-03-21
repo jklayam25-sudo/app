@@ -16,7 +16,7 @@ import lumi.insert.app.core.entity.Employee;
 import lumi.insert.app.core.repository.AuthTokenRepository;
 import lumi.insert.app.core.repository.EmployeeRepository;
 import lumi.insert.app.service.implement.EmployeeServiceImpl;
-import lumi.insert.app.utils.mapper.EmployeeMapperImpl;
+import lumi.insert.app.mapper.EmployeeMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseEmployeeServiceTest {

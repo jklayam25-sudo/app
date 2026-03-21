@@ -57,7 +57,7 @@ public class XlsxServiceTest {
 
         XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new ByteArrayInputStream(out.toByteArray()));
 
-        XSSFSheet sheet = xssfWorkbook.getSheet("Transaction");
+        XSSFSheet sheet = xssfWorkbook.getSheet("Transactions");
         assertEquals(transactionResponse.invoiceId(), sheet.getRow(2).getCell(1).getStringCellValue()); 
         assertEquals(transactionResponse.status().toString(), sheet.getRow(2).getCell(12).getStringCellValue()); 
         assertEquals(transactionResponse.status().toString(), sheet.getRow(3).getCell(12).getStringCellValue());

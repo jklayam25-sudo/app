@@ -13,19 +13,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.config.security.AuditorAwareImpl;
 import lumi.insert.app.core.entity.Customer;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.repository.CustomerRepository;
 import lumi.insert.app.core.repository.ProductRepository;
 import lumi.insert.app.core.repository.TransactionItemRepository;
@@ -35,9 +41,10 @@ import lumi.insert.app.core.repository.projection.ProductSale;
 import lumi.insert.app.utils.forTesting.ProductUtils;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 
-@DataJpaTest
+@DataJpaTest 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-@Import(InvoiceGenerator.class)
+@Import({InvoiceGenerator.class, AuditorAwareImpl.class })
 @ActiveProfiles("test")
 public class TransactionItemRepositoryTest {
 
@@ -61,6 +68,16 @@ public class TransactionItemRepositoryTest {
 
     @BeforeEach
     void setup(){ 
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         customer = customerRepository.save(Customer.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("TESTES").contact("TESTE123").shippingAddress("SHIPTEST").build());
     }
 

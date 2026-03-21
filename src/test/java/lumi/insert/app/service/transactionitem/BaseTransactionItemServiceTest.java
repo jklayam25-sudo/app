@@ -19,7 +19,7 @@ import lumi.insert.app.core.repository.TransactionItemRepository;
 import lumi.insert.app.core.repository.TransactionRepository;
 import lumi.insert.app.mapper.AllTransactionMapper;
 import lumi.insert.app.service.implement.TransactionItemServiceImpl;
-import lumi.insert.app.utils.mapper.AllTransactionMapperImpl;
+import lumi.insert.app.mapper.AllTransactionMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseTransactionItemServiceTest {

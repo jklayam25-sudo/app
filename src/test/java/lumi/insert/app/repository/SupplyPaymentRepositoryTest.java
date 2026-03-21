@@ -12,20 +12,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.config.security.AuditorAwareImpl;
 import lumi.insert.app.core.entity.Supplier;
 import lumi.insert.app.core.entity.Supply;
 import lumi.insert.app.core.entity.SupplyPayment;
+import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
+import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.repository.SupplierRepository;
 import lumi.insert.app.core.repository.SupplyPaymentRepository;
 import lumi.insert.app.core.repository.SupplyRepository;
@@ -33,9 +39,10 @@ import lumi.insert.app.dto.request.SupplyPaymentGetByFilter;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
 
-@DataJpaTest
+@DataJpaTest 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
-@Import({InvoiceGenerator.class, JpaSpecGenerator.class}) 
+@Import({InvoiceGenerator.class, JpaSpecGenerator.class, AuditorAwareImpl.class}) 
 @ActiveProfiles("test")
 public class SupplyPaymentRepositoryTest {
 
@@ -58,6 +65,16 @@ public class SupplyPaymentRepositoryTest {
 
     @BeforeEach
     void setup(){
+        EmployeeLogin employeeLogin = EmployeeLogin.builder()
+        .id(UuidCreator.getTimeOrderedEpochFast())
+        .username("Test Username")
+        .role(EmployeeRole.CASHIER)
+        .ipAddress("t.e.s.t")
+        .build();
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(employeeLogin, null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         supplier = supplierRepository.save(Supplier.builder().id(UuidCreator.getTimeOrderedEpochFast()).name("Test").contact("test").build());
     }
  

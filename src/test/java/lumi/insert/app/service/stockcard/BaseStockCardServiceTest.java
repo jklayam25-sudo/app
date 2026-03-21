@@ -17,7 +17,7 @@ import lumi.insert.app.core.repository.TransactionItemRepository;
 import lumi.insert.app.mapper.StockCardMapper;
 import lumi.insert.app.service.implement.StockCardServiceImpl;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.StockCardMapperImpl;
+import lumi.insert.app.mapper.StockCardMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseStockCardServiceTest {

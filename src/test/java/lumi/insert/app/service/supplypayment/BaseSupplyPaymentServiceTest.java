@@ -19,7 +19,7 @@ import lumi.insert.app.mapper.AllSupplyMapper;
 import lumi.insert.app.service.implement.SupplyPaymentServiceImpl;
 import lumi.insert.app.utils.generator.InvoiceGenerator;
 import lumi.insert.app.utils.generator.JpaSpecGenerator;
-import lumi.insert.app.utils.mapper.AllSupplyMapperImpl;
+import lumi.insert.app.mapper.AllSupplyMapperImpl;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class BaseSupplyPaymentServiceTest {
