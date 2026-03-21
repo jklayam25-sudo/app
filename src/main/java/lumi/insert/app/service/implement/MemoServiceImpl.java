@@ -7,9 +7,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Employee;
 import lumi.insert.app.core.entity.Memo;
 import lumi.insert.app.core.entity.MemoView;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.EmployeeLogin;
 import lumi.insert.app.core.entity.nondatabase.EmployeeRole;
 import lumi.insert.app.core.repository.EmployeeRepository;
@@ -39,6 +41,11 @@ public class MemoServiceImpl implements MemoService{
     MemoMapper mapper;
 
     @Override
+    @ActivityLogger(
+        entityName = "memos",
+        action = ActivityAction.MEMO_CREATED,
+        actionMessage = "New memo created"
+    )
     public MemoResponse createMemo(MemoCreateRequest request) {
         Memo memo = Memo.builder()
         .title(request.getTitle())
@@ -56,6 +63,11 @@ public class MemoServiceImpl implements MemoService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "memos",
+        action = ActivityAction.MEMO_UPDATED,
+        actionMessage = "Memo updated"
+    )
     public MemoResponse updateMemo(Long id, MemoUpdateRequest request) {
         Memo memo = memoRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " was not found"));
@@ -68,6 +80,11 @@ public class MemoServiceImpl implements MemoService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "memos",
+        action = ActivityAction.MEMO_UPDATED,
+        actionMessage = "Memo is archieved"
+    )
     public MemoResponse archiveMemo(Long id) {
         Memo memo = memoRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Memo with ID " + id + " is not found"));
@@ -90,6 +107,11 @@ public class MemoServiceImpl implements MemoService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "memo_views",
+        action = ActivityAction.MEMO_READ,
+        actionMessage = "Memo read"
+    )
     public Boolean createMemoView(EmployeeLogin login, Long id) {
         try {
             Memo memo = memoRepository.getReferenceById(id);

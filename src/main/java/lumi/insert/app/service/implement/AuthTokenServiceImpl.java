@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.AuthToken;
 import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.repository.AuthTokenRepository;
 import lumi.insert.app.core.repository.EmployeeRepository;
 import lumi.insert.app.dto.request.AuthTokenCreateRequest;
@@ -45,6 +47,11 @@ public class AuthTokenServiceImpl implements AuthTokenService{
     JwtUtils jwtUtils;
 
     @Override
+    @ActivityLogger(
+        entityName = "auth_tokens",
+        action = ActivityAction.LOGIN_SUCCESS,
+        actionMessage = "Employee login success"
+    )
     public AuthTokenResponse createAuthToken(AuthTokenCreateRequest request) {
         Employee employee = employeeRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new AuthenticationTokenException("Employee with username " + request.getUsername() + " is not found"));
@@ -68,7 +75,6 @@ public class AuthTokenServiceImpl implements AuthTokenService{
         return authMapper.createDtoResponseFromEntity(accessToken, savedToken);
     }
 
-    @Override
     public AuthTokenResponse refreshAuthToken(String refreshToken) {
         AuthToken authToken = authTokenRepository.findByRefreshToken(refreshToken)
             .orElseThrow(() -> new AuthenticationTokenException("Credentials token is not valid"));
@@ -86,6 +92,11 @@ public class AuthTokenServiceImpl implements AuthTokenService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "auth_tokens",
+        action = ActivityAction.LOGOUT,
+        actionMessage = "Employee logout"
+    )
     public void deleteRefreshToken(String refreshToken) {
         authTokenRepository.deleteByRefreshToken(refreshToken);
     }

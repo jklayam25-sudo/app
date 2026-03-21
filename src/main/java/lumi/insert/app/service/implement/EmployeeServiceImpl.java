@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Employee;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.repository.AuthTokenRepository;
 import lumi.insert.app.core.repository.EmployeeRepository;
 import lumi.insert.app.dto.request.EmployeeCreateRequest;
@@ -42,6 +44,11 @@ public class EmployeeServiceImpl implements EmployeeService{
     EmployeeMapper employeeMapper;
 
     @Override
+    @ActivityLogger(
+        entityName = "employees",
+        action = ActivityAction.EMPLOYEE_REGISTERED,
+        actionMessage = "New employee registered"
+    )
     public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
         if(employeeRepository.existsByUsername(request.getUsername())) throw new DuplicateEntityException("Employee with username " + request.getUsername() + " already exists");
 
@@ -81,6 +88,11 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "employees",
+        action = ActivityAction.EMPLOYEE_UPDATED,
+        actionMessage = "Employee password changed"
+    )
     public EmployeeResponse resetEmployeePassword(UUID id, String password) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Employee with ID " + id + " was not found"));
@@ -96,6 +108,11 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "employees",
+        action = ActivityAction.EMPLOYEE_UPDATED,
+        actionMessage = "Employee updated"
+    )
     public EmployeeResponse updateEmployee(UUID id, EmployeeUpdateRequest request) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Employee with ID " + id + " was not found"));

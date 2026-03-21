@@ -20,11 +20,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Customer;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.StockCard;
 import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.core.repository.CustomerRepository;
@@ -76,6 +78,11 @@ public class TransactionServiceImpl implements TransactionService{
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_CART_CREATED,
+        actionMessage = "New transaction cart created"
+    )
     public TransactionResponse createTransaction(TransactionCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
             .orElseThrow(() -> new NotFoundEntityException("Customer with ID " + request.getCustomerId() + " is not found"));
@@ -109,6 +116,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_PLACED,
+        actionMessage = "Transaction order placed"
+    )
     public TransactionResponse setTransactionToProcess(UUID id) {
         List<String> messages = new ArrayList<>();
 
@@ -181,6 +193,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_COMPLETED,
+        actionMessage = "Transaction order completed"
+    )
     public TransactionResponse setTransactionToComplete(UUID id) {
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));
@@ -194,6 +211,11 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.TRANSACTION_ORDER_CANCELLED,
+        actionMessage = "Transaction order cancelled"
+    )
     public TransactionResponse cancelTransaction(UUID id) {
         Transaction searchedTransaction = transactionRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + id + " was not found"));

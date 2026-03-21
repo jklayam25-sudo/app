@@ -11,8 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
  
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Category;
 import lumi.insert.app.core.entity.Product;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.SliceIndex;
 import lumi.insert.app.core.repository.CategoryRepository;
 import lumi.insert.app.core.repository.ProductRepository;
@@ -50,6 +52,11 @@ public class ProductServiceImpl implements ProductService {
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "products",
+        action = ActivityAction.PRODUCT_CREATED,
+        actionMessage = "New product created"
+    )
     public ProductResponse createProduct(ProductCreateRequest request) {
         if (productRepository.existsByName(request.getName())) {
             throw new DuplicateEntityException("Product with name " + request.getName() + " already exists");
@@ -98,6 +105,11 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @ActivityLogger(
+        entityName = "products",
+        action = ActivityAction.PRODUCT_UPDATED,
+        actionMessage = "Product updated"
+    )
     public ProductResponse updateProduct(ProductUpdateRequest request) {
         Product existingProduct = productRepository.findById(request.getId()).orElseThrow(() -> new NotFoundEntityException("Product with ID " + request.getId() + " was not found"));
 
@@ -174,6 +186,11 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @ActivityLogger(
+        entityName = "products",
+        action = ActivityAction.PRODUCT_UPDATED,
+        actionMessage = "Product set to inactive"
+    )
     public ProductDeleteResponse deactivateProduct(Long id) {
         Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Category with ID " + id + " was not found"));
         if(!searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already inactive");
@@ -194,6 +211,11 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @ActivityLogger(
+        entityName = "products",
+        action = ActivityAction.PRODUCT_UPDATED,
+        actionMessage = "Product set to active"
+    )
     public ProductDeleteResponse activateProduct(Long id) {
         Product searchedProduct = productRepository.findById(id).orElseThrow(() -> new NotFoundEntityException("Product with ID " + id + " was not found"));
         if(searchedProduct.getIsActive()) throw new BoilerplateRequestException("Product with ID " + id + " already active");

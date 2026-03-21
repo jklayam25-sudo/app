@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Supplier;
 import lumi.insert.app.core.entity.Supply;
 import lumi.insert.app.core.entity.SupplyPayment;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.core.repository.SupplyPaymentRepository;
 import lumi.insert.app.core.repository.SupplyRepository;
@@ -46,6 +48,11 @@ public class SupplyPaymentServiceImpl implements SupplyPaymentService{
 
 
     @Override
+    @ActivityLogger(
+        entityName = "supply_payments",
+        action = ActivityAction.SUPPLY_PAYMENT_SETTLED,
+        actionMessage = "Supply payment settled to supplier"
+    )
     public SupplyPaymentResponse createSupplyPayment(UUID supplyId, SupplyPaymentCreateRequest request) {
         Supply supply = supplyRepository.findById(supplyId)
             .orElseThrow(() -> new NotFoundEntityException("Supply with ID " + supplyId + " was not found"));
@@ -77,6 +84,7 @@ public class SupplyPaymentServiceImpl implements SupplyPaymentService{
     }
 
     @Override
+    
     public Slice<SupplyPaymentResponse> getSupplyPaymentsBySupplyId(UUID supplyId, PaginationRequest request) {
         Pageable pageable = jpaSpecGenerator.pageable(request);
 
@@ -103,6 +111,11 @@ public class SupplyPaymentServiceImpl implements SupplyPaymentService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "supply_payments",
+        action = ActivityAction.SUPPLY_REFUND_RECEIVED,
+        actionMessage = "Supply payment refund received from supplier"
+    )
     public SupplyPaymentResponse refundSupplyPayment(UUID supplyId, SupplyPaymentCreateRequest request) {
         Supply supply = supplyRepository.findById(supplyId)
             .orElseThrow(() -> new NotFoundEntityException("Supply with ID " + supplyId + " was not found"));

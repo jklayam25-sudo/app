@@ -16,11 +16,13 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator; 
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.StockCard;
 import lumi.insert.app.core.entity.Supplier;
 import lumi.insert.app.core.entity.Supply;
 import lumi.insert.app.core.entity.SupplyItem;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.core.entity.nondatabase.SupplyStatus;
 import lumi.insert.app.core.repository.ProductRepository;
@@ -68,6 +70,11 @@ public class SupplyServiceImpl implements SupplyService{
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.SUPPLY_ORDER_PLACED,
+        actionMessage = "New supply order placed"
+    )
     public SupplyResponse createSupply(SupplyCreateRequest request) {
         Supplier supplier = supplierRepository.findById(request.getSupplierId())
              .orElseThrow(() -> new NotFoundEntityException("Supplier with id " + request.getSupplierId() + " is not found"));
@@ -164,6 +171,11 @@ public class SupplyServiceImpl implements SupplyService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.SUPPLY_ORDER_CANCELLED,
+        actionMessage = "Supply order cancelled"
+    )
     public SupplyResponse cancelSupply(UUID id) {
         Supply supply = supplyRepository.findByIdDetail(id)
             .orElseThrow(() -> new NotFoundEntityException("Supply with ID " + id + " was not found"));
@@ -252,6 +264,11 @@ public class SupplyServiceImpl implements SupplyService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.SUPPLY_ORDER_UPDATED,
+        actionMessage = "Supply updated"
+    )
     public SupplyResponse updateSupply(UUID id, SupplyUpdateRequest request) {
         Supply supply = supplyRepository.findByIdDetail(id)
             .orElseThrow(() -> new NotFoundEntityException("Supply with ID " + id + " is not found"));
@@ -292,6 +309,11 @@ public class SupplyServiceImpl implements SupplyService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.SUPPLY_ITEM_REFUNDED,
+        actionMessage = "Supply item refunded"
+    )
     public SupplyResponse refundSupplyItem(UUID id, ItemRefundRequest request) { 
 
         List<SupplyItem> matchItems = supplyItemRepository.findBySupplyIdAndProductId(id, request.getProductId());

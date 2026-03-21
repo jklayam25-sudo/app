@@ -13,8 +13,10 @@ import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.StockCard;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.core.repository.ProductRepository;
 import lumi.insert.app.core.repository.StockCardRepository;
@@ -50,6 +52,11 @@ public class StockCardServiceImpl implements StockCardService{
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "stock_cards",
+        action = ActivityAction.STOCK_ADJUSTMENT,
+        actionMessage = "Product stock adjustment"
+    )
     public StockCardResponse createStockCard(StockCardCreateRequest request) {
         if((request.getType() == StockMove.CUSTOMER_IN.toString() || request.getType() == StockMove.SUPPLIER_IN.toString() ||
             request.getType() == StockMove.REPAIRED.toString()) && request.getQuantity() < 0L) {

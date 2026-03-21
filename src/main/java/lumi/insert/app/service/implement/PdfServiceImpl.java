@@ -21,6 +21,8 @@ import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter; 
 import org.springframework.stereotype.Service;
 
+import lumi.insert.app.aspect.annotation.ActivityLogger;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.repository.projection.ProductOutOfStock;
 import lumi.insert.app.core.repository.projection.ProductRefund;
 import lumi.insert.app.core.repository.projection.ProductSale;
@@ -39,6 +41,11 @@ public class PdfServiceImpl implements PdfService{
     private Font helveticaBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
 
     @Override
+    @ActivityLogger(
+        entityName = "supplies",
+        action = ActivityAction.EXPORT_DATA,
+        actionMessage = "Suppy exported as PDF"
+    )
     public ByteArrayInputStream exportSupplyWithItems(SupplyDetailResponse data) {
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {     
@@ -180,6 +187,11 @@ public class PdfServiceImpl implements PdfService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transactions",
+        action = ActivityAction.EXPORT_DATA,
+        actionMessage = "Transaction exported as PDF"
+    )
     public ByteArrayInputStream exportTransactionWithItems(TransactionDetailResponse data) {
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -322,6 +334,11 @@ public class PdfServiceImpl implements PdfService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "products",
+        action = ActivityAction.EXPORT_DATA,
+        actionMessage = "Product statistics exported as PDF"
+    )
     public ByteArrayInputStream exportProductsStatistic(TransactionItemStatisticResponse statistic,
             List<ProductOutOfStock> oosProducts, LocalDateTime minTime, LocalDateTime maxTime) {
 

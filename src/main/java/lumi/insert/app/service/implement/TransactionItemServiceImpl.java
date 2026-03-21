@@ -17,11 +17,13 @@ import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Customer;
 import lumi.insert.app.core.entity.Product;
 import lumi.insert.app.core.entity.StockCard;
 import lumi.insert.app.core.entity.Transaction;
 import lumi.insert.app.core.entity.TransactionItem;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.StockMove;
 import lumi.insert.app.core.entity.nondatabase.TransactionStatus;
 import lumi.insert.app.core.repository.ProductRepository;
@@ -67,6 +69,11 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     DateUtils datePicker;
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_items",
+        action = ActivityAction.TRANSACTION_ITEM_CARTED,
+        actionMessage = "New item carted to transaction cart"
+    )
     public TransactionItemResponse createTransactionItem(UUID transactionId, TransactionItemCreateRequest request) {
         Transaction transaction = transactionRepository.findById(transactionId)
             .orElseThrow(() -> new NotFoundEntityException("Transaction with ID " + transactionId + " was not found"));
@@ -97,6 +104,11 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_items",
+        action = ActivityAction.TRANSACTION_ITEM_DELETED,
+        actionMessage = "Item deleted from transaction cart"
+    )
     public TransactionItemDelete deleteTransactionItem(UUID id) {
         TransactionItem transactionItem = transactionItemRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction Items with ID " + id + " was not found"));
@@ -115,6 +127,11 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_items",
+        action = ActivityAction.TRANSACTION_ITEM_UPDATED,
+        actionMessage = "Item quantity updated"
+    )
     public TransactionItemResponse updateTransactionItemQuantity(UUID id, Long quantity) {
          TransactionItem transactionItem = transactionItemRepository.findById(id)
             .orElseThrow(() -> new NotFoundEntityException("Transaction Items with ID " + id + " was not found"));
@@ -158,6 +175,11 @@ public class TransactionItemServiceImpl implements TransactionItemService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "transaction_items",
+        action = ActivityAction.TRANSACTION_ITEM_UPDATED,
+        actionMessage = "Item quantity updated from transaction order"
+    )
     public TransactionItemResponse refundTransactionItem(UUID id, ItemRefundRequest request) { 
 
         List<TransactionItem> itemsWithMatchProduct = transactionItemRepository.findByTransactionIdAndProductId(id, request.getProductId());

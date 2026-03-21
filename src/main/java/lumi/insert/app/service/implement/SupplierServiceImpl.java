@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.github.f4b6a3.uuid.UuidCreator;
 
 import jakarta.transaction.Transactional;
+import lumi.insert.app.aspect.annotation.ActivityLogger;
 import lumi.insert.app.core.entity.Supplier;
+import lumi.insert.app.core.entity.nondatabase.ActivityAction;
 import lumi.insert.app.core.entity.nondatabase.SliceIndex;
 import lumi.insert.app.core.repository.SupplierRepository;
 import lumi.insert.app.dto.request.SupplierCreateRequest;
@@ -42,6 +44,11 @@ public class SupplierServiceImpl implements SupplierService{
     JpaSpecGenerator jpaSpecGenerator;
 
     @Override
+    @ActivityLogger(
+        entityName = "suppliers",
+        action = ActivityAction.SUPPLIER_REGISTERED,
+        actionMessage = "New supplier registered"
+    )
     public SupplierDetailResponse createSupplier(SupplierCreateRequest request) {
         if(supplierRepository.existsByName(request.getName())) throw new DuplicateEntityException("Supplier with name " + request.getName() + " already exists");
 
@@ -85,6 +92,11 @@ public class SupplierServiceImpl implements SupplierService{
     }
 
     @Override
+    @ActivityLogger(
+        entityName = "suppliers",
+        action = ActivityAction.SUPPLIER_UPDATED,
+        actionMessage = "Supplier updated"
+    )
     public SupplierDetailResponse updateSupplier(UUID id, SupplierUpdateRequest request) {
         if(request.getName() != null && supplierRepository.existsByName(request.getName())) throw new DuplicateEntityException("Supplier with name " + request.getName() + " already exists");
 
