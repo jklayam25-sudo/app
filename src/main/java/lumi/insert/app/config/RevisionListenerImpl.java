@@ -2,6 +2,7 @@ package lumi.insert.app.config;
 
 import org.hibernate.envers.RevisionListener;
 
+import lumi.insert.app.config.security.AuditorAwareImpl;
 import lumi.insert.app.core.entity.RevisionAudit;
  
 public class RevisionListenerImpl implements RevisionListener{
@@ -13,6 +14,7 @@ public class RevisionListenerImpl implements RevisionListener{
         if(entity instanceof RevisionAudit){
             RevisionAudit revisionAudit = (RevisionAudit) entity;
             revisionAudit.setUsername(auditorAwareImpl.getCurrentAuditor().orElse("SYSTEM"));
+            revisionAudit.setIpAddress(auditorAwareImpl.getAuditorIpAddress().orElse("0.0.0.0"));
         }
     }
     
