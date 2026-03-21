@@ -9,5 +9,5 @@ CREATE TABLE suppliers (
     total_paid BIGINT DEFAULT 0 NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL
+    version BIGINT DEFAULT 0 NOT NULL
 );

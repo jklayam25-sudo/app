@@ -12,7 +12,7 @@ CREATE TABLE stock_cards(
 
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL,
+    version BIGINT DEFAULT 0 NOT NULL,
 
     CONSTRAINT fk_stock_cards_products FOREIGN KEY (product_id)
         REFERENCES products(id)

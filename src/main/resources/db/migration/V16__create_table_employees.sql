@@ -10,5 +10,5 @@ CREATE TABLE employees (
     role employee_role DEFAULT 'CASHIER',
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL
+    version BIGINT DEFAULT 0 NOT NULL
 );

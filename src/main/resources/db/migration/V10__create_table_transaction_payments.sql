@@ -6,7 +6,7 @@ CREATE TABLE transaction_payments (
     payment_to VARCHAR(100) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL,
+    version BIGINT DEFAULT 0 NOT NULL,
 
     CONSTRAINT fk_transaction_payments FOREIGN KEY (transaction_id)
         REFERENCES transactions(id)

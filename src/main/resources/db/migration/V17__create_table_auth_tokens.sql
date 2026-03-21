@@ -5,7 +5,7 @@ CREATE TABLE auth_tokens (
     expired_at TIMESTAMP NOT NULL,  
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    version INTEGER DEFAULT 0 NOT NULL,
+    version BIGINT DEFAULT 0 NOT NULL,
 
     CONSTRAINT fk_employees_auth_tokens FOREIGN KEY (employee_id)
         REFERENCES employees(id)
