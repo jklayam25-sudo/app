@@ -38,7 +38,7 @@ public class SupplyItem extends BaseAuditing{
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false, unique = true) 
+    @JoinColumn(name = "product_id", nullable = false ) 
     @NotAudited
     private Product product;
 
