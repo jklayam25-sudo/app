@@ -38,7 +38,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query(value = "SELECT p FROM products p WHERE p.id IN :ids AND p.updatedAt >= :updatedAt")
     List<Product> searchProductUpdatedAtMoreThan(@Param("ids") List<Long> ids,@Param("updatedAt") LocalDateTime updatedAt);
     
-    @Query(value = "SELECT new lumi.insert.app.repository.projection.ProductOutOfStock(p.id, p.name, p.stockQuantity, p.stockMinimum) " + 
+    @Query(value = "SELECT new lumi.insert.app.core.repository.projection.ProductOutOfStock(p.id, p.name, p.stockQuantity, p.stockMinimum) " + 
         "FROM products p WHERE p.stockQuantity <= p.stockMinimum")
     List<ProductOutOfStock> findAllOutOfStockProduct();
 
